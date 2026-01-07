@@ -1,25 +1,17 @@
-name: Deploy Laravel App
+name: Laravel Deploy (Apache)
 
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
+    - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '7.3'
-
-    - name: Install Composer Dependencies
-      run: composer install --no-dev --optimize-autoloader
 
     - name: Deploy to Server
       uses: appleboy/ssh-action@v1.0.3
@@ -29,11 +21,8 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd ${{ secrets.DEPLOY_PATH }}
-          git pull origin main
+          git pull origin master
           composer install --no-dev --optimize-autoloader
           php artisan migrate --force
-          php artisan config:clear
-          php artisan cache:clear
-          php artisan route:clear
-          php artisan view:clear
           php artisan optimize
+          sudo systemctl reload apache2
