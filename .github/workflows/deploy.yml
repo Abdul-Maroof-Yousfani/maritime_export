@@ -1,4 +1,4 @@
-name: Laravel Deploy (Apache - Production)
+name: Laravel Deploy
 
 on:
   push:
@@ -7,23 +7,17 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to Server via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            cd ${{ secrets.DEPLOY_PATH }}
-            git pull origin main
-            composer install --no-dev --optimize-autoloader
-            php artisan migrate --force
-            php artisan optimize
-            sudo systemctl reload apache2
+      - name: Deploy Laravel
+        run: |
+          cd /var/www/maritime-export.inplsoftwares.com
+          git pull origin main
+          composer install --no-dev --optimize-autoloader
+          php artisan migrate --force
+          php artisan optimize
+          sudo systemctl reload apache2
