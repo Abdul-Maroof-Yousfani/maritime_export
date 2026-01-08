@@ -1,4 +1,4 @@
-name: Laravel Deploy via FTP
+name: Deploy Laravel via FTP
 
 on:
   push:
@@ -10,19 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repo
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Upload via FTP
       - name: FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@4.4.0
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
-          server: ${{ secrets.FTP_HOST }}       # server IP or domain
-          username: ${{ secrets.FTP_USERNAME }} # FTP user
-          password: ${{ secrets.FTP_PASSWORD }} # FTP password
-          local-dir: ./                         # repo root
-          server-dir: ./
-          passive: true
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftp
           port: 21
+          local-dir: ./
+          server-dir: ./
