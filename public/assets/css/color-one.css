@@ -1,0 +1,20 @@
+.btn-dashboard {
+     background-color: #234c8e;
+}
+.erp-menus {
+    background-color: #133875;
+}
+.user-name-drop .dropdown-toggle{
+    background-color: #171616;
+    background: linear-gradient(to right, #000000 0%, #000000 100%);	
+}
+.account-information .title{
+	    background-color: #171616;
+    background: linear-gradient(to right, #000000 0%, #000000 100%);	
+}
+.mega-dropdown-menu .dropdown-header{
+	background-color: #143874;
+}
+.all-company .col-sm-12 ul li{
+	 background-color: #234c8e;
+}

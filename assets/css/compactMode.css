@@ -1,0 +1,70 @@
+
+ 
+ /* No Side Bar Css Start */
+ .ibox-content b {
+  font-size: 20px;
+  color: #000;
+  padding-bottom: 22px;
+}
+.ibox-content h4 {
+  font-size: 17px;
+  font-weight: 900;
+  font-family: 'erp-regular';
+  color: #102a77;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 21px;
+}
+label {
+  font-size: 20px;
+  color: #000000;
+}
+.form-control {
+  border: 1px solid #D8D6DE;
+  height: 44px;
+  font-size: 17px;
+  color: #918f8f;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+body.full_with .well_N {
+ margin-left: 0px;
+}
+.well_N {
+ position: relative;
+ transition: 300ms ease all;
+ backface-visibility: hidden;
+ min-height: calc(100% - 3.35rem);
+ margin-left: 0px;
+ /* padding: calc(2rem + 4.45rem + 1.3rem) 0.6rem 0; */
+}
+.table-bordered > thead > tr > th,.table-bordered > tbody > tr > th,.table-bordered > tfoot > tr > th,.table-bordered > thead > tr > td,.table-bordered > tbody > tr > td,.table-bordered > tfoot > tr > td{border:2px solid #f1e8e8;padding:10px 8px;vertical-align:middle;font-size: 17px;font-weight: 900;color: #000;}
+.sidenavnr {
+ display: none;
+}
+.abs-btn {
+ position: absolute;
+ right: 2%;
+}
+.headerwrap {
+  margin: 1.3rem auto 0px;
+  border-radius: 0.428rem;
+  z-index: 12;
+  margin-left: 0;
+  box-shadow: 0 4px 24px 0 rgb(34 41 47 / 10%);
+}
+/* .show-side:hover .sidenavnr {
+ display: inline;
+}  */
+/* No Side Bar Css End */
+
+
+.ibox h1 {
+  font-size: 24px;
+  font-weight: 900;
+  color: #123085;
+  letter-spacing: 1px;
+  position: relative;
+  padding-bottom: 10px;
+  margin-bottom: 30px!important;
+}
