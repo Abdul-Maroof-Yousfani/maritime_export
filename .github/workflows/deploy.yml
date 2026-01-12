@@ -1,4 +1,4 @@
-name: Laravel Deploy
+name: Deploy Laravel via FTP
 
 on:
   push:
@@ -7,17 +7,19 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy Laravel
-        run: |
-          cd /var/www/maritime-export.inplsoftwares.com
-          git pull origin main
-          composer install --no-dev --optimize-autoloader
-          php artisan migrate --force
-          php artisan optimize
-          sudo systemctl reload apache2
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: ./
+          server-dir: ./
