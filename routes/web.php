@@ -805,6 +805,60 @@ Route::group(['prefix' => 'export', 'middleware' => 'mysql2', 'before' => 'csrf'
     Route::post('/incotermUpdate/{id}', 'IncoTermController@incotermUpdate')->name('incotermUpdate');
     Route::get('/incotermDelete', 'IncoTermController@incotermDelete');
 
+    //  Port
+    Route::get('/viewPortList', 'PortController@viewPortList')->name('viewPortList');
+    Route::get('/viewPortListAjax', 'PortController@viewPortListAjax')->name('viewPortListAjax');
+    Route::get('/portCreateForm', 'PortController@portCreateForm')->name('portCreateForm');
+    Route::post('/portStore', 'PortController@portStore')->name('portStore');
+    Route::get('/portEditForm/{id}', 'PortController@portEditForm')->name('portEditForm');
+    Route::post('/portUpdate/{id}', 'PortController@portUpdate')->name('portUpdate');
+    Route::get('/portDelete', 'PortController@portDelete');
+
+    //  Origin
+    Route::get('/viewOriginList', 'OriginController@viewOriginList')->name('viewOriginList');
+    Route::get('/viewOriginListAjax', 'OriginController@viewOriginListAjax')->name('viewOriginListAjax');
+    Route::get('/originCreateForm', 'OriginController@originCreateForm')->name('originCreateForm');
+    Route::post('/originStore', 'OriginController@originStore')->name('originStore');
+    Route::get('/originEditForm/{id}', 'OriginController@originEditForm')->name('originEditForm');
+    Route::post('/originUpdate/{id}', 'OriginController@originUpdate')->name('originUpdate');
+    Route::get('/originDelete', 'OriginController@originDelete');
+
+    //  Consignee
+    Route::get('/viewConsigneeList', 'ConsigneeController@viewConsigneeList')->name('viewConsigneeList');
+    Route::get('/viewConsigneeListAjax', 'ConsigneeController@viewConsigneeListAjax')->name('viewConsigneeListAjax');
+    Route::get('/consigneeCreateForm', 'ConsigneeController@consigneeCreateForm')->name('consigneeCreateForm');
+    Route::post('/consigneeStore', 'ConsigneeController@consigneeStore')->name('consigneeStore');
+    Route::get('/consigneeEditForm/{id}', 'ConsigneeController@consigneeEditForm')->name('consigneeEditForm');
+    Route::post('/consigneeUpdate/{id}', 'ConsigneeController@consigneeUpdate')->name('consigneeUpdate');
+    Route::get('/consigneeDelete', 'ConsigneeController@consigneeDelete');
+
+    //  Grade
+    Route::get('/viewGradeList', 'GradeController@viewGradeList')->name('viewGradeList');
+    Route::get('/viewGradeListAjax', 'GradeController@viewGradeListAjax')->name('viewGradeListAjax');
+    Route::get('/gradeCreateForm', 'GradeController@gradeCreateForm')->name('gradeCreateForm');
+    Route::post('/gradeStore', 'GradeController@gradeStore')->name('gradeStore');
+    Route::get('/gradeEditForm/{id}', 'GradeController@gradeEditForm')->name('gradeEditForm');
+    Route::post('/gradeUpdate/{id}', 'GradeController@gradeUpdate')->name('gradeUpdate');
+    Route::get('/gradeDelete', 'GradeController@gradeDelete');
+
+    //  Size
+    Route::get('/viewSizeList', 'SizeController@viewSizeList')->name('viewSizeList');
+    Route::get('/viewSizeListAjax', 'SizeController@viewSizeListAjax')->name('viewSizeListAjax');
+    Route::get('/sizeCreateForm', 'SizeController@sizeCreateForm')->name('sizeCreateForm');
+    Route::post('/sizeStore', 'SizeController@sizeStore')->name('sizeStore');
+    Route::get('/sizeEditForm/{id}', 'SizeController@sizeEditForm')->name('sizeEditForm');
+    Route::post('/sizeUpdate/{id}', 'SizeController@sizeUpdate')->name('sizeUpdate');
+    Route::get('/sizeDelete', 'SizeController@sizeDelete');
+
+    //  Packing
+    Route::get('/viewPackingList', 'PackingController@viewPackingList')->name('viewPackingList');
+    Route::get('/viewPackingListAjax', 'PackingController@viewPackingListAjax')->name('viewPackingListAjax');
+    Route::get('/packingCreateForm', 'PackingController@packingCreateForm')->name('packingCreateForm');
+    Route::post('/packingStore', 'PackingController@packingStore')->name('packingStore');
+    Route::get('/packingEditForm/{id}', 'PackingController@packingEditForm')->name('packingEditForm');
+    Route::post('/packingUpdate/{id}', 'PackingController@packingUpdate')->name('packingUpdate');
+    Route::get('/packingDelete', 'PackingController@packingDelete');
+
     //  Mode Of Term 
     Route::get('/modeoftermList', 'ModeOfTermController@modeoftermList')->name('modeoftermList');
     Route::get('/modeoftermListAjax', 'ModeOfTermController@modeoftermListAjax')->name('modeoftermListAjax');
