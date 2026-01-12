@@ -1,5 +1,12 @@
-.env
+/__app-assets/
+/__assets/
+public/__app-assets/
+public/__assets/
+public/assets_copy/
 /vendor/
+/vendor
+assets/
+/vendor_old/
 node_modules/
 npm-debug.log
 yarn-error.log
@@ -15,17 +22,26 @@ public/hot
 # Laravel 5 & Lumen specific with changed public path
 public_html/storage
 public_html/hot
+public/app-assets
+public/assets
 
 storage/*.key
-
+.env
+.htaccess
+/storage/
+storage/framework/cache/data/65/dd/65dd3ab34ce5e81f53d6c823cd41b885b9cfe793
+storage/framework/views
 Homestead.yaml
 Homestead.json
 /.vagrant
 .phpunit.result.cache
+.htaccess
+storage/logs/laravel.log
 
-/public/build
-/storage/pail
-.env.backup
-.env.production
-.phpactor.json
-auth.json
+storage/framework/cache/data/65/dd/65dd3ab34ce5e81f53d6c823cd41b885b9cfe793
+*.log
+bootstrap/cache/packages.php
+bootstrap/cache/services.php
+
+composer.lock
+composer.lock
