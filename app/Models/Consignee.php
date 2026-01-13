@@ -12,3 +12,4 @@ class Consignee extends Model
     protected $fillable = ['name'];
 }
 
+

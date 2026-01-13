@@ -12,3 +12,4 @@ class Packing extends Model
     protected $fillable = ['name'];
 }
 
+

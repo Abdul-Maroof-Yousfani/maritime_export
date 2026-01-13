@@ -60,3 +60,4 @@
     <script src="{{ URL::asset('assets/js/select2/js_tabindex.js') }}"></script>
 @endsection
 
+

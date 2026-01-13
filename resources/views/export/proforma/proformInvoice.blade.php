@@ -11,203 +11,442 @@ $total_expense = 0;
 ?>
 
 <style>
- textarea{border-style:none;border-color:Transparent;}
-.col-lg-12{width:99%;}
-table{border:1px solid #000;border-collapse:collapse;margin:0;padding:0;width:100%;table-layout:fixed;}
-table caption{font-size:1.5em;margin:.5em 0 .75em;}
-table tr{border:1px solid #000;padding:0.35em;}
-table th,table td{padding:0.625em;text-align:center;border:1px solid #000;text-align:left;font-weight:bold;}
-table th{font-size:.85em;letter-spacing:.1em;text-transform:uppercase;}
-.profe{height:auto;margin-bottom:40px;}
-.diector{margin-top:20px;}
-.profohead{margin-bottom:20px;width:100%;}
-/* .flr{display:flex;justify-content:space-between;} */
-.gariblogo2 img{width:350px;}
-.gafa{text-align:center;}
-
-@media screen and (max-width:600px) {
-table{border:0;}
-table caption{font-size:1.3em;}
-table thead{border:1px solid #000;clip:rect(0 0 0 0);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px;}
-table tr{border-bottom:3px solid #ddd;display:block;margin-bottom:.625em;}
-table td{border-bottom:1px solid #ddd;display:block;font-size:.8em;text-align:right;}
-table td::before{/* * aria-label has no advantage,it won't be read inside a table content:attr(aria-label);*/
- content:attr(data-label);float:left;font-weight:bold;text-transform:uppercase;}
-table td:last-child{border-bottom:0;}
-
-    }
-
-
     @media print {
- .profohead{width:500px !important;}
-table th{font-size:20px;}
-.printHide{display:none !important;}
-.fa{font-size:small !important;}
-.table-bordered{border:1px solid black;}
-table.table-bordered>thead>tr>th{border:1px solid blue !important;}
-
+        .printHide{display:none !important;}
+        @page {
+            margin: 10mm;
+        }
+    }
+    
+    .invoice-container {
+        font-family: Arial, sans-serif;
+        max-width: 210mm;
+        margin: 0 auto;
+        padding: 15px;
+        background: #fff;
+    }
+    
+    .invoice-header {
+        border-bottom: 2px solid #000;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .company-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+    
+    .company-info {
+        flex: 1;
+    }
+    
+    .company-name {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+    }
+    
+    .company-tagline {
+        font-size: 12px;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .certifications {
+        display: flex;
+        gap: 10px;
+        margin-top: 5px;
+    }
+    
+    .cert-badge {
+        background: #f0f0f0;
+        padding: 3px 8px;
+        border-radius: 3px;
+        font-size: 10px;
+        font-weight: bold;
+    }
+    
+    .logo-area {
+        width: 150px;
+        text-align: right;
+    }
+    
+    .logo-area img {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    .invoice-title {
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+        margin: 15px 0;
+        text-transform: uppercase;
+    }
+    
+    .invoice-meta {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        font-size: 12px;
+    }
+    
+    .buyer-section {
+        margin-bottom: 20px;
+    }
+    
+    .section-title {
+        font-weight: bold;
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
+    
+    .buyer-info {
+        font-size: 11px;
+        line-height: 1.4;
+    }
+    
+    .buyer-name {
+        font-weight: bold;
+        font-size: 12px;
+    }
+    
+    .goods-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 11px;
+    }
+    
+    .goods-table th {
+        background-color: #f0f0f0;
+        border: 1px solid #000;
+        padding: 8px 5px;
+        text-align: left;
+        font-weight: bold;
+        font-size: 10px;
+        text-transform: uppercase;
+    }
+    
+    .goods-table td {
+        border: 1px solid #000;
+        padding: 8px 5px;
+        text-align: left;
+    }
+    
+    .goods-table tr:last-child td {
+        font-weight: bold;
+        background-color: #f9f9f9;
+    }
+    
+    .terms-section {
+        margin: 20px 0;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+    
+    .terms-row {
+        margin-bottom: 8px;
+    }
+    
+    .terms-label {
+        font-weight: bold;
+        display: inline-block;
+        min-width: 120px;
+    }
+    
+    .bank-section {
+        margin: 20px 0;
+        font-size: 11px;
+    }
+    
+    .bank-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    
+    .bank-table td {
+        border: 1px solid #000;
+        padding: 8px;
+        vertical-align: top;
+    }
+    
+    .bank-table .label {
+        font-weight: bold;
+        width: 200px;
+        background-color: #f0f0f0;
+    }
+    
+    .signature-section {
+        margin-top: 40px;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .signature-box {
+        width: 45%;
+    }
+    
+    .signature-line {
+        border-top: 1px solid #000;
+        margin-top: 60px;
+        padding-top: 5px;
+        font-size: 11px;
+        text-align: center;
+    }
+    
+    .footer-section {
+        margin-top: 30px;
+        padding-top: 15px;
+        border-top: 1px solid #ccc;
+        font-size: 10px;
+        text-align: center;
+        color: #666;
+    }
+    
+    .footer-info {
+        line-height: 1.6;
     }
 </style>
+
 <div class="row">
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-right">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-right printHide">
         <?php CommonHelper::displayPrintButtonInView('printPurchaseRequestVoucherDetail', '', '1'); ?>
     </div>
 </div>
-<div style="line-height:5px;">&nbsp;</div>
+
 <div class="row" id="printPurchaseRequestVoucherDetail">
-    <!-- <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-
-    </div> -->
-    <div class="col-md-12 ">
-        <?php
-        if (!empty($ExportPerforma->currencey_id)) {
-            $name_currency1 = App\Models\Currency::find($ExportPerforma->currencey_id);
-            $name_currency = $name_currency1['curreny'];
-        } else {
-            $name_currency = '-';
-        }
-        $total_amount = $sales_order_data->total_amount;
-        $a = CommonHelper::AmountInWords($total_amount, $name_currency);
-        
-        $final_advance = $ExportPerforma->advance_payment ?? 0;
-        
-        if (!empty($ExportPerforma->bank)) {
-            $bank_name = App\Models\Bank::find($ExportPerforma->bank)->bank_name;
-            $bank_swift = App\Models\Bank::find($ExportPerforma->bank)->swift_code;
-            $bank_ibn = App\Models\Bank::find($ExportPerforma->bank)->IBAN_no;
-            $bank_address = App\Models\Bank::find($ExportPerforma->bank)->bank_address;
-            $account_title = App\Models\Bank::find($ExportPerforma->bank)->account_title;
-        } else {
-            $bank_name = '-';
-            $bank_swift = '-';
-            $bank_ibn = '-';
-            $bank_address = '-';
-            $account_title = '-';
-        }
-        ?>
-        <div class="par ">
-            <div class="profex profe">
-                    <div class="row">
-                        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                            <div class="profo">
-                                <div class="profohead" style="border:1px solid;">
-                                    <h4 style="text-align: center; ">
-                                        PROFORMA INVOICE
-                                    </h4>
-                                </div>
-                                <p style="margin-top: 20px;">CONSIGNED TO:</p>
-                                <p>BUYER: <strong>{{ $ExportPerforma->name }}</strong></p>
-                                <p><strong>{{ $ExportPerforma->address }}</strong></p>
-                          
-                                <p>CONTRACT NO:{{ '    ' . $ExportPerforma->contract_no . ',   ' }} DATED :
-                                    {{ $ExportPerforma->created_at->format('d-m-Y') }}</p>
+    <div class="col-md-12">
+        <div class="invoice-container">
+            <?php
+            if (!empty($ExportPerforma->currencey_id)) {
+                $name_currency1 = App\Models\Currency::find($ExportPerforma->currencey_id);
+                $name_currency = $name_currency1['curreny'];
+            } else {
+                $name_currency = 'USD';
+            }
+            $total_amount = $sales_order_data->total_amount ?? 0;
             
-                                <p>PROFORMA NO:{{ '    ' . $ExportPerforma->pro_contract_no . ',   ' }}</p>
-                               
-                                <input type="hidden" id="d_t_amount_1001001" value="{{ $total_amount }}">
+            if (!empty($ExportPerforma->bank)) {
+                $bank_obj = App\Models\Bank::find($ExportPerforma->bank);
+                $bank_name = $bank_obj->bank_name ?? '-';
+                $bank_swift = $bank_obj->swift_code ?? '-';
+                $bank_ibn = $bank_obj->IBAN_no ?? '-';
+                $bank_address = $bank_obj->bank_address ?? '-';
+                $account_title = $bank_obj->account_title ?? '-';
+            } else {
+                $bank_name = '-';
+                $bank_swift = '-';
+                $bank_ibn = '-';
+                $bank_address = '-';
+                $account_title = '-';
+            }
             
-                                <p>AMOUNT: {{ $name_currency . ' ' }} {{ number_format($total_amount, 2) }} <span
-                                        id="rupees1001001"></span>
-                                  
-                                    @if($final_advance > 0) PURPOSE: {{ $final_advance }} % ADVANCE PAYMENT @endif
-                                </p>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                            <div class="gariblogo2">
-                                <img src="{{asset('/public/images/garibsons.jpg')}}" alt="">
-                            </div>
+            // Calculate totals
+            $total_quantity = 0;
+            $total_net_weight = 0;
+            $total_amount_calc = 0;
+            
+            if(isset($sales_order_data_items) && $sales_order_data_items) {
+                foreach($sales_order_data_items as $item) {
+                    $total_quantity += $item->actual_qty ?? 0;
+                    $total_net_weight += ($item->pack_size ?? 1) * ($item->actual_qty ?? 0);
+                    $total_amount_calc += $item->after_dis_amount ?? 0;
+                }
+            }
+            ?>
+            
+            <!-- Header Section -->
+            <div class="invoice-header">
+                <div class="company-header">
+                    <div class="company-info">
+                        <div class="company-name">SUPER STAR ENTERPRISES</div>
+                        <div class="company-tagline">Gift from the Sea</div>
+                        <div class="certifications">
+                            <span class="cert-badge">FDA</span>
+                            <span class="cert-badge">ISO</span>
                         </div>
                     </div>
-                 
-       
-                    <div class="table-responsive tabtop profee">
-                        <table class="protabbss table table-bordered sf-table-list proforma_table" id="EmpExitInterviewList">
-                            <tbody>
-                                <tr>
-                                <td data-label="Account">Beneficiary:</td>
-                                <td data-label="Due Date">{{ $account_title }}</td>
-                                </tr>
-                                <tr>
-                                    <td scope="row" data-label="Account">Beneficiary address:</td>
-                                    <td data-label="Due Date">{{ $bank_address }}</td>
-                                </tr>
-                                {{-- <tr>
-                                    <td scope="row" data-label="Account">Beneficiary account Pak Rupess:</td>
-                                    <td data-label="Due Date">{{$bank_swift}}</td>
-                                    </tr> --}}
-                                <tr>
-                                    <td scope="row" data-label="Account">IBAN#:</td>
-                                    <td data-label="Due Date">{{ $bank_ibn }}</td>
-                                </tr>
-                                <tr>
-                                    <td scope="row" data-label="Account">Beneficiary bank:</td>
-                                    <td data-label="Due Date">{{ $bank_name }}</td>
-                                </tr>
-                                <tr>
-                                    <td scope="row" data-label="Account">Beneficiary bank swift code:</td>
-                                    <td data-label="Due Date">{{ $bank_swift }}</td>
-                                </tr>
-                                {{-- <tr>
-                                    <td scope="row" data-label="Account">Beneficiary bank address:</td>
-                                    <td data-label="Due Date"></td>
-                                    </tr> --}}
-                                <tr>
-                                    <td scope="row" data-label="Account">Correspondent bank:</td>
-                                    <td data-label="Due Date">{{ $ExportPerforma->correspondent_bank }}</td>
-                                </tr>
-                                <tr>
-                                    <td scope="row" data-label="Account">Correspondent bank account USD:</td>
-                                    <td data-label="Due Date">{{ $ExportPerforma->correspondent_account_no }}</td>
-                                </tr>
-                                {{-- <tr>
-                                    <td scope="row" data-label="Account">Correspondent bank account Title:</td>
-                                    <td data-label="Due Date">{{$ExportPerforma->account_title}}</td>
-                                    </tr> --}}
-                                <tr>
-                                    <td scope="row" data-label="Account">Correspondent bank swift code:</td>
-                                    <td data-label="Due Date">{{ $ExportPerforma->correspondent_bank_swift }}</td>
-                                </tr>
-                                <tr>
-                                    <td scope="row" data-label="Account">Details of payment</td>
-                                    <td data-label="Due Date">
-                                        @if ($ExportPerforma->mode_of_term == 14)
-                                            OPEN ACCOUNT
-                                        @else
-                                            @if ($ExportPerforma->advance_payment > 0)
-                                                @php
-                                                    $final_advance = 100 - $ExportPerforma->advance_payment;
-                                                @endphp
-                                                {{ $ExportPerforma->advance_payment . '% Addvance and ' . $final_advance . '% within ' . $ExportPerforma->payment_days . ' Working Days Of BL and Invoice' }}
-                                            @else
-                                                {{ '100% Within ' . $ExportPerforma->payment_days . ' working days of BL and Invoice.' }}
-                                            @endif
-                                        @endif
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                 <br>
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div class="diector">
-                        <p>For Garibsons (Pvt) LIMITED</p><br>
-                        <br>
-                        ___________________________<br>
-
-                        <p><strong>Director</strong></p>
+                    <div class="logo-area">
+                        <img src="{{asset('/public/images/garibsons.jpg')}}" alt="Company Logo" onerror="this.style.display='none'">
                     </div>
                 </div>
-
-                <div class="gafa">
-                    <img src="{{ asset('/public/images/gafa.png') }}" alt="">
+                
+                <div class="invoice-title">PROFORMA INVOICE</div>
+                
+                <div class="invoice-meta">
+                    <div><strong>PROFORMA INVOICE NO:</strong> {{ $ExportPerforma->pro_contract_no ?? 'PI-' . $ExportPerforma->id }}</div>
+                    <div><strong>DATE:</strong> {{ $ExportPerforma->created_at->format('d/m/Y') }}</div>
                 </div>
+            </div>
+            
+            <!-- Buyer Section -->
+            <div class="buyer-section">
+                <div class="section-title">BUYER:</div>
+                <div class="buyer-info">
+                    <div class="buyer-name">{{ strtoupper($ExportPerforma->name ?? '') }}</div>
+                    <div>{{ strtoupper($ExportPerforma->address ?? '') }}</div>
+                </div>
+            </div>
+            
+            <!-- Description of Goods Table -->
+            <table class="goods-table">
+                <thead>
+                    <tr>
+                        <th style="width: 35%;">DETAILED SPECIFICATIONS</th>
+                        <th style="width: 12%;">SIZE (G/PC)</th>
+                        <th style="width: 10%;">QUANTITY</th>
+                        <th style="width: 12%;">NET WEIGHT KGS</th>
+                        <th style="width: 15%;">UNIT</th>
+                        <th style="width: 16%;">TOTAL AMOUNT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php
+                    $grand_total_qty = 0;
+                    $grand_total_weight = 0;
+                    $grand_total_amount = 0;
+                    @endphp
+                    
+                    @if(isset($sales_order_data_items) && count($sales_order_data_items) > 0)
+                        @foreach($sales_order_data_items as $item)
+                            @php
+                            $item_name = CommonHelper::get_item_name($item->item_id);
+                            $net_weight = ($item->pack_size ?? 1) * ($item->actual_qty ?? 0);
+                            $unit_price = $item->rate ?? 0;
+                            $item_total = $item->after_dis_amount ?? ($item->amount ?? 0);
+                            
+                            $grand_total_qty += $item->actual_qty ?? 0;
+                            $grand_total_weight += $net_weight;
+                            $grand_total_amount += $item_total;
+                            @endphp
+                            <tr>
+                                <td>{{ $item_name }}</td>
+                                <td>{{ $item->pack_size ?? '-' }}</td>
+                                <td style="text-align: right;">{{ number_format($item->actual_qty ?? 0, 0) }}</td>
+                                <td style="text-align: right;">{{ number_format($net_weight, 2) }}</td>
+                                <td>{{ $name_currency }}/KG</td>
+                                <td style="text-align: right;">{{ $name_currency }} {{ number_format($item_total, 2) }}</td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 20px;">No items found</td>
+                        </tr>
+                    @endif
+                    
+                    <!-- Total Row -->
+                    <tr>
+                        <td><strong>TOTAL</strong></td>
+                        <td></td>
+                        <td style="text-align: right;"><strong>{{ number_format($grand_total_qty, 0) }}</strong></td>
+                        <td style="text-align: right;"><strong>{{ number_format($grand_total_weight, 2) }}</strong></td>
+                        <td></td>
+                        <td style="text-align: right;"><strong>{{ $name_currency }} {{ number_format($grand_total_amount, 2) }}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- Terms and Conditions -->
+            <div class="terms-section">
+                <div class="terms-row">
+                    <span class="terms-label">TOTAL VALUE:</span>
+                    <span><strong>{{ $name_currency }} {{ number_format($total_amount, 2) }}</strong></span>
+                </div>
+                <div class="terms-row">
+                    <span class="terms-label">SHIPMENT:</span>
+                    <span>{{ $ExportPerforma->port_loading ?? 'KARACHI' }} TO {{ $ExportPerforma->port_of_discharge ?? 'PORT' }}</span>
+                </div>
+                <div class="terms-row">
+                    <span class="terms-label">SHIPMENT DELIVERY:</span>
+                    <span>PROMPT</span>
+                </div>
+                <div class="terms-row">
+                    <span class="terms-label">PAYMENT TERM:</span>
+                    <span>
+                        @if ($ExportPerforma->advance_payment > 0)
+                            {{ $ExportPerforma->advance_payment }}% ADVANCE, BALANCE WITHIN {{ $ExportPerforma->payment_days ?? 30 }} DAYS
+                        @else
+                            {{ $ExportPerforma->payment_days ?? 30 }} DAYS AFTER BL DATE
+                        @endif
+                    </span>
+                </div>
+                <div class="terms-row">
+                    <span class="terms-label">TOLERANCE:</span>
+                    <span>10% PLUS/MINUS ALLOWED IN AMOUNT AND QUANTITY</span>
+                </div>
+                <div class="terms-row">
+                    <span class="terms-label">INSURANCE:</span>
+                    <span>COVERED BY BUYER</span>
+                </div>
+            </div>
+            
+            <!-- Bank Account Details -->
+            <div class="bank-section">
+                <div class="section-title">BANK ACCOUNT DETAILS:</div>
+                <table class="bank-table">
+                    <tr>
+                        <td class="label">BANK NAME:</td>
+                        <td>{{ $bank_name }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">ADDRESS:</td>
+                        <td>{{ $bank_address }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">SWIFT CODE:</td>
+                        <td>{{ $bank_swift }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">ACCOUNT TITLE:</td>
+                        <td>{{ $account_title }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">IBAN NO:</td>
+                        <td>{{ $bank_ibn }}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- Signature Section -->
+            <div class="signature-section">
+                <div class="signature-box">
+                    <div class="section-title">SELLER:</div>
+                    <div style="margin-top: 10px;">FOR SUPER STAR ENTERPRISES</div>
+                    <div class="signature-line">
+                        <strong>AUTHORIZED SIGNATURE</strong>
+                    </div>
+                </div>
+                <div class="signature-box">
+                    <div class="section-title">BUYER:</div>
+                    <div style="margin-top: 10px;">{{ strtoupper($ExportPerforma->name ?? '') }}</div>
+                    <div class="signature-line">
+                        <strong>AUTHORIZED SIGNATURE</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer Section -->
+            <div class="footer-section">
+                <div class="footer-info">
+                    <div><strong>C1, C2, Fish Harbour West Wharf, Karachi-Pakistan</strong></div>
+                    <div>Phone: +92 21 32202415, +92 21 32315408</div>
+                    <div>Email: info@superstarenterprises.com.pk</div>
+                    <div>Website: www.superstarenterprises.com.pk</div>
+                </div>
+            </div>
+            
         </div>
     </div>
 </div>
 
 <script>
     $(function() {
-        toWords('1001001');
+        // Print functionality if needed
     });
 </script>
