@@ -185,8 +185,10 @@ class ExportPerformaController extends Controller
       ->select(DB::raw('sum(after_dis_amount) as total_amount'))
       ->groupBy('sale_order_export_id')
       ->first();
+
+      $sales_order_data_items = SaleOrderDataExport::where(['sale_order_export_id'=>$ExportPerforma->sale_order_id,'status'=>1])->get();
     
-        return view('export.proforma.proformInvoice', compact('ExportPerforma','sales_order_data'));
+        return view('export.proforma.proformInvoice', compact('ExportPerforma','sales_order_data','sales_order_data_items'));
     }
 
 }

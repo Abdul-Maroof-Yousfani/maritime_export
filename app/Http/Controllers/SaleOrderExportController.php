@@ -13,10 +13,12 @@ use App\Models\ModeOfTransport;
 use App\Models\PrintingBags;
 use App\Models\SaleOrderExport;
 use App\Models\SaleOrderDataExport;
+use App\Models\SaleOrderExportAttachment;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 
 class SaleOrderExportController extends Controller
 {
