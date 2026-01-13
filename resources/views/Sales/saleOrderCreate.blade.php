@@ -354,7 +354,7 @@ use App\Helpers\CommonHelper;
                                                 <tr class="text-center">
                                                     <th colspan="10" class="text-center">Sales Order Detail</th>
                                                     <th colspan="2" class="text-center">
-                                                        <input type="button" class="btn btn-sm btn-primary" onclick="addRow()" value="Add More Rows" />
+                                                        <input type="button" class="btn btn-sm btn-danger" style="background: blueviolet" onclick="addRow()" value="Add More Rows" />
                                                     </th>
                                                     <th class="text-center">
                                                         <span class="badge badge-success" id="rowCounter">1</span>
