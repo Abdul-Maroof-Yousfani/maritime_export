@@ -271,7 +271,7 @@ use App\Helpers\CommonHelper;
                             </div>
                             
                             <!-- Customer Details (Readonly) -->
-                            <div class="form-row" id="customerDetailsRow" style="display: none;">
+                            <div class="form-row" id="customerDetailsRow">
                                 <div class="form-group">
                                     <label class="form-label">Customer Address</label>
                                     <input type="text" class="form-control" id="customer_address" readonly />
@@ -338,7 +338,7 @@ use App\Helpers\CommonHelper;
                             </div>
                             
                             <!-- Bank Details (Readonly) -->
-                            <div class="form-row" id="bankDetailsRow" style="display: none;">
+                            <div class="form-row" id="bankDetailsRow">
                                 <div class="form-group">
                                     <label class="form-label">Bank Name</label>
                                     <input type="text" class="form-control" id="bank_account_name" readonly />
@@ -353,7 +353,7 @@ use App\Helpers\CommonHelper;
                                 </div>
                             </div>
                             
-                            <div class="form-row" id="bankDetailsRow2" style="display: none;">
+                            <div class="form-row" id="bankDetailsRow2">
                                 <div class="form-group">
                                     <label class="form-label">SWIFT Code</label>
                                     <input type="text" class="form-control" id="bank_swift_code" readonly />
@@ -364,7 +364,7 @@ use App\Helpers\CommonHelper;
                                 </div>
                             </div>
                             
-                            <div class="form-row" id="bankDetailsRow3" style="display: none;">
+                            <div class="form-row" id="bankDetailsRow3">
                                 <div class="form-group" style="flex: 1 1 100%;">
                                     <label class="form-label">Bank Address</label>
                                     <input type="text" class="form-control" id="bank_address" readonly />
@@ -488,6 +488,7 @@ use App\Helpers\CommonHelper;
                                                     <th class="text-center" style="width: 12%; min-width: 120px;">Item Size</th>
                                                     <th class="text-center" style="width: 10%; min-width: 100px;">Quality</th>
                                                     <th class="text-center" style="width: 10%; min-width: 100px;">UOM</th>
+                                                    <th class="text-center" style="width: 10%; min-width: 100px;">HS Code</th>
                                                     <th class="text-center" style="width: 10%; min-width: 100px;">Pack UOM</th>
                                                     <th class="text-center" style="width: 10%; min-width: 100px;">Pack Size</th>
                                                     <th class="text-center" style="width: 10%; min-width: 100px;">Quantity</th>
@@ -507,8 +508,9 @@ use App\Helpers\CommonHelper;
                                                                 $uom = CommonHelper::get_uom($row->id);
                                                                 $uom_name = CommonHelper::get_uom_name($uom);
                                                                 $pack_uom = CommonHelper::get_uom_name($row->pack_uom);
+                                                                $hs_code = $row->hs_code ?? '';
                                                                 ?>
-                                                                <option value="{{ $row->id . ',' . $uom . ',' . $uom_name . ',' . $row->pack_type . ',' . $row->pack_size . ',' . $row->pack_uom . ',' . $pack_uom }}">{{ $row->sub_ic }}</option>
+                                                                <option value="{{ $row->id . ',' . $uom . ',' . $uom_name . ',' . $row->pack_type . ',' . $row->pack_size . ',' . $row->pack_uom . ',' . $pack_uom . ',' . $hs_code }}">{{ $row->sub_ic }}</option>
                                                             @endforeach
                                                         </select>
                                                         <input type="hidden" name="uom_id[]" class="uom-id-hidden" />
@@ -541,6 +543,9 @@ use App\Helpers\CommonHelper;
                                                     </td>
                                                     <td>
                                                         <input type="text" name="uom_display[]" class="form-control uom-display" readonly />
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="hs_code_display[]" class="form-control hs-code-display" readonly />
                                                     </td>
                                                     <td>
                                                         <select name="pack_uom[]" class="form-control select2 pack-uom-select" onchange="calculateRow(1)" required>
@@ -700,11 +705,9 @@ use App\Helpers\CommonHelper;
                     if (response.success) {
                         $('#customer_address').val(response.address);
                         $('#customer_ntn').val(response.ntn);
-                        $('#customerDetailsRow').show();
                     } else {
                         $('#customer_address').val('');
                         $('#customer_ntn').val('');
-                        $('#customerDetailsRow').hide();
                     }
                 },
                 error: function() {
@@ -716,7 +719,6 @@ use App\Helpers\CommonHelper;
         } else {
             $('#customer_address').val('');
             $('#customer_ntn').val('');
-            $('#customerDetailsRow').hide();
         }
     }
     
@@ -735,9 +737,6 @@ use App\Helpers\CommonHelper;
                         $('#bank_swift_code').val(response.swift_code);
                         $('#bank_iban_no').val(response.iban_no);
                         $('#bank_address').val(response.bank_address);
-                        $('#bankDetailsRow').show();
-                        $('#bankDetailsRow2').show();
-                        $('#bankDetailsRow3').show();
                     } else {
                         clearBankDetails();
                     }
@@ -758,9 +757,6 @@ use App\Helpers\CommonHelper;
         $('#bank_swift_code').val('');
         $('#bank_iban_no').val('');
         $('#bank_address').val('');
-        $('#bankDetailsRow').hide();
-        $('#bankDetailsRow2').hide();
-        $('#bankDetailsRow3').hide();
     }
     
     let selectedFiles = [];
@@ -815,8 +811,9 @@ use App\Helpers\CommonHelper;
                             $uom = CommonHelper::get_uom($row->id);
                             $uom_name = CommonHelper::get_uom_name($uom);
                             $pack_uom = CommonHelper::get_uom_name($row->pack_uom);
+                            $hs_code = $row->hs_code ?? '';
                             ?>
-                            <option value="{{ $row->id . ',' . $uom . ',' . $uom_name . ',' . $row->pack_type . ',' . $row->pack_size . ',' . $row->pack_uom . ',' . $pack_uom }}">{{ $row->sub_ic }}</option>
+                            <option value="{{ $row->id . ',' . $uom . ',' . $uom_name . ',' . $row->pack_type . ',' . $row->pack_size . ',' . $row->pack_uom . ',' . $pack_uom . ',' . $hs_code }}">{{ $row->sub_ic }}</option>
                         @endforeach
                     </select>
                     <input type="hidden" name="uom_id[]" class="uom-id-hidden" />
@@ -849,6 +846,9 @@ use App\Helpers\CommonHelper;
                 </td>
                 <td>
                     <input type="text" name="uom_display[]" class="form-control uom-display" readonly />
+                </td>
+                <td>
+                    <input type="text" name="hs_code_display[]" class="form-control hs-code-display" readonly />
                 </td>
                 <td>
                     <select name="pack_uom[]" class="form-control select2 pack-uom-select" onchange="calculateRow(${rowCounter})" required>
@@ -921,7 +921,7 @@ use App\Helpers\CommonHelper;
         
         if (selectedValue) {
             const parts = selectedValue.split(',');
-            if (parts.length >= 7) {
+            if (parts.length >= 8) {
                 // parts[0] = item_id
                 // parts[1] = uom_id
                 // parts[2] = uom_name
@@ -929,9 +929,11 @@ use App\Helpers\CommonHelper;
                 // parts[4] = pack_size
                 // parts[5] = pack_uom_id
                 // parts[6] = pack_uom_name
+                // parts[7] = hs_code
                 
                 row.find('.uom-id-hidden').val(parts[1]); // UOM ID (hidden field)
                 row.find('.uom-display').val(parts[2]); // UOM Name (display)
+                row.find('.hs-code-display').val(parts[7] || ''); // HS Code (display)
                 
                 // Set Pack UOM dropdown
                 row.find('.pack-uom-select').val(parts[5]).trigger('change');
@@ -940,10 +942,20 @@ use App\Helpers\CommonHelper;
                 if (parts[4] && parts[4] != '') {
                     row.find('.pack-size').val(parts[4]);
                 }
+            } else if (parts.length >= 7) {
+                // Backward compatibility for old format
+                row.find('.uom-id-hidden').val(parts[1]);
+                row.find('.uom-display').val(parts[2]);
+                row.find('.hs-code-display').val('');
+                row.find('.pack-uom-select').val(parts[5]).trigger('change');
+                if (parts[4] && parts[4] != '') {
+                    row.find('.pack-size').val(parts[4]);
+                }
             }
         } else {
             row.find('.uom-id-hidden').val('');
             row.find('.uom-display').val('');
+            row.find('.hs-code-display').val('');
             row.find('.pack-uom-select').val('').trigger('change');
         }
     }

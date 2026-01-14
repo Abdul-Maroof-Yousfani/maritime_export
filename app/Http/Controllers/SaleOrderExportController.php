@@ -10,12 +10,21 @@ use App\Models\ExportOrderNotify;
 use App\Models\IncoTerm;
 use App\Models\ModeOfTerm;
 use App\Models\ModeOfTransport;
+use App\Models\Port;
+use App\Models\Origin;
+use App\Models\Consignee;
+use App\Models\Grade;
+use App\Models\Size;
+use App\Models\Packing;
 use App\Models\PrintingBags;
 use App\Models\SaleOrderExport;
 use App\Models\SaleOrderDataExport;
 use App\Models\SaleOrderExportAttachment;
+use App\Models\Transactions;
+use App\Helpers\FinanceHelper;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
@@ -106,11 +115,15 @@ class SaleOrderExportController extends Controller
             $sale_order->under_milled = $request->under_milled;
             $sale_order->milled_double_polish = $request->milled_double_polish;
             $sale_order->whiteness = $request->whiteness;
-            $sale_order->incoterm = $request->incoterm;
+            $sale_order->incoterm = $request->incoterm ? (int)$request->incoterm : null;
             $sale_order->mode_transport = $request->mode_transport;
-            $sale_order->origin = $request->origin;
+            $sale_order->origin = $request->origin ? (int)$request->origin : null;
+            $sale_order->port = $request->port ? (int)$request->port : null;
             $sale_order->port_of_discharge = $request->port_of_discharge;
             $sale_order->port_loading = $request->port_loading;
+            $sale_order->grade = $request->grade ? (int)$request->grade : null;
+            $sale_order->size = $request->size ? (int)$request->size : null;
+            $sale_order->packing = $request->packing ? (int)$request->packing : null;
             $sale_order->hs_code = $request->hs_code;
             $sale_order->partial_payment = $request->partial_payment;
             $sale_order->bank = $request->beneficiary_bank ?? 1;
@@ -135,7 +148,7 @@ class SaleOrderExportController extends Controller
 
 
             $sale_order->marking_labeling = $request->marking_labeling;
-            // $sale_order->consignee = $request->consignee;
+            $sale_order->consignee = $request->consignee ? (int)$request->consignee : null;
             // $sale_order->notify_party = $request->notify_party_details;
             $sale_order->broker = $request->broker;
             $sale_order->document_to_provided = $request->document_to_provide;
@@ -145,13 +158,21 @@ class SaleOrderExportController extends Controller
             $sale_order->type_of_loading = $request->type_of_loading;
             $sale_order->save();
 
-            foreach ($request->consignee as $key => $consignee) {
-                if (!empty($consignee)) {
-                    ExportOrderConsignee::create([
-                        'consignee' => $consignee,
-                        'export_order_id' => $sale_order->id
-                    ]);
+            // Handle consignee details (for display purposes) - check if it's array (old format) or single value (new format)
+            if (isset($request->consignee_details) && is_array($request->consignee_details)) {
+                foreach ($request->consignee_details as $key => $consignee_detail) {
+                    if (!empty($consignee_detail)) {
+                        ExportOrderConsignee::create([
+                            'consignee' => $consignee_detail,
+                            'export_order_id' => $sale_order->id
+                        ]);
+                    }
                 }
+            } elseif (isset($request->consignee_details) && !empty($request->consignee_details)) {
+                ExportOrderConsignee::create([
+                    'consignee' => $request->consignee_details,
+                    'export_order_id' => $sale_order->id
+                ]);
             }
             foreach ($request->notify_party_details as $key => $notify_party_details) {
                 if (!empty($notify_party_details)) {
@@ -167,26 +188,89 @@ class SaleOrderExportController extends Controller
                 $sale_order_data->sale_order_export_id = $sale_order->id;
                 $sale_order_data->item_id = $request->sub_ic_des[$key];
                 $sale_order_data->uom_id = $request->uom_id[$key];
-                $sale_order_data->pack_type = $request->pack_type[$key];
-                $sale_order_data->bag_type = $request->bag_type[$key];
-                $sale_order_data->color = $request->bag_color[$key];
+                $sale_order_data->item_size = $request->item_size[$key] ?? null;
+                $sale_order_data->quality = $request->quality[$key] ?? null;
+                $sale_order_data->pack_type = $request->pack_type[$key] ?? null;
+                $sale_order_data->bag_type = $request->bag_type[$key] ?? null;
+                $sale_order_data->color = $request->bag_color[$key] ?? null;
                 $sale_order_data->pack_size = $request->pack_size[$key];
+                $sale_order_data->pack_uom = $request->pack_uom[$key] ?? null;
 
                 $sale_order_data->total_qty = $request->total_qty[$key];
                 $sale_order_data->actual_qty = $request->actual_qty[$key];
-                $sale_order_data->flc_size = $request->flc_size[$key];
-                $sale_order_data->flc_qty = $request->flc_qty[$key];
-                $sale_order_data->no_of_container = $request->no_of_container[$key];
+                $sale_order_data->flc_size = $request->flc_size[$key] ?? null;
+                $sale_order_data->flc_qty = $request->flc_qty[$key] ?? null;
+                $sale_order_data->no_of_container = $request->no_of_container[$key] ?? null;
 
-                $sale_order_data->qty_variation = $request->qty_variation[$key];
+                $sale_order_data->qty_variation = $request->qty_variation[$key] ?? null;
                 $sale_order_data->rate = $request->rate[$key];
                 $sale_order_data->amount = $request->amount[$key];
-                $sale_order_data->tax = $request->tax_rate[$key];
-                $sale_order_data->tax_amount = $request->tax_amount[$key];
-                $sale_order_data->after_dis_amount = $request->after_dis_amount[$key];
-                $sale_order_data->sales_total = $request->after_dis_amount[$key];
+                $sale_order_data->tax = $request->tax_rate[$key] ?? null;
+                $sale_order_data->tax_amount = $request->tax_amount[$key] ?? null;
+                $sale_order_data->after_dis_amount = $request->after_dis_amount[$key] ?? null;
+                $sale_order_data->sales_total = $request->after_dis_amount[$key] ?? null;
                 $sale_order_data->save();
             }
+            
+            // Create transaction entries if advance payment > 0
+            if ($request->advance_payment > 0) {
+                $advance_amount = $request->advance_payment;
+                
+                // Get customer acc_id
+                $customer = Customer::find($request->buyers_id);
+                $customer_acc_id = $customer->acc_id ?? null;
+                
+                // Get bank acc_id from banks table
+                $bank = Bank::find($request->beneficiary_bank);
+                $bank_acc_id = $bank->acc_id ?? null;
+                
+                // If bank doesn't have acc_id, try to get from accounts table based on bank name
+                if (!$bank_acc_id && $bank) {
+                    $bank_account = DB::connection('mysql2')->table('accounts')
+                        ->where('name', 'like', '%' . $bank->bank_name . '%')
+                        ->where('status', 1)
+                        ->where('code', 'like', '1-2-6-3%') // Bank account code pattern
+                        ->first();
+                    $bank_acc_id = $bank_account->id ?? null;
+                }
+                
+                if ($customer_acc_id && $bank_acc_id) {
+                    // Customer Credit Entry (Customer is paying us)
+                    $transaction_customer = new Transactions();
+                    $transaction_customer = $transaction_customer->SetConnection('mysql2');
+                    $transaction_customer->voucher_no = $request->voucher_no;
+                    $transaction_customer->v_date = $request->voucher_date;
+                    $transaction_customer->acc_id = $customer_acc_id;
+                    $transaction_customer->acc_code = FinanceHelper::getAccountCodeByAccId($customer_acc_id);
+                    $transaction_customer->particulars = 'Advance Payment - ' . $request->voucher_no;
+                    $transaction_customer->opening_bal = 0;
+                    $transaction_customer->debit_credit = 0; // Credit - customer paying
+                    $transaction_customer->amount = $advance_amount;
+                    $transaction_customer->username = Auth::user()->name;
+                    $transaction_customer->status = 1;
+                    $transaction_customer->voucher_type = 21; // Export Sale Order voucher type
+                    $transaction_customer->master_id = $sale_order->id;
+                    $transaction_customer->save();
+                    
+                    // Bank Debit Entry (Money coming into bank)
+                    $transaction_bank = new Transactions();
+                    $transaction_bank = $transaction_bank->SetConnection('mysql2');
+                    $transaction_bank->voucher_no = $request->voucher_no;
+                    $transaction_bank->v_date = $request->voucher_date;
+                    $transaction_bank->acc_id = $bank_acc_id;
+                    $transaction_bank->acc_code = FinanceHelper::getAccountCodeByAccId($bank_acc_id);
+                    $transaction_bank->particulars = 'Advance Payment - ' . $request->voucher_no;
+                    $transaction_bank->opening_bal = 0;
+                    $transaction_bank->debit_credit = 1; // Debit - money coming in
+                    $transaction_bank->amount = $advance_amount;
+                    $transaction_bank->username = Auth::user()->name;
+                    $transaction_bank->status = 1;
+                    $transaction_bank->voucher_type = 21; // Export Sale Order voucher type
+                    $transaction_bank->master_id = $sale_order->id;
+                    $transaction_bank->save();
+                }
+            }
+            
             DB::Connection('mysql2')->commit();
             return redirect()->route('saleOrderList');
 
@@ -327,7 +411,13 @@ class SaleOrderExportController extends Controller
         $banks = Bank::where('status', 1)->wherenull('beneficiary_id')->get();
         $customers = Customer::where(['status' => 1, 'purchaser_type' => 2])->get();
         $printingBags = PrintingBags::select('printing_bags')->where('status', 1)->groupBy('printing_bags')->get();
-        return view('export.sales.saleOrderEdit', compact('exportOrder', 'incoterms', 'printingBags', 'modeofterms', 'modeoftransports', 'conversions', 'banks', 'customers'));
+        $ports = Port::all();
+        $origins = Origin::all();
+        $consignees = Consignee::all();
+        $grades = Grade::all();
+        $sizes = Size::all();
+        $packings = Packing::all();
+        return view('export.sales.saleOrderEdit', compact('exportOrder', 'incoterms', 'printingBags', 'modeofterms', 'modeoftransports', 'conversions', 'banks', 'customers', 'ports', 'origins', 'consignees', 'grades', 'sizes', 'packings'));
     }
 
 
@@ -367,11 +457,15 @@ class SaleOrderExportController extends Controller
             $sale_order->under_milled = $request->under_milled;
             $sale_order->milled_double_polish = $request->milled_double_polish;
             $sale_order->whiteness = $request->whiteness;
-            $sale_order->incoterm = $request->incoterm;
+            $sale_order->incoterm = $request->incoterm ? (int)$request->incoterm : null;
             $sale_order->mode_transport = $request->mode_transport;
-            $sale_order->origin = $request->origin;
+            $sale_order->origin = $request->origin ? (int)$request->origin : null;
+            $sale_order->port = $request->port ? (int)$request->port : null;
             $sale_order->port_of_discharge = $request->port_of_discharge;
             $sale_order->port_loading = $request->port_loading;
+            $sale_order->grade = $request->grade ? (int)$request->grade : null;
+            $sale_order->size = $request->size ? (int)$request->size : null;
+            $sale_order->packing = $request->packing ? (int)$request->packing : null;
             $sale_order->hs_code = $request->hs_code;
             $sale_order->partial_payment = $request->partial_payment;
             $sale_order->bank = $request->beneficiary_bank ?? 1;
@@ -396,7 +490,7 @@ class SaleOrderExportController extends Controller
 
 
             $sale_order->marking_labeling = $request->marking_labeling;
-            // $sale_order->consignee = $request->consignee;
+            $sale_order->consignee = $request->consignee ? (int)$request->consignee : null;
             // $sale_order->notify_party = $request->notify_party_details;
             $sale_order->broker = $request->broker;
             $sale_order->document_to_provided = $request->document_to_provide;
@@ -406,14 +500,22 @@ class SaleOrderExportController extends Controller
             $sale_order->type_of_loading = $request->type_of_loading;
             $sale_order->save();
 
-            ExportOrderConsignee::where('export_order_id', $sale_order->id)->delete();      
-            foreach ($request->consignee as $key => $consignee) {
-                if (!empty($consignee)) {
-                    ExportOrderConsignee::create([
-                        'consignee' => $consignee,
-                        'export_order_id' => $sale_order->id
-                    ]);
+            ExportOrderConsignee::where('export_order_id', $sale_order->id)->delete();
+            // Handle consignee - check if it's array (old format) or single value (new format)
+            if (is_array($request->consignee)) {
+                foreach ($request->consignee as $key => $consignee) {
+                    if (!empty($consignee)) {
+                        ExportOrderConsignee::create([
+                            'consignee' => $consignee,
+                            'export_order_id' => $sale_order->id
+                        ]);
+                    }
                 }
+            } elseif (!empty($request->consignee)) {
+                ExportOrderConsignee::create([
+                    'consignee' => $request->consignee,
+                    'export_order_id' => $sale_order->id
+                ]);
             }
             ExportOrderNotify::where('export_order_id', $sale_order->id)->delete();      
             foreach ($request->notify_party_details as $key => $notify_party_details) {
@@ -432,24 +534,27 @@ class SaleOrderExportController extends Controller
                 $sale_order_data->sale_order_export_id = $sale_order->id;
                 $sale_order_data->item_id = $request->sub_ic_des[$key];
                 $sale_order_data->uom_id = $request->uom_id[$key];
-                $sale_order_data->pack_type = $request->pack_type[$key];
-                $sale_order_data->bag_type = $request->bag_type[$key];
-                $sale_order_data->color = $request->bag_color[$key];
+                $sale_order_data->item_size = $request->item_size[$key] ?? null;
+                $sale_order_data->quality = $request->quality[$key] ?? null;
+                $sale_order_data->pack_type = $request->pack_type[$key] ?? null;
+                $sale_order_data->bag_type = $request->bag_type[$key] ?? null;
+                $sale_order_data->color = $request->bag_color[$key] ?? null;
                 $sale_order_data->pack_size = $request->pack_size[$key];
+                $sale_order_data->pack_uom = $request->pack_uom[$key] ?? null;
 
                 $sale_order_data->total_qty = $request->total_qty[$key];
                 $sale_order_data->actual_qty = $request->actual_qty[$key];
-                $sale_order_data->flc_size = $request->flc_size[$key];
-                $sale_order_data->flc_qty = $request->flc_qty[$key];
-                $sale_order_data->no_of_container = $request->no_of_container[$key];
+                $sale_order_data->flc_size = $request->flc_size[$key] ?? null;
+                $sale_order_data->flc_qty = $request->flc_qty[$key] ?? null;
+                $sale_order_data->no_of_container = $request->no_of_container[$key] ?? null;
 
-                $sale_order_data->qty_variation = $request->qty_variation[$key];
+                $sale_order_data->qty_variation = $request->qty_variation[$key] ?? null;
                 $sale_order_data->rate = $request->rate[$key];
                 $sale_order_data->amount = $request->amount[$key];
-                $sale_order_data->tax = $request->tax_rate[$key];
-                $sale_order_data->tax_amount = $request->tax_amount[$key];
-                $sale_order_data->after_dis_amount = $request->after_dis_amount[$key];
-                $sale_order_data->sales_total = $request->after_dis_amount[$key];
+                $sale_order_data->tax = $request->tax_rate[$key] ?? null;
+                $sale_order_data->tax_amount = $request->tax_amount[$key] ?? null;
+                $sale_order_data->after_dis_amount = $request->after_dis_amount[$key] ?? null;
+                $sale_order_data->sales_total = $request->after_dis_amount[$key] ?? null;
                 $sale_order_data->save();
             }
             DB::Connection('mysql2')->commit();

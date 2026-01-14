@@ -144,6 +144,18 @@ else{
 	                                    <label class="sf-label">Terms Of Payment <span class="rflabelsteric"><strong>*</strong></span></label>
 	                                    <input onkeyup="calculate_due_date()"  type="number" class="form-control requiredField" placeholder="" name="model_terms_of_payment" id="model_terms_of_payment" value="" />
 	                                 </div> --}}
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                                <label class="sf-label">Customer Address</label>
+                                                                <input type="text" class="form-control" id="customer_address" readonly value="{{ $exportOrder->buyer ? $exportOrder->buyer->address ?? '' : '' }}" />
+                                                            </div>
+                                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                                <label class="sf-label">Customer NTN</label>
+                                                                <input type="text" class="form-control" id="customer_ntn" readonly value="{{ $exportOrder->buyer ? $exportOrder->buyer->cnic_ntn ?? '' : '' }}" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
                                                             <div class="col-lg-4 col-md-2 col-sm-2 col-xs-12">
                                                                 @php
                                                                     $due_date = new DateTime($exportOrder->due_date);
@@ -451,9 +463,23 @@ else{
                                                                 <tr>
                                                                     <td>ORIGIN</td>
                                                                     <td>
-
-                                                                        <input type="text" class="form-control"
-                                                                            name="origin" value="{{$exportOrder->origin}}">
+                                                                        <select class="form-control select2" name="origin" id="origin">
+                                                                            <option value="">Select Origin</option>
+                                                                            @foreach ($origins as $origin)
+                                                                                <option value="{{ $origin->id }}" {{ ($exportOrder->origin == $origin->id) ? 'selected' : '' }}>{{ $origin->name }}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>PORT</td>
+                                                                    <td>
+                                                                        <select class="form-control select2" name="port" id="port">
+                                                                            <option value="">Select Port</option>
+                                                                            @foreach ($ports as $port)
+                                                                                <option value="{{ $port->id }}" {{ ($exportOrder->port == $port->id) ? 'selected' : '' }}>{{ $port->name }}</option>
+                                                                            @endforeach
+                                                                        </select>
                                                                     </td>
                                                                 </tr>
                                                                 <tr>
@@ -471,6 +497,50 @@ else{
                                                                         <input type="text" class="form-control"
                                                                         value="{{$exportOrder->port_loading}}"
                                                                             name="port_loading">
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>CONSIGNEE</td>
+                                                                    <td>
+                                                                        <select class="form-control select2" name="consignee" id="consignee">
+                                                                            <option value="">Select Consignee</option>
+                                                                            @foreach ($consignees as $consignee)
+                                                                                <option value="{{ $consignee->id }}" {{ ($exportOrder->consignee == $consignee->id) ? 'selected' : '' }}>{{ $consignee->name }}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>GRADE</td>
+                                                                    <td>
+                                                                        <select class="form-control select2" name="grade" id="grade">
+                                                                            <option value="">Select Grade</option>
+                                                                            @foreach ($grades as $grade)
+                                                                                <option value="{{ $grade->id }}" {{ ($exportOrder->grade == $grade->id) ? 'selected' : '' }}>{{ $grade->name }}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>SIZE</td>
+                                                                    <td>
+                                                                        <select class="form-control select2" name="size" id="size">
+                                                                            <option value="">Select Size</option>
+                                                                            @foreach ($sizes as $size)
+                                                                                <option value="{{ $size->id }}" {{ ($exportOrder->size == $size->id) ? 'selected' : '' }}>{{ $size->name }}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>PACKING</td>
+                                                                    <td>
+                                                                        <select class="form-control select2" name="packing" id="packing">
+                                                                            <option value="">Select Packing</option>
+                                                                            @foreach ($packings as $packing)
+                                                                                <option value="{{ $packing->id }}" {{ ($exportOrder->packing == $packing->id) ? 'selected' : '' }}>{{ $packing->name }}</option>
+                                                                            @endforeach
+                                                                        </select>
                                                                     </td>
                                                                 </tr>
                                                                 <tr>
@@ -668,9 +738,12 @@ else{
                                                                 </tr>
                                                                 <tr>
                                                                     <th class="text-center" style="width: 20%;">Item</th>
+                                                                    <th class="text-center">Item Size</th>
+                                                                    <th class="text-center">Quality</th>
                                                                     <th class="text-center">Uom<span
                                                                             class="rflabelsteric"><strong>*</strong></span>
                                                                     </th>
+                                                                    <th class="text-center">HS Code</th>
                                                                     <th class="text-center">Pack Type<span
                                                                             class="rflabelsteric"><strong>*</strong></span>
                                                                     </th>
@@ -719,18 +792,49 @@ else{
                                                                                 @foreach (CommonHelper::get_item_by_category(81) as $row)
                                                                                     <?php
                                                                                     $uom = CommonHelper::get_uom($row->id);
+                                                                                    $uom_name = CommonHelper::get_uom_name($uom);
                                                                                     $pack_uom = ($row->pack_uom)? CommonHelper::get_uom_name($row->pack_uom) : '';
+                                                                                    $hs_code = $row->hs_code ?? '';
                                                                                     ?>
                                                                                     <option
-                                                                                        value="{{ $row->id . ',' . $uom . ',' . $row->pack_type . ',' . $row->pack_size . ',' . $pack_uom }}"
+                                                                                        value="{{ $row->id . ',' . $uom . ',' . $uom_name . ',' . $row->pack_type . ',' . $row->pack_size . ',' . $row->pack_uom . ',' . $pack_uom . ',' . $hs_code }}"
                                                                                         {{($exportOrderData->item_id == $row->id)? 'selected' : ''}}>
                                                                                         {{ $row->sub_ic }}</option>
                                                                                 @endforeach
                                                                             </select>
                                                                         </td>
+                                                                        <td>
+                                                                            <select class="form-control select2" name="item_size[]" id="item_size{{ $key }}">
+                                                                                <option value="">Select</option>
+                                                                                <option value="0-19" {{ ($exportOrderData->item_size == '0-19') ? 'selected' : '' }}>0-19</option>
+                                                                                <option value="10-20" {{ ($exportOrderData->item_size == '10-20') ? 'selected' : '' }}>10-20</option>
+                                                                                <option value="20-30" {{ ($exportOrderData->item_size == '20-30') ? 'selected' : '' }}>20-30</option>
+                                                                                <option value="30-40" {{ ($exportOrderData->item_size == '30-40') ? 'selected' : '' }}>30-40</option>
+                                                                                <option value="40-50" {{ ($exportOrderData->item_size == '40-50') ? 'selected' : '' }}>40-50</option>
+                                                                                <option value="50-60" {{ ($exportOrderData->item_size == '50-60') ? 'selected' : '' }}>50-60</option>
+                                                                                <option value="60-70" {{ ($exportOrderData->item_size == '60-70') ? 'selected' : '' }}>60-70</option>
+                                                                                <option value="70-80" {{ ($exportOrderData->item_size == '70-80') ? 'selected' : '' }}>70-80</option>
+                                                                                <option value="80-90" {{ ($exportOrderData->item_size == '80-90') ? 'selected' : '' }}>80-90</option>
+                                                                                <option value="90-100" {{ ($exportOrderData->item_size == '90-100') ? 'selected' : '' }}>90-100</option>
+                                                                                <option value="100+" {{ ($exportOrderData->item_size == '100+') ? 'selected' : '' }}>100+</option>
+                                                                            </select>
+                                                                        </td>
+                                                                        <td>
+                                                                            <select class="form-control select2" name="quality[]" id="quality{{ $key }}">
+                                                                                <option value="">Select</option>
+                                                                                <option value="A" {{ ($exportOrderData->quality == 'A') ? 'selected' : '' }}>A</option>
+                                                                                <option value="A+" {{ ($exportOrderData->quality == 'A+') ? 'selected' : '' }}>A+</option>
+                                                                                <option value="B" {{ ($exportOrderData->quality == 'B') ? 'selected' : '' }}>B</option>
+                                                                                <option value="B+" {{ ($exportOrderData->quality == 'B+') ? 'selected' : '' }}>B+</option>
+                                                                                <option value="C" {{ ($exportOrderData->quality == 'C') ? 'selected' : '' }}>C</option>
+                                                                            </select>
+                                                                        </td>
                                                                         <td><input readonly type="text"
                                                                                 class="form-control" name="uom_id[]"
                                                                                 id="uom_id{{ $key }}" value="{{$exportOrderData->uom_id}}"></td>
+                                                                        <td><input readonly type="text"
+                                                                                class="form-control" name="hs_code_display[]"
+                                                                                id="hs_code_display{{ $key }}" value=""></td>
                                                                         <td><input readonly type="text"
                                                                                 class="form-control" name="pack_type[]"
                                                                                 id="pack_type{{ $key }}" value="{{$exportOrderData->pack_type}}"></td>
@@ -912,6 +1016,45 @@ else{
             // alert(counts);
             // return
             banksDataBeneficiary();
+            
+            // Populate customer details on page load
+            var buyerId = $('#ntn').find(':selected').val();
+            if (buyerId) {
+                var ntn = buyerId.split('*');
+                var customerId = ntn[0];
+                if (customerId) {
+                    $.ajax({
+                        url: '{{ route('getCustomerDetails') }}',
+                        data: { id: customerId },
+                        type: 'GET',
+                        success: function(response) {
+                            $('#customer_address').val(response.address || '');
+                            $('#customer_ntn').val(response.ntn || '');
+                        }
+                    });
+                }
+            }
+            
+            // Handle buyer selection change
+            $('#ntn').on('change', function() {
+                var buyerId = $(this).val();
+                if (buyerId) {
+                    var ntn = buyerId.split('*');
+                    var customerId = ntn[0];
+                    if (customerId) {
+                        $.ajax({
+                            url: '{{ route('getCustomerDetails') }}',
+                            data: { id: customerId },
+                            type: 'GET',
+                            success: function(response) {
+                                $('#customer_address').val(response.address || '');
+                                $('#customer_ntn').val(response.ntn || '');
+                            }
+                        });
+                    }
+                }
+            });
+            
             CKEDITOR.replace('quality_remarks');
             // CKEDITOR.replace('consignee');
             CKEDITOR.replace('product_specification');
@@ -1000,7 +1143,35 @@ else{
                 '@endforeach' +
                 '</select>' +
                 '</td>' +
+                '<td>' +
+                '<select class="form-control select2" name="item_size[]" id="item_size' + Counter + '">' +
+                '<option value="">Select</option>' +
+                '<option value="0-19">0-19</option>' +
+                '<option value="10-20">10-20</option>' +
+                '<option value="20-30">20-30</option>' +
+                '<option value="30-40">30-40</option>' +
+                '<option value="40-50">40-50</option>' +
+                '<option value="50-60">50-60</option>' +
+                '<option value="60-70">60-70</option>' +
+                '<option value="70-80">70-80</option>' +
+                '<option value="80-90">80-90</option>' +
+                '<option value="90-100">90-100</option>' +
+                '<option value="100+">100+</option>' +
+                '</select>' +
+                '</td>' +
+                '<td>' +
+                '<select class="form-control select2" name="quality[]" id="quality' + Counter + '">' +
+                '<option value="">Select</option>' +
+                '<option value="A">A</option>' +
+                '<option value="A+">A+</option>' +
+                '<option value="B">B</option>' +
+                '<option value="B+">B+</option>' +
+                '<option value="C">C</option>' +
+                '</select>' +
+                '</td>' +
                 '<td><input readonly  type="text" class="form-control" name="uom_id[]" id="uom_id' + Counter +
+                '" ></td>' +
+                '<td><input readonly type="text" class="form-control" name="hs_code_display[]" id="hs_code_display' + Counter +
                 '" ></td>' +
                 '<td><input readonly type="text" class="form-control" name="pack_type[]" id="pack_type' + Counter +
                 '" ></td>' +
@@ -1431,6 +1602,20 @@ else{
             ntn = ntn.split('*');
             $('#buyers_ntn').val(ntn[1]);
             $('#buyers_sales').val(ntn[2]);
+            
+            // Get customer details via AJAX
+            var customerId = ntn[0];
+            if (customerId) {
+                $.ajax({
+                    url: '{{ route('getCustomerDetails') }}',
+                    data: { id: customerId },
+                    type: 'GET',
+                    success: function(response) {
+                        $('#customer_address').val(response.address || '');
+                        $('#customer_ntn').val(response.ntn || '');
+                    }
+                });
+            }
             $('#model_terms_of_payment').val(ntn[3]);
             calculate_due_date();
             sales_tax();
@@ -1534,9 +1719,10 @@ else{
             var sub_ic_data = $('#sub_ic_des' + id).val();
             sub_ic_data = sub_ic_data.split(',');
             $('#uom_id' + id).val(sub_ic_data[1]);
-            $('#pack_type' + id).val(sub_ic_data[2]);
-            $('#pack_size' + id).val(sub_ic_data[3]);
-            $('#pack_uom' + id).val(sub_ic_data[4]);
+            $('#pack_type' + id).val(sub_ic_data[3]);
+            $('#pack_size' + id).val(sub_ic_data[4]);
+            $('#pack_uom' + id).val(sub_ic_data[6]);
+            $('#hs_code_display' + id).val(sub_ic_data[7] || '');
 
         }
 
