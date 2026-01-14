@@ -88,6 +88,12 @@ use App\Helpers\CommonHelper;
                                                         @endif
                                                     </div>
                                                     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                                        <label>Scientific Name :</label>
+                                                        <input type="text" name="scientific_name" id="scientific_name"
+                                                            value="<?php echo $sub_item->scientific_name ?? ''; ?>"
+                                                            class="form-control" placeholder="Enter Scientific Name" />
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
                                                         <label>SKU Code:</label>
                                                         <span class="rflabelsteric"><strong>*</strong></span>
                                                         <input type="hidden" name="old_sku_code" id="old_sku_code" value="<?php echo $sub_item->sku_code; ?>" />
@@ -184,6 +190,11 @@ use App\Helpers\CommonHelper;
                                                         <label>Mxn Stock</label>
                                                         <input type="number" class="form-control" name="max_stock"
                                                             step="0.01" value="{{ $sub_item->max_stock }}">
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                                        <label>HS Code</label>
+                                                        <input type="text" class="form-control" name="hs_code"
+                                                            value="{{ $sub_item->hs_code ?? '' }}" placeholder="Enter HS Code">
                                                     </div>
                                                 </div>
 

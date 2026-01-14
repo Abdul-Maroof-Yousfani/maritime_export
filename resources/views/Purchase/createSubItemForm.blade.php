@@ -66,6 +66,12 @@ use App\Helpers\CommonHelper;
                                                                 </span>
                                                             @endif
                                                         </div>
+                                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                                            <label>Scientific Name :</label>
+                                                            <input type="text" name="scientific_name" id="scientific_name"
+                                                                value="{{ old('scientific_name') }}" class="form-control" 
+                                                                placeholder="Enter Scientific Name" />
+                                                        </div>
 
 
                                                         {{-- <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
@@ -167,6 +173,11 @@ use App\Helpers\CommonHelper;
                                                             <label>Max Stock</label>
                                                             <input type="number" class="form-control" name="max_stock"
                                                                 step="0.01" value="{{ old('max_stock') }}">
+                                                        </div>
+                                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                                            <label>HS Code</label>
+                                                            <input type="text" class="form-control" name="hs_code"
+                                                                value="{{ old('hs_code') }}" placeholder="Enter HS Code">
                                                         </div>
                                                     </div>
 

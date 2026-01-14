@@ -465,6 +465,7 @@ class PurchaseAddDetailControler extends Controller
         $sub_item = $sub_item->SetConnection('mysql2');
         $sub_item->main_ic_id = $request->CategoryId;
         $sub_item->sub_ic = $request->sub_ic;
+        $sub_item->scientific_name = $request->scientific_name;
         $sub_item->sku_code = $request->sku_code??'';
         $sub_item->item_code = $request->sku_code ?? '';
         $sub_item->uom = $request->uom_id;
@@ -476,6 +477,7 @@ class PurchaseAddDetailControler extends Controller
         $sub_item->pack_size = $request->pack_size;
         $sub_item->pack_uom = $request->pack_uom_id;
         $sub_item->pack_type = $request->pack_type;
+        $sub_item->hs_code = $request->hs_code;
         $sub_item->stockType = $request->stockType??1;
         $sub_item->acc_id = $account->id ?? 0;
         $sub_item->username = Auth::user()->name;

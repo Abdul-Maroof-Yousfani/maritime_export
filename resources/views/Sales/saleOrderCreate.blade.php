@@ -250,6 +250,11 @@ use App\Helpers\CommonHelper;
                                         value="{{ strtoupper(SalesHelper::get_unique_no_export(date('y'), date('m'))) }}" readonly />
                                 </div>
                                 <div class="form-group">
+                                    <label class="form-label">Contract No</label>
+                                    <input type="text" class="form-control" name="contract_no" id="contract_no" 
+                                        value="{{ old('contract_no') }}" placeholder="Enter Contract Number" />
+                                </div>
+                                <div class="form-group">
                                     <label class="form-label">Export Date <span class="rflabelsteric">*</span></label>
                                     <input type="date" class="form-control" name="voucher_date" id="voucher_date" 
                                         value="{{ date('Y-m-d') }}" required />
@@ -453,7 +458,6 @@ use App\Helpers\CommonHelper;
                             </div>
                             
                             <!-- Hidden fields for backend compatibility -->
-                            <input type="hidden" name="contract_no" value="" />
                             <input type="hidden" name="voucher_heading" value="Export Order" />
                             <input type="hidden" name="currencey_id" id="currencey_id" />
                             <input type="hidden" name="rate_conversion" id="rate_conversion" />
