@@ -38,3 +38,4 @@ class CreateSaleOrderExportAttachmentsTable extends Migration
     }
 }
 
+

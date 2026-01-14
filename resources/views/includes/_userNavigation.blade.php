@@ -27,7 +27,7 @@ $icons = [
     'Commodities Purchase' => 'glyphicon glyphicon-wrench',
     'Arrival' => 'glyphicon glyphicon-home',
     'Scrap Declration' => 'glyphicon glyphicon-home',
-    '' => 'glyphicon glyphicon-home',
+    'Setup' => 'glyphicon glyphicon-home',
 ];
 
 $accType = Auth::user()->acc_type;

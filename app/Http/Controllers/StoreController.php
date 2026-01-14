@@ -33,6 +33,12 @@ use App\Models\PrintingBags;
 use App\Models\StockAdjustment;
 use App\Models\StockMovement;
 use App\Models\SubDepartment;
+use App\Models\Port;
+use App\Models\Origin;
+use App\Models\Consignee;
+use App\Models\Grade;
+use App\Models\Size;
+use App\Models\Packing;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
@@ -1075,8 +1081,44 @@ class StoreController extends Controller
         $banks = Bank::where('status', 1)->wherenull('beneficiary_id')->get();
         $customers = Customer::where(['status' => 1, 'purchaser_type' => 2])->get();
         $printingBags = PrintingBags::select('pack_type')->where('status', 1)->groupBy('pack_type')->get();
+        $ports = Port::all();
+        $origins = Origin::all();
+        $consignees = Consignee::all();
+        $grades = Grade::all();
+        $sizes = Size::all();
+        $packings = Packing::all();
         // dd($printingBags);
-        return view('Sales.saleOrderCreate', compact('incoterms', 'printingBags', 'modeofterms', 'modeoftransports', 'conversions', 'banks', 'customers'));
+        return view('Sales.saleOrderCreate', compact('incoterms', 'printingBags', 'modeofterms', 'modeoftransports', 'conversions', 'banks', 'customers', 'ports', 'origins', 'consignees', 'grades', 'sizes', 'packings'));
+    }
+
+    public function getCustomerDetails(Request $request)
+    {
+        $customer = Customer::where('id', $request->id)->first();
+        if ($customer) {
+            return response()->json([
+                'success' => true,
+                'address' => $customer->address ?? '',
+                'ntn' => $customer->cnic_ntn ?? ''
+            ]);
+        }
+        return response()->json(['success' => false]);
+    }
+
+    public function getBankDetails(Request $request)
+    {
+        $bank = Bank::where('id', $request->id)->first();
+        if ($bank) {
+            return response()->json([
+                'success' => true,
+                'bank_name' => $bank->bank_name ?? '',
+                'account_title' => $bank->account_title ?? '',
+                'account_no' => $bank->account_no ?? '',
+                'swift_code' => $bank->swift_code ?? '',
+                'iban_no' => $bank->IBAN_no ?? '',
+                'bank_address' => $bank->bank_address ?? ''
+            ]);
+        }
+        return response()->json(['success' => false]);
     }
 
     public function getPackSize(Request $request)

@@ -763,6 +763,8 @@ Route::group(['prefix' => 'export', 'middleware' => 'mysql2', 'before' => 'csrf'
 
     Route::post('/importExcelData','ExportPakingListController@importExcelData')->name('importExcelData');
     Route::get('/saleOrderCreate', 'StoreController@saleOrderCreate')->name('saleOrderCreate');
+    Route::get('/getCustomerDetails', 'StoreController@getCustomerDetails')->name('getCustomerDetails');
+    Route::get('/getBankDetails', 'StoreController@getBankDetails')->name('getBankDetails');
 
 
     Route::get('/saleOrderEdit', 'SaleOrderExportController@saleOrderEdit')->name('saleOrderEdit');

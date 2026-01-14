@@ -42,3 +42,4 @@ class AddMissingFieldsToSaleOrderDataExportsTable extends Migration
     }
 }
 
+

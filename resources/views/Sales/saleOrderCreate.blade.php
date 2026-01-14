@@ -256,12 +256,24 @@ use App\Helpers\CommonHelper;
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Customer <span class="rflabelsteric">*</span></label>
-                                    <select class="form-control select2" name="buyers_id" id="buyers_id" required>
+                                    <select class="form-control select2" name="buyers_id" id="buyers_id" onchange="loadCustomerDetails()" required>
                                         <option value="">Select Customer</option>
                                         @foreach ($customers as $row)
                                             <option value="{{ $row->id }}">{{ $row->name }}</option>
                                         @endforeach
                                     </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Customer Details (Readonly) -->
+                            <div class="form-row" id="customerDetailsRow" style="display: none;">
+                                <div class="form-group">
+                                    <label class="form-label">Customer Address</label>
+                                    <input type="text" class="form-control" id="customer_address" readonly />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Customer NTN</label>
+                                    <input type="text" class="form-control" id="customer_ntn" readonly />
                                 </div>
                             </div>
                             
@@ -306,7 +318,7 @@ use App\Helpers\CommonHelper;
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Bank <span class="rflabelsteric">*</span></label>
-                                    <select class="form-control select2" name="beneficiary_bank" id="beneficiary_bank" required>
+                                    <select class="form-control select2" name="beneficiary_bank" id="beneficiary_bank" onchange="loadBankDetails()" required>
                                         <option value="">Select Bank</option>
                                         @foreach ($banks as $bank)
                                             <option value="{{ $bank->id }}">{{ $bank->bank_name }}</option>
@@ -317,6 +329,113 @@ use App\Helpers\CommonHelper;
                                     <label class="form-label">Advance Amount</label>
                                     <input type="number" class="form-control" name="advance_payment" id="advance_payment" 
                                         step="0.01" min="0" placeholder="Enter advance payment amount" />
+                                </div>
+                            </div>
+                            
+                            <!-- Bank Details (Readonly) -->
+                            <div class="form-row" id="bankDetailsRow" style="display: none;">
+                                <div class="form-group">
+                                    <label class="form-label">Bank Name</label>
+                                    <input type="text" class="form-control" id="bank_account_name" readonly />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Account Title</label>
+                                    <input type="text" class="form-control" id="bank_account_title" readonly />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Account No</label>
+                                    <input type="text" class="form-control" id="bank_account_no" readonly />
+                                </div>
+                            </div>
+                            
+                            <div class="form-row" id="bankDetailsRow2" style="display: none;">
+                                <div class="form-group">
+                                    <label class="form-label">SWIFT Code</label>
+                                    <input type="text" class="form-control" id="bank_swift_code" readonly />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">IBAN No</label>
+                                    <input type="text" class="form-control" id="bank_iban_no" readonly />
+                                </div>
+                            </div>
+                            
+                            <div class="form-row" id="bankDetailsRow3" style="display: none;">
+                                <div class="form-group" style="flex: 1 1 100%;">
+                                    <label class="form-label">Bank Address</label>
+                                    <input type="text" class="form-control" id="bank_address" readonly />
+                                </div>
+                            </div>
+                            
+                            <!-- New Dropdown Fields -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Incoterm</label>
+                                    <select class="form-control select2" name="incoterm" id="incoterm">
+                                        <option value="">Select Incoterm</option>
+                                        @foreach ($incoterms as $incoterm)
+                                            <option value="{{ $incoterm->id }}">{{ $incoterm->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Port</label>
+                                    <select class="form-control select2" name="port" id="port">
+                                        <option value="">Select Port</option>
+                                        @foreach ($ports as $port)
+                                            <option value="{{ $port->id }}">{{ $port->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Origin</label>
+                                    <select class="form-control select2" name="origin" id="origin">
+                                        <option value="">Select Origin</option>
+                                        @foreach ($origins as $origin)
+                                            <option value="{{ $origin->id }}">{{ $origin->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Consignee</label>
+                                    <select class="form-control select2" name="consignee" id="consignee">
+                                        <option value="">Select Consignee</option>
+                                        @foreach ($consignees as $consignee)
+                                            <option value="{{ $consignee->id }}">{{ $consignee->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Grade</label>
+                                    <select class="form-control select2" name="grade" id="grade">
+                                        <option value="">Select Grade</option>
+                                        @foreach ($grades as $grade)
+                                            <option value="{{ $grade->id }}">{{ $grade->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Size</label>
+                                    <select class="form-control select2" name="size" id="size">
+                                        <option value="">Select Size</option>
+                                        @foreach ($sizes as $size)
+                                            <option value="{{ $size->id }}">{{ $size->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Packing</label>
+                                    <select class="form-control select2" name="packing" id="packing">
+                                        <option value="">Select Packing</option>
+                                        @foreach ($packings as $packing)
+                                            <option value="{{ $packing->id }}">{{ $packing->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                             
@@ -565,6 +684,80 @@ use App\Helpers\CommonHelper;
         // Show remove button if more than one row
         updateRemoveButtons();
     });
+    
+    function loadCustomerDetails() {
+        const customerId = $('#buyers_id').val();
+        if (customerId) {
+            $.ajax({
+                url: '{{ route("getCustomerDetails") }}',
+                type: 'GET',
+                data: { id: customerId },
+                success: function(response) {
+                    if (response.success) {
+                        $('#customer_address').val(response.address);
+                        $('#customer_ntn').val(response.ntn);
+                        $('#customerDetailsRow').show();
+                    } else {
+                        $('#customer_address').val('');
+                        $('#customer_ntn').val('');
+                        $('#customerDetailsRow').hide();
+                    }
+                },
+                error: function() {
+                    $('#customer_address').val('');
+                    $('#customer_ntn').val('');
+                    $('#customerDetailsRow').hide();
+                }
+            });
+        } else {
+            $('#customer_address').val('');
+            $('#customer_ntn').val('');
+            $('#customerDetailsRow').hide();
+        }
+    }
+    
+    function loadBankDetails() {
+        const bankId = $('#beneficiary_bank').val();
+        if (bankId) {
+            $.ajax({
+                url: '{{ route("getBankDetails") }}',
+                type: 'GET',
+                data: { id: bankId },
+                success: function(response) {
+                    if (response.success) {
+                        $('#bank_account_name').val(response.bank_name);
+                        $('#bank_account_title').val(response.account_title);
+                        $('#bank_account_no').val(response.account_no || '');
+                        $('#bank_swift_code').val(response.swift_code);
+                        $('#bank_iban_no').val(response.iban_no);
+                        $('#bank_address').val(response.bank_address);
+                        $('#bankDetailsRow').show();
+                        $('#bankDetailsRow2').show();
+                        $('#bankDetailsRow3').show();
+                    } else {
+                        clearBankDetails();
+                    }
+                },
+                error: function() {
+                    clearBankDetails();
+                }
+            });
+        } else {
+            clearBankDetails();
+        }
+    }
+    
+    function clearBankDetails() {
+        $('#bank_account_name').val('');
+        $('#bank_account_title').val('');
+        $('#bank_account_no').val('');
+        $('#bank_swift_code').val('');
+        $('#bank_iban_no').val('');
+        $('#bank_address').val('');
+        $('#bankDetailsRow').hide();
+        $('#bankDetailsRow2').hide();
+        $('#bankDetailsRow3').hide();
+    }
     
     let selectedFiles = [];
     
