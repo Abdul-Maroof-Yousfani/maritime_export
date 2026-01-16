@@ -552,9 +552,13 @@ class SaleOrderExportController extends Controller
                 return response()->json(['success' => false, 'message' => 'Advance amount must be greater than 0'], 400);
             }
             
-            // Get customer acc_id
+            // Get customer acc_id and liability_acc_id
             $customer = Customer::find($saleOrder->buyer_id);
             $customer_acc_id = $customer->acc_id ?? null;
+            $liability_acc_id = $customer->liability_acc_id ?? null;
+            
+            // Use liability_acc_id if available, otherwise fall back to customer acc_id
+            $credit_acc_id = $liability_acc_id ?? $customer_acc_id;
             
             // Get bank acc_id from banks table
             $bank = Bank::find($saleOrder->bank);
@@ -570,7 +574,7 @@ class SaleOrderExportController extends Controller
                 $bank_acc_id = $bank_account->id ?? null;
             }
             
-            if (!$customer_acc_id) {
+            if (!$credit_acc_id) {
                 return response()->json(['success' => false, 'message' => 'Customer account ID not found'], 400);
             }
             
@@ -581,13 +585,13 @@ class SaleOrderExportController extends Controller
             // Generate unique voucher number for advance payment
             $advance_voucher_no = $saleOrder->voucehr_no . '-ADV-' . date('YmdHis');
             
-            // Customer Credit Entry (Customer is paying us)
+            // Liability Account Credit Entry (Customer advance payment liability)
             $transaction_customer = new Transactions();
             $transaction_customer = $transaction_customer->SetConnection('mysql2');
             $transaction_customer->voucher_no = $advance_voucher_no;
             $transaction_customer->v_date = date('Y-m-d');
-            $transaction_customer->acc_id = $customer_acc_id;
-            $transaction_customer->acc_code = FinanceHelper::getAccountCodeByAccId($customer_acc_id);
+            $transaction_customer->acc_id = $credit_acc_id;
+            $transaction_customer->acc_code = FinanceHelper::getAccountCodeByAccId($credit_acc_id);
             $transaction_customer->particulars = 'Advance Payment Received - ' . $saleOrder->voucehr_no;
             $transaction_customer->opening_bal = 0;
             $transaction_customer->debit_credit = 0; // Credit - customer paying

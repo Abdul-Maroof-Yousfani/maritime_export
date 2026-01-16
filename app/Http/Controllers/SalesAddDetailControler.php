@@ -112,8 +112,37 @@ class SalesAddDetailControler extends Controller
 
         $acc_id = DB::table('accounts')->insertGetId($data1);
 
+        // Create second account with parent_code 2-2-1
+        $second_parent_code = '2-2-1';
+        $max_id_second = DB::selectOne('SELECT max(`id`) as id  FROM `accounts` WHERE `parent_code` LIKE \''.$second_parent_code.'\'')->id;
+        if($max_id_second == ''){
+            $code_second = $second_parent_code.'-1';
+        }else{
+            $max_code2_second = DB::selectOne('SELECT `code`  FROM `accounts` WHERE `id` LIKE \''.$max_id_second.'\'')->code;
+            $max_code2_second;
+            $max_second = explode('-',$max_code2_second);
+            $code_second = $second_parent_code.'-'.(end($max_second)+1);
+        }
+
+        $level_array_second = explode('-',$code_second);
+        $counter_second = 1;
+        foreach($level_array_second as $level_second):
+            $data1_second['level'.$counter_second] = $level_second;
+            $counter_second++;
+        endforeach;
+        $data1_second['code'] = $code_second;
+        $data1_second['name'] = $customer_name;
+        $data1_second['parent_code'] = $second_parent_code;
+        $data1_second['username'] = Auth::user()->name;
+        $data1_second['date'] = date("d-m-Y");
+        $data1_second['time'] = date("H:i:s");
+        $data1_second['action'] = 'create';
+        $data1_second['operational'] = $operational;
+
+        $acc_id_second = DB::table('accounts')->insertGetId($data1_second);
 
         $data2['acc_id']		     = $acc_id;
+        $data2['liability_acc_id']  = $acc_id_second;
         $data2['name']     		   = $customer_name;
         $data2['country']     		= $country;
         $data2['province']     	   = $state;
@@ -201,8 +230,37 @@ class SalesAddDetailControler extends Controller
 
         $acc_id = DB::table('accounts')->insertGetId($data1);
 
+        // Create second account with parent_code 2-2-1
+        $second_parent_code = '2-2-1';
+        $max_id_second = DB::selectOne('SELECT max(`id`) as id  FROM `accounts` WHERE `parent_code` LIKE \''.$second_parent_code.'\'')->id;
+        if($max_id_second == ''){
+            $code_second = $second_parent_code.'-1';
+        }else{
+            $max_code2_second = DB::selectOne('SELECT `code`  FROM `accounts` WHERE `id` LIKE \''.$max_id_second.'\'')->code;
+            $max_code2_second;
+            $max_second = explode('-',$max_code2_second);
+            $code_second = $second_parent_code.'-'.(end($max_second)+1);
+        }
+
+        $level_array_second = explode('-',$code_second);
+        $counter_second = 1;
+        foreach($level_array_second as $level_second):
+            $data1_second['level'.$counter_second] = $level_second;
+            $counter_second++;
+        endforeach;
+        $data1_second['code'] = $code_second;
+        $data1_second['name'] = $customer_name;
+        $data1_second['parent_code'] = $second_parent_code;
+        $data1_second['username'] = Auth::user()->name;
+        $data1_second['date'] = date("d-m-Y");
+        $data1_second['time'] = date("H:i:s");
+        $data1_second['action'] = 'create';
+        $data1_second['operational'] = $operational;
+
+        $acc_id_second = DB::table('accounts')->insertGetId($data1_second);
 
         $data2['acc_id']		     = $acc_id;
+        $data2['liability_acc_id']  = $acc_id_second;
         $data2['name']     		   = $customer_name;
         $data2['customer_code']   = $customer_code??'';
         $data2['country']     		= $country??'';
