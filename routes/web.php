@@ -785,6 +785,8 @@ Route::group(['prefix' => 'export', 'middleware' => 'mysql2', 'before' => 'csrf'
     Route::get('/viewSaleExportVoucher/{id?}', 'SaleOrderExportController@viewSaleExportVoucher');
     Route::get('/deleteSalesOrder', 'SaleOrderExportController@deleteSalesOrder');
     Route::get('/updateApprovedStatus', 'SaleOrderExportController@updateApprovedStatus');
+    Route::get('/getSaleOrderForAdvance', 'SaleOrderExportController@getSaleOrderForAdvance');
+    Route::post('/receiveAdvancePayment', 'SaleOrderExportController@receiveAdvancePayment');
 
 
 

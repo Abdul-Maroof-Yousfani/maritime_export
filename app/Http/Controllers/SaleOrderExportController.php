@@ -132,7 +132,7 @@ class SaleOrderExportController extends Controller
             $sale_order->transhipment = $request->transhipment;
             $sale_order->part_shipment = $request->part_shipment;
             $sale_order->insurance_coverd = $request->insurance_coverd;
-            $sale_order->advance_payment = $request->advance_payment;
+            $sale_order->is_advance = $request->is_advance ?? 0;
             $sale_order->payment_days = $request->payment_days;
             $sale_order->currencey_id = $request->rate_conversion;
             $sale_order->currencey_rate = $request->rate_of_conversion;
@@ -210,65 +210,6 @@ class SaleOrderExportController extends Controller
                 $sale_order_data->after_dis_amount = $request->after_dis_amount[$key] ?? null;
                 $sale_order_data->sales_total = $request->after_dis_amount[$key] ?? null;
                 $sale_order_data->save();
-            }
-            
-            // Create transaction entries if advance payment > 0
-            if ($request->advance_payment > 0) {
-                $advance_amount = $request->advance_payment;
-                
-                // Get customer acc_id
-                $customer = Customer::find($request->buyers_id);
-                $customer_acc_id = $customer->acc_id ?? null;
-                
-                // Get bank acc_id from banks table
-                $bank = Bank::find($request->beneficiary_bank);
-                $bank_acc_id = $bank->acc_id ?? null;
-                
-                // If bank doesn't have acc_id, try to get from accounts table based on bank name
-                if (!$bank_acc_id && $bank) {
-                    $bank_account = DB::connection('mysql2')->table('accounts')
-                        ->where('name', 'like', '%' . $bank->bank_name . '%')
-                        ->where('status', 1)
-                        ->where('code', 'like', '1-2-6-3%') // Bank account code pattern
-                        ->first();
-                    $bank_acc_id = $bank_account->id ?? null;
-                }
-                
-                if ($customer_acc_id && $bank_acc_id) {
-                    // Customer Credit Entry (Customer is paying us)
-                    $transaction_customer = new Transactions();
-                    $transaction_customer = $transaction_customer->SetConnection('mysql2');
-                    $transaction_customer->voucher_no = $request->voucher_no;
-                    $transaction_customer->v_date = $request->voucher_date;
-                    $transaction_customer->acc_id = $customer_acc_id;
-                    $transaction_customer->acc_code = FinanceHelper::getAccountCodeByAccId($customer_acc_id);
-                    $transaction_customer->particulars = 'Advance Payment - ' . $request->voucher_no;
-                    $transaction_customer->opening_bal = 0;
-                    $transaction_customer->debit_credit = 0; // Credit - customer paying
-                    $transaction_customer->amount = $advance_amount;
-                    $transaction_customer->username = Auth::user()->name;
-                    $transaction_customer->status = 1;
-                    $transaction_customer->voucher_type = 21; // Export Sale Order voucher type
-                    $transaction_customer->master_id = $sale_order->id;
-                    $transaction_customer->save();
-                    
-                    // Bank Debit Entry (Money coming into bank)
-                    $transaction_bank = new Transactions();
-                    $transaction_bank = $transaction_bank->SetConnection('mysql2');
-                    $transaction_bank->voucher_no = $request->voucher_no;
-                    $transaction_bank->v_date = $request->voucher_date;
-                    $transaction_bank->acc_id = $bank_acc_id;
-                    $transaction_bank->acc_code = FinanceHelper::getAccountCodeByAccId($bank_acc_id);
-                    $transaction_bank->particulars = 'Advance Payment - ' . $request->voucher_no;
-                    $transaction_bank->opening_bal = 0;
-                    $transaction_bank->debit_credit = 1; // Debit - money coming in
-                    $transaction_bank->amount = $advance_amount;
-                    $transaction_bank->username = Auth::user()->name;
-                    $transaction_bank->status = 1;
-                    $transaction_bank->voucher_type = 21; // Export Sale Order voucher type
-                    $transaction_bank->master_id = $sale_order->id;
-                    $transaction_bank->save();
-                }
             }
             
             DB::Connection('mysql2')->commit();
@@ -474,7 +415,7 @@ class SaleOrderExportController extends Controller
             $sale_order->transhipment = $request->transhipment;
             $sale_order->part_shipment = $request->part_shipment;
             $sale_order->insurance_coverd = $request->insurance_coverd;
-            $sale_order->advance_payment = $request->advance_payment;
+            $sale_order->is_advance = $request->is_advance ?? 0;
             $sale_order->payment_days = $request->payment_days;
             $sale_order->currencey_id = $request->rate_conversion;
             $sale_order->currencey_rate = $request->rate_of_conversion;
@@ -566,6 +507,128 @@ class SaleOrderExportController extends Controller
             DB::rollBack();
             dd($ex);
             $ex->getCode();
+        }
+    }
+
+    /**
+     * Get sale order details for receiving advance payment
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function getSaleOrderForAdvance(Request $request)
+    {
+        $saleOrder = SaleOrderExport::find($request->id);
+        
+        if (!$saleOrder) {
+            return response()->json(['error' => 'Sale order not found'], 404);
+        }
+        
+        $customer = Customer::find($saleOrder->buyer_id);
+        $bank = Bank::find($saleOrder->bank);
+        
+        return view('Sales.AjaxPages.receiveAdvancePayment', compact('saleOrder', 'customer', 'bank'));
+    }
+
+    /**
+     * Receive advance payment and create GL entries
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function receiveAdvancePayment(Request $request)
+    {
+        DB::Connection('mysql2')->beginTransaction();
+        try {
+            $saleOrder = SaleOrderExport::find($request->sale_order_id);
+            
+            if (!$saleOrder) {
+                return response()->json(['success' => false, 'message' => 'Sale order not found'], 404);
+            }
+            
+            $advance_amount = $request->advance_amount;
+            
+            if ($advance_amount <= 0) {
+                return response()->json(['success' => false, 'message' => 'Advance amount must be greater than 0'], 400);
+            }
+            
+            // Get customer acc_id
+            $customer = Customer::find($saleOrder->buyer_id);
+            $customer_acc_id = $customer->acc_id ?? null;
+            
+            // Get bank acc_id from banks table
+            $bank = Bank::find($saleOrder->bank);
+            $bank_acc_id = $bank->acc_id ?? null;
+            
+            // If bank doesn't have acc_id, try to get from accounts table based on bank name
+            if (!$bank_acc_id && $bank) {
+                $bank_account = DB::connection('mysql2')->table('accounts')
+                    ->where('name', 'like', '%' . $bank->bank_name . '%')
+                    ->where('status', 1)
+                    ->where('code', 'like', '1-2-6-3%') // Bank account code pattern
+                    ->first();
+                $bank_acc_id = $bank_account->id ?? null;
+            }
+            
+            if (!$customer_acc_id) {
+                return response()->json(['success' => false, 'message' => 'Customer account ID not found'], 400);
+            }
+            
+            if (!$bank_acc_id) {
+                return response()->json(['success' => false, 'message' => 'Bank account ID not found'], 400);
+            }
+            
+            // Generate unique voucher number for advance payment
+            $advance_voucher_no = $saleOrder->voucehr_no . '-ADV-' . date('YmdHis');
+            
+            // Customer Credit Entry (Customer is paying us)
+            $transaction_customer = new Transactions();
+            $transaction_customer = $transaction_customer->SetConnection('mysql2');
+            $transaction_customer->voucher_no = $advance_voucher_no;
+            $transaction_customer->v_date = date('Y-m-d');
+            $transaction_customer->acc_id = $customer_acc_id;
+            $transaction_customer->acc_code = FinanceHelper::getAccountCodeByAccId($customer_acc_id);
+            $transaction_customer->particulars = 'Advance Payment Received - ' . $saleOrder->voucehr_no;
+            $transaction_customer->opening_bal = 0;
+            $transaction_customer->debit_credit = 0; // Credit - customer paying
+            $transaction_customer->amount = $advance_amount;
+            $transaction_customer->username = Auth::user()->name;
+            $transaction_customer->status = 1;
+            $transaction_customer->voucher_type = 21; // Export Sale Order voucher type
+            $transaction_customer->master_id = $saleOrder->id;
+            $transaction_customer->save();
+            
+            // Bank Debit Entry (Money coming into bank)
+            $transaction_bank = new Transactions();
+            $transaction_bank = $transaction_bank->SetConnection('mysql2');
+            $transaction_bank->voucher_no = $advance_voucher_no;
+            $transaction_bank->v_date = date('Y-m-d');
+            $transaction_bank->acc_id = $bank_acc_id;
+            $transaction_bank->acc_code = FinanceHelper::getAccountCodeByAccId($bank_acc_id);
+            $transaction_bank->particulars = 'Advance Payment Received - ' . $saleOrder->voucehr_no;
+            $transaction_bank->opening_bal = 0;
+            $transaction_bank->debit_credit = 1; // Debit - money coming in
+            $transaction_bank->amount = $advance_amount;
+            $transaction_bank->username = Auth::user()->name;
+            $transaction_bank->status = 1;
+            $transaction_bank->voucher_type = 21; // Export Sale Order voucher type
+            $transaction_bank->master_id = $saleOrder->id;
+            $transaction_bank->save();
+            
+            DB::Connection('mysql2')->commit();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Advance payment received successfully',
+                'voucher_no' => $advance_voucher_no
+            ]);
+            
+        } catch (Exception $ex) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $ex->getMessage()
+            ], 500);
         }
     }
 }

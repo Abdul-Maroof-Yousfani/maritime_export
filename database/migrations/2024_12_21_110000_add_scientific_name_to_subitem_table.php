@@ -31,3 +31,4 @@ class AddScientificNameToSubitemTable extends Migration
     }
 }
 
+

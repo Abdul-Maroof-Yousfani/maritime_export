@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AlterOriginToIntegerInSaleOrderExportsTable extends Migration
+class AddAdvanceTypeToSaleOrderExportsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,8 +14,9 @@ class AlterOriginToIntegerInSaleOrderExportsTable extends Migration
     public function up()
     {
         Schema::connection('mysql2')->table('sale_order_exports', function (Blueprint $table) {
-            // Change origin from string to integer
-            $table->integer('origin')->nullable()->change();
+            if (!Schema::connection('mysql2')->hasColumn('sale_order_exports', 'advance_type')) {
+                $table->string('advance_type')->nullable()->after('advance_payment');
+            }
         });
     }
 
@@ -27,9 +28,10 @@ class AlterOriginToIntegerInSaleOrderExportsTable extends Migration
     public function down()
     {
         Schema::connection('mysql2')->table('sale_order_exports', function (Blueprint $table) {
-            $table->string('origin')->nullable()->change();
+            if (Schema::connection('mysql2')->hasColumn('sale_order_exports', 'advance_type')) {
+                $table->dropColumn('advance_type');
+            }
         });
     }
 }
-
 

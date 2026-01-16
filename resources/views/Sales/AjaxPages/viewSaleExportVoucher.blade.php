@@ -319,7 +319,14 @@ $total_expense = 0;
                             <input type="hidden" id="d_t_amount_1001001" value="{{ $total }}">
                             <?php
                             $hundred = 100;
-                            $final_advance = $hundred - $sales_order->advance_payment;
+                            // Handle both old and new format
+                            $advancePayment = 0;
+                            if (isset($sales_order->is_advance)) {
+                                $advancePayment = $sales_order->is_advance == 1 ? 0 : 0; // is_advance is just Yes/No, not percentage
+                            } elseif (isset($sales_order->advance_payment)) {
+                                $advancePayment = is_numeric($sales_order->advance_payment) ? $sales_order->advance_payment : 0;
+                            }
+                            $final_advance = $hundred - $advancePayment;
                             // $a = CommonHelper::AmountInWords($total,$name_currency);
                             // echo '('.$a.').';
                             ?>
@@ -394,9 +401,17 @@ $total_expense = 0;
                             </td>
                         </tr>
                     @endif
-                    @if ($sales_order->advance_payment > 0)
+                    @php
+                        $isAdvance = 0;
+                        if (isset($sales_order->is_advance)) {
+                            $isAdvance = $sales_order->is_advance;
+                        } elseif (isset($sales_order->advance_payment)) {
+                            $isAdvance = ($sales_order->advance_payment == 'Yes' || $sales_order->advance_payment == 1) ? 1 : 0;
+                        }
+                    @endphp
+                    @if ($isAdvance == 1)
                         <tr>
-                            <td>{{ $sales_order->advance_payment . '% Addvance and ' . $final_advance . '% within ' . $sales_order->payment_days . ' Working Days Of BL and Invoice' }}
+                            <td>{{ 'Advance payment required. Balance within ' . $sales_order->payment_days . ' Working Days Of BL and Invoice' }}
                             </td>
                         </tr>
                     @else

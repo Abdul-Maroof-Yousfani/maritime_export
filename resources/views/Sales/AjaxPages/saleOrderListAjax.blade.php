@@ -61,6 +61,18 @@ $counter =  1 ;
     {{-- @if( $item->approved_status == 1 && $item->proforma_status == 0)
     <li><a  href="{{route('proformaCreateForm',$item->id)}}">Create Proforma</a></li>
     @endif  --}}
+    @php
+        $isAdvance = 0;
+        if (isset($item->is_advance)) {
+            $isAdvance = $item->is_advance;
+        } elseif (isset($item->advance_payment)) {
+            // Handle old data: "Yes" = 1, "No" or empty = 0
+            $isAdvance = ($item->advance_payment == 'Yes' || $item->advance_payment == 1) ? 1 : 0;
+        }
+    @endphp
+    @if($isAdvance == 1)
+    <li><a onclick="openReceiveAdvanceModal({{ $item->id}})">Receive Advance</a></li>
+    @endif
 
 
     {{-- @if ($edit)

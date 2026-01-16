@@ -285,6 +285,77 @@ $AccYearTo = $AccYearDate->accyearto;
 
 
         }
+
+        function openReceiveAdvanceModal(saleOrderId) {
+            var base_url='<?php echo URL::to('/'); ?>';
+            $.ajax({
+                url: base_url+'/export/getSaleOrderForAdvance',
+                type: 'GET',
+                data: {id: saleOrderId},
+                success: function (response) {
+                    $('#receiveAdvanceModalBody').html(response);
+                    $('#receiveAdvanceModal').modal('show');
+                },
+                error: function() {
+                    alert('Error loading sale order details');
+                }
+            });
+        }
+
+        function submitAdvancePayment() {
+            var form = $('#advancePaymentForm');
+            if (!form[0].checkValidity()) {
+                form[0].reportValidity();
+                return;
+            }
+
+            var formData = form.serialize();
+            var base_url='<?php echo URL::to('/'); ?>';
+            
+            $.ajax({
+                url: base_url+'/export/receiveAdvancePayment',
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (response) {
+                    if (response.success) {
+                        alert('Advance payment received successfully');
+                        $('#receiveAdvanceModal').modal('hide');
+                        viewRangeWiseDataFilter();
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to receive advance payment'));
+                    }
+                },
+                error: function(xhr) {
+                    var errorMsg = 'Error receiving advance payment';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    }
+                    alert(errorMsg);
+                }
+            });
+        }
     </script>
+
+    <!-- Receive Advance Payment Modal -->
+    <div class="modal fade" id="receiveAdvanceModal" tabindex="-1" role="dialog" aria-labelledby="receiveAdvanceModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="receiveAdvanceModalLabel">Receive Advance Payment</h4>
+                </div>
+                <div class="modal-body" id="receiveAdvanceModalBody">
+                    <div class="text-center">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection

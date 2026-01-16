@@ -625,10 +625,21 @@ else{
                                                                     </td>
                                                                 </tr>
                                                                 <tr>
-                                                                    <td>Advance Payment (%)</td>
+                                                                    <td>Is Advance</td>
                                                                     <td>
-                                                                        <input type="number" class="form-control"
-                                                                            max="100" name="advance_payment" value="{{$exportOrder->advance_payment}}">
+                                                                        <select class="form-control" name="is_advance" id="is_advance">
+                                                                            @php
+                                                                                $isAdvance = 0;
+                                                                                if (isset($exportOrder->is_advance)) {
+                                                                                    $isAdvance = $exportOrder->is_advance;
+                                                                                } elseif (isset($exportOrder->advance_payment)) {
+                                                                                    // Handle old data: "Yes" = 1, "No" or empty = 0
+                                                                                    $isAdvance = ($exportOrder->advance_payment == 'Yes' || $exportOrder->advance_payment == 1) ? 1 : 0;
+                                                                                }
+                                                                            @endphp
+                                                                            <option value="0" {{($isAdvance == 0)? 'selected' : ''}}>No</option>
+                                                                            <option value="1" {{($isAdvance == 1)? 'selected' : ''}}>Yes</option>
+                                                                        </select>
                                                                     </td>
                                                                 </tr>
                                                                 <tr>

@@ -331,9 +331,11 @@ use App\Helpers\CommonHelper;
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Advance Amount</label>
-                                    <input type="number" class="form-control" name="advance_payment" id="advance_payment" 
-                                        step="0.01" min="0" placeholder="Enter advance payment amount" />
+                                    <label class="form-label">Is Advance</label>
+                                    <select class="form-control" name="is_advance" id="is_advance">
+                                        <option value="0" selected>No</option>
+                                        <option value="1">Yes</option>
+                                    </select>
                                 </div>
                             </div>
                             
