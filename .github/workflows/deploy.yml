@@ -11,18 +11,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy via SFTP (FileZilla Style)
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      # 1. Fast Upload (Zip karke bhejega)
+      - name: Copy files via SCP (Fast)
+        uses: appleboy/scp-action@master
         with:
+          host: ${{ secrets.SFTP_HOST }}
           username: 'maritimedeploy'
-          server: ${{ secrets.SFTP_HOST }}
           password: 'asdf44534%%^dfgrgGdtUI9**unvG'
           port: 22
-          local_path: './' # Aapke GitHub ka code
-          remote_path: '/var/www/maritime-export.inplsoftwares.com' # Server ka path
-          sftp_only: true # Ye command terminal use nahi karegi
+          source: "./*"
+          # vendor folder ko skip karein taake upload foran ho jaye
+          rm: false 
+          target: "/var/www/maritime-export.inplsoftwares.com/"
+          tar_tmp_path: "/tmp"
 
-      # 2. Permissions Fix aur Laravel Setup
+      # 2. Commands Execution
       - name: Post-Deployment Execution
         uses: appleboy/ssh-action@master
         with:
@@ -32,18 +35,13 @@ jobs:
           script: |
             cd /var/www/maritime-export.inplsoftwares.com
             
-            # Permissions Fix
-            find . -type d -exec chmod 775 {} \;
-            find . -type f -exec chmod 664 {} \;
-            
-            # ACL ensure karna
-            sudo setfacl -R -m u:www-data:rwx -m u:maritimedeploy:rwx storage bootstrap/cache
-            sudo setfacl -Rd -m u:www-data:rwx -m u:maritimedeploy:rwx storage bootstrap/cache
-            
-            if [ -f .env ]; then
-                php7.4 artisan config:clear
-                php7.4 artisan route:clear
-                php7.4 artisan view:clear
-                php7.4 artisan cache:clear
+            # Composer sirf tab chalega jab zaroorat ho (Ye server pe fast hai)
+            if [ -f composer.json ]; then
+                php7.4 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
             fi
-            echo "Bhai, Maritime Export Deploy Ho Gaya!"
+
+            # Permissions & Cache
+            sudo chmod -R 775 storage bootstrap/cache
+            php7.4 artisan config:clear
+            php7.4 artisan view:clear
+            echo "Bhai, speed check karo ab!"
