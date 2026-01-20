@@ -11,18 +11,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 1. Files upload karna (Password use ho raha hai)
-      - name: Copy files via SFTP
-        uses: appleboy/scp-action@master
+      - name: Deploy via SFTP (FileZilla Style)
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
-          host: ${{ secrets.SFTP_HOST }}
           username: 'maritimedeploy'
-          password: 'asdf44534%%^dfgrgGdtUI9**unvG' 
+          server: ${{ secrets.SFTP_HOST }}
+          password: 'asdf44534%%^dfgrgGdtUI9**unvG'
           port: 22
-          source: "."
-          target: "/var/www/maritime-export.inplsoftwares.com/"
-          strip_components: 0
-          tar_tmp_path: "/tmp"
+          local_path: './' # Aapke GitHub ka code
+          remote_path: '/var/www/maritime-export.inplsoftwares.com' # Server ka path
+          sftp_only: true # Ye command terminal use nahi karegi
 
       # 2. Permissions Fix aur Laravel Setup
       - name: Post-Deployment Execution
