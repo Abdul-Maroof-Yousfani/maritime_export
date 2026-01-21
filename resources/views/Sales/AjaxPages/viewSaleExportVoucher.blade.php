@@ -230,8 +230,7 @@ textarea{border-style:none;border-color:Transparent;}
                                     -
                                 @endif
                             </td>
-                            <th style="border:1px solid">HS Code</th>
-                            <td style="border:1px solid">{{ $sales_order->hs_code ?? '-' }}</td>
+                           
                         </tr>
                         <tr>
                             <th style="border:1px solid">Consignee</th>
@@ -334,59 +333,14 @@ textarea{border-style:none;border-color:Transparent;}
                             <td colspan="11" style="border:1px solid;text-align:right;">TOTAL:</td>
                             <td style="border:1px solid;text-align:right;">{{ number_format($total_amount, 2) }}</td>
                         </tr>
+                        @php
+                            $total_amount_pkr = $total_amount * ($sales_order->currencey_rate ?? 1);
+                        @endphp
+                        <tr style="font-weight:bold;">
+                            <td colspan="11" style="border:1px solid;text-align:right;">TOTAL AMOUNT IN PKR:</td>
+                            <td style="border:1px solid;text-align:right;">{{ number_format($total_amount_pkr, 2) }}</td>
+                        </tr>
                     </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    {{-- Beneficiary Bank Details --}}
-    <div class="row" style="margin-top: 20px;">
-        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <h4 style="text-align: center; margin-bottom: 15px;"><u><b>BENEFICIARY BANK DETAILS</b></u></h4>
-            <div class="table-reponsive">
-                <table class="table" style="width:100%;border:1px solid">
-                    @php
-                        if (!empty($sales_order->bank)) {
-                            $bank_name = App\Models\Bank::find($sales_order->bank)->bank_name ?? '-';
-                            $bank_swift = App\Models\Bank::find($sales_order->bank)->swift_code ?? '-';
-                            $bank_ibn = App\Models\Bank::find($sales_order->bank)->IBAN_no ?? '-';
-                            $bank_account_no = App\Models\Bank::find($sales_order->bank)->account_no ?? '-';
-                            $bank_address = App\Models\Bank::find($sales_order->bank)->bank_address ?? '-';
-                            $account_title = App\Models\Bank::find($sales_order->bank)->account_title ?? '-';
-                        } else {
-                            $bank_name = '-';
-                            $bank_swift = '-';
-                            $bank_ibn = '-';
-                            $bank_account_no = '-';
-                            $bank_address = '-';
-                            $account_title = '-';
-                        }
-                    @endphp
-                    <tr>
-                        <td style="width:50%;border:1px solid">Beneficiary Bank Title:</td>
-                        <td style="border:1px solid">{{ $account_title }}</td>
-                    </tr>
-                    <tr>
-                        <td style="width:50%;border:1px solid">Beneficiary Bank:</td>
-                        <td style="border:1px solid">{{ $bank_name }}</td>
-                    </tr>
-                    <tr>
-                        <td style="width:50%;border:1px solid">Beneficiary Bank Address:</td>
-                        <td style="border:1px solid">{{ $bank_address }}</td>
-                    </tr>
-                    <tr>
-                        <td style="width:50%;border:1px solid">Beneficiary Account No.</td>
-                        <td style="border:1px solid">{{ $bank_account_no }}</td>
-                    </tr>
-                    <tr>
-                        <td style="width:50%;border:1px solid">Beneficiary IBAN No:</td>
-                        <td style="border:1px solid">{{ $bank_ibn }}</td>
-                    </tr>
-                    <tr>
-                        <td style="width:50%;border:1px solid">SWIFT Code:</td>
-                        <td style="border:1px solid">{{ $bank_swift }}</td>
-                    </tr>
                 </table>
             </div>
         </div>

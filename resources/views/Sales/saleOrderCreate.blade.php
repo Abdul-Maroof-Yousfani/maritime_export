@@ -592,15 +592,18 @@ use App\Helpers\CommonHelper;
                             
                             <!-- Total Amount -->
                             <div class="form-row">
-                                <div class="form-group" style="flex: 1 1 100%; text-align: right;">
-                                    <label class="form-label" style="font-size: 16px;">
-                                        Total Amount: <span id="totalAmount">0.00</span> <span id="currencySymbol"></span>
-                                    </label>
-                                    <div id="pkrAmountDisplay" style="display: none; margin-top: 5px;">
-                                        <label class="form-label" style="font-size: 16px;">
-                                            Total Amount in PKR: <span id="totalAmountPKR">0.00</span> PKR
-                                        </label>
+                                <div class="form-group" style="flex: 1 1 50%; padding-right: 10px;">
+                                    <label class="form-label" style="font-size: 16px;">Total Amount</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="total_amount" id="total_amount" readonly />
+                                        <span class="input-group-addon" id="currencySymbolWrapper">
+                                            <span id="currencySymbol"></span>
+                                        </span>
                                     </div>
+                                </div>
+                                <div class="form-group" style="flex: 1 1 50%; padding-left: 10px;">
+                                    <label class="form-label" style="font-size: 16px;">Total Amount in PKR</label>
+                                    <input type="text" class="form-control" name="total_amount_pkr" id="total_amount_pkr" readonly />
                                 </div>
                             </div>
                             
@@ -671,15 +674,9 @@ use App\Helpers\CommonHelper;
         $('#currency_rate').val(exchangeRate);
         $('#currency_name').val(currencyName);
         $('#currencySymbol').text(currencyName);
-        
-        // Show PKR amount if USD is selected
-        if (currencyName.toUpperCase() === 'USD') {
-            $('#pkrAmountDisplay').show();
-            calculateTotal();
-        } else {
-            $('#pkrAmountDisplay').hide();
-            calculateTotal();
-        }
+
+        // Recalculate totals whenever exchange rate or currency changes
+        calculateTotal();
     }
     
     $(document).ready(function() {
@@ -1007,18 +1004,14 @@ use App\Helpers\CommonHelper;
         $('.amount').each(function() {
             total += parseFloat($(this).val()) || 0;
         });
-        $('#totalAmount').text(total.toFixed(2));
-        
-        // Calculate PKR amount if USD is selected
-        const currencyName = $('#currency_name').val();
-        if (currencyName.toUpperCase() === 'USD') {
-            const currencyRate = parseFloat($('#currency_rate').val()) || 1;
-            const totalPKR = total * currencyRate;
-            $('#totalAmountPKR').text(totalPKR.toFixed(2));
-            $('#pkrAmountDisplay').show();
-        } else {
-            $('#pkrAmountDisplay').hide();
-        }
+
+        // Set total amount in selected currency
+        $('#total_amount').val(total.toFixed(2));
+
+        // Calculate PKR amount using exchange rate (for any currency)
+        const currencyRate = parseFloat($('#currency_rate').val()) || 1;
+        const totalPKR = total * currencyRate;
+        $('#total_amount_pkr').val(totalPKR.toFixed(2));
     }
 </script>
 

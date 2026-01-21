@@ -294,7 +294,7 @@ class SaleOrderExportController extends Controller
 
 
         $sales_order_data = SaleOrderDataExport::where('sale_order_data_exports.sale_order_export_id', $id)
-            ->select('sale_order_data_exports.*', 'subitem.sub_ic', 'subitem.pack_uom')
+            ->select('sale_order_data_exports.*', 'subitem.sub_ic')
             ->join('subitem', 'subitem.id', 'sale_order_data_exports.item_id')
             ->where('sale_order_data_exports.status', 1)
             ->get();
