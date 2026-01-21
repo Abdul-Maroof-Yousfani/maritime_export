@@ -9,3 +9,4 @@ class ArrivalLocation extends Model
     protected $connection = 'mysql2';
     protected $guarded = [];
 }
+//asdfdf

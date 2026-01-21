@@ -1,25 +1,47 @@
-name: Deploy Laravel via FTP
+name: Deploy Maritime Project
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+      # 1. Fast Upload (Zip karke bhejega)
+      - name: Copy files via SCP (Fast)
+        uses: appleboy/scp-action@master
         with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          port: 21
-          local-dir: ./
-          server-dir: ./
+          host: ${{ secrets.SFTP_HOST }}
+          username: 'maritimedeploy'
+          password: 'asdf44534%%^dfgrgGdtUI9**unvG'
+          port: 22
+          source: "./*"
+          # vendor folder ko skip karein taake upload foran ho jaye
+          rm: false 
+          target: "/var/www/maritime-export.inplsoftwares.com/"
+          tar_tmp_path: "/tmp"
+
+      # 2. Commands Execution
+      - name: Post-Deployment Execution
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: 'maritimedeploy'
+          password: 'asdf44534%%^dfgrgGdtUI9**unvG'
+          script: |
+            cd /var/www/maritime-export.inplsoftwares.com
+            
+            # Composer sirf tab chalega jab zaroorat ho (Ye server pe fast hai)
+            if [ -f composer.json ]; then
+                php7.4 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
+            fi
+
+            # Permissions & Cache
+            sudo chmod -R 775 storage bootstrap/cache
+            php7.4 artisan config:clear
+            php7.4 artisan view:clear
+            echo "Bhai, speed check karo ab!"
