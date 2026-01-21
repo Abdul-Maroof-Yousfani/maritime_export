@@ -30,19 +30,7 @@ $m = Session::get('run_company');
                                                 <div class="row">
                                                     <form method="POST" action="{{ route('bankFormStore') }}">
                                                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-                                                            <label class="sf-label">Select Beneficiary <span
-                                                                    class="rflabelsteric"><strong>*</strong></span></label>
-                                                            <select style="width: 100%" name="beneficiary_id" id="beneficiary_id"
-                                                                class="form-control select2 requiredField">
-                                                                <option value="">Select</option>
-                                                                @foreach ($banks as $row)
-                                                                    <option
-                                                                        value="{{ $row->id }}">
-                                                                        {{ $row->bank_name . ' - ' . $row->account_title}}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
+                                                        
                                                         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
                                                             <label>Account Title</label>
                                                             <span class="rflabelsteric"><strong>*</strong></span>

@@ -5,6 +5,7 @@ use App\Helpers\CommonHelper;
 use App\Helpers\StoreHelper;
 use App\Models\IncoTerm;
 use App\Models\ModeOfTransport;
+use Illuminate\Support\Facades\Storage;
 $id = $_GET['id'];
 $m = Session::get('run_company');
 $currentDate = date('Y-m-d');
@@ -281,6 +282,89 @@ $total_expense =0;
                                 <td style="border:1px solid black;" class="text-left"><?php echo  $sales_order->currencey_rate;?></td>
                                
                             </tr>
+                            <tr>
+                                <td style="border:1px solid black;" class="text-left">Mode of Production</td>
+                                <td style="border:1px solid black;" class="text-left"><?php echo $sales_order->mode_of_production ?? '-';?></td>
+                               
+                                <td style="border:1px solid black;" class="text-left">Payment Days</td>
+                                <td style="border:1px solid black;" class="text-left"><?php echo $sales_order->payment_days ?? '-';?></td>
+                            </tr>
+                            <tr>
+                                <td style="border:1px solid black;" class="text-left">Consignee</td>
+                                <td style="border:1px solid black;" class="text-left">
+                                    @if(!empty($sales_order->consignee))
+                                        <?php $consignee = App\Models\Consignee::find($sales_order->consignee); ?>
+                                        {{ $consignee->name ?? '-' }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                               
+                                <td style="border:1px solid black;" class="text-left">Part Shipment</td>
+                                <td style="border:1px solid black;" class="text-left">@if($sales_order->part_shipment == 0) Allow @else Not Allow @endif</td>
+                            </tr>
+                            <tr>
+                                <td style="border:1px solid black;" class="text-left">Broker</td>
+                                <td style="border:1px solid black;" class="text-left"><?php echo $sales_order->broker ?? '-';?></td>
+                               
+                                <td style="border:1px solid black;" class="text-left">Due Date</td>
+                                <td style="border:1px solid black;" class="text-left"><?php echo CommonHelper::changeDateFormat($sales_order->due_date ?? '-');?></td>
+                            </tr>
+                            <tr>
+                                <td style="border:1px solid black;" class="text-left">Delivery Date To</td>
+                                <td style="border:1px solid black;" class="text-left"><?php echo CommonHelper::changeDateFormat($sales_order->delevery_date_to ?? '-');?></td>
+                               
+                                <td style="border:1px solid black;" class="text-left">Type of Loading</td>
+                                <td style="border:1px solid black;" class="text-left"><?php echo $sales_order->type_of_loading ?? '-';?></td>
+                            </tr>
+                            @if(!empty($sales_order->marking_labeling))
+                            <tr>
+                                <td style="border:1px solid black;" class="text-left" colspan="2">Marking & Labeling</td>
+                                <td style="border:1px solid black;" class="text-left" colspan="2"><?php echo $sales_order->marking_labeling;?></td>
+                            </tr>
+                            @endif
+                            @if(!empty($sales_order->document_to_provided))
+                            <tr>
+                                <td style="border:1px solid black;" class="text-left" colspan="2">Document to be Provided</td>
+                                <td style="border:1px solid black;" class="text-left" colspan="2"><?php echo $sales_order->document_to_provided;?></td>
+                            </tr>
+                            @endif
+                            @if(!empty($sales_order->other_condition))
+                            <tr>
+                                <td style="border:1px solid black;" class="text-left" colspan="2">Other Conditions</td>
+                                <td style="border:1px solid black;" class="text-left" colspan="2"><?php echo $sales_order->other_condition;?></td>
+                            </tr>
+                            @endif
+                            @if(!empty($sales_order->application_law))
+                            <tr>
+                                <td style="border:1px solid black;" class="text-left" colspan="2">Application Law</td>
+                                <td style="border:1px solid black;" class="text-left" colspan="2"><?php echo $sales_order->application_law;?></td>
+                            </tr>
+                            @endif
+                            @if(!empty($sales_order->force_majure))
+                            <tr>
+                                <td style="border:1px solid black;" class="text-left" colspan="2">Force Majeure</td>
+                                <td style="border:1px solid black;" class="text-left" colspan="2"><?php echo $sales_order->force_majure;?></td>
+                            </tr>
+                            @endif
+                            @if(!empty($sales_order->quality_remarks))
+                            <tr>
+                                <td style="border:1px solid black;" class="text-left" colspan="2">Quality Remarks</td>
+                                <td style="border:1px solid black;" class="text-left" colspan="2"><?php echo $sales_order->quality_remarks;?></td>
+                            </tr>
+                            @endif
+                            @if(!empty($sales_order->product_specification))
+                            <tr>
+                                <td style="border:1px solid black;" class="text-left" colspan="2">Product Specification</td>
+                                <td style="border:1px solid black;" class="text-left" colspan="2"><?php echo $sales_order->product_specification;?></td>
+                            </tr>
+                            @endif
+                            @if(!empty($sales_order->shipment_delivery))
+                            <tr>
+                                <td style="border:1px solid black;" class="text-left" colspan="2">Shipment & Delivery</td>
+                                <td style="border:1px solid black;" class="text-left" colspan="2"><?php echo $sales_order->shipment_delivery;?></td>
+                            </tr>
+                            @endif
                             </tbody>
                         </table>
                     </div>
@@ -360,6 +444,40 @@ $total_expense =0;
                             </table>
                         </div>
                     </div>
+
+                    <!-- Attachments Section -->
+                    @if(isset($attachments) && $attachments->count() > 0)
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 30px;">
+                        <h4 style="text-align: center; margin-bottom: 20px;">Attachments</h4>
+                        <div class="table-responsive">
+                            <table class="table table-bordered" style="border: solid 1px black;">
+                                <thead>
+                                    <tr>
+                                        <th style="border:1px solid black; text-align: center;">S.No</th>
+                                        <th style="border:1px solid black; text-align: center;">File Name</th>
+                                        <th style="border:1px solid black; text-align: center;">File Type</th>
+                                        <th style="border:1px solid black; text-align: center;">File Size</th>
+                                        <th style="border:1px solid black; text-align: center;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($attachments as $index => $attachment)
+                                    <tr>
+                                        <td style="border:1px solid black; text-align: center;">{{ $index + 1 }}</td>
+                                        <td style="border:1px solid black;">{{ $attachment->original_name }}</td>
+                                        <td style="border:1px solid black; text-align: center;">{{ strtoupper($attachment->file_type) }}</td>
+                                        <td style="border:1px solid black; text-align: center;">{{ number_format($attachment->file_size / 1024, 2) }} KB</td>
+                                        <td style="border:1px solid black; text-align: center;">
+                                            <a href="{{ Storage::url($attachment->file_path) }}" target="_blank" class="btn btn-sm btn-primary">View</a>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    @endif
+
                     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3"></div>
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div class="row text-left">

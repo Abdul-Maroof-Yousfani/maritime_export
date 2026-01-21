@@ -36,19 +36,19 @@
                 </tr>
                 <tr>
                     <th>Account Title:</th>
-                    <td>{{ $saleOrder->account_title ?? '-' }}</td>
+                    <td>{{ $bank->account_title ?? '-' }}</td>
                 </tr>
                 <tr>
                     <th>Account Number:</th>
-                    <td>{{ $saleOrder->correspondent_account_no ?? '-' }}</td>
+                    <td>{{ $bank->account_no ?? '-' }}</td>
                 </tr>
                 <tr>
                     <th>IBAN:</th>
-                    <td>{{ $saleOrder->correspondent_account_usd ?? '-' }}</td>
+                    <td>{{ $bank->IBAN_no ?? '-' }}</td>
                 </tr>
                 <tr>
                     <th>SWIFT Code:</th>
-                    <td>{{ $saleOrder->correspondent_bank_swift ?? '-' }}</td>
+                    <td>{{ $bank->swift_code ?? '-' }}</td>
                 </tr>
             </table>
         </div>

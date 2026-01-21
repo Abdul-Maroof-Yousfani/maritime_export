@@ -343,20 +343,7 @@ else{
                                                                 <span class="subHeadingLabelClass">Shipping
                                                                     Instruction</span>
                                                             </div>
-                                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="addMoreConsigneeField">
-                                                                <label class="sf-label">Consignee Details<span class="rflabelsteric"></span></label>
-                                                                <button class="btn btn-xs btn-primary" type="button" onclick="addMoreConsigneeField()">Add More</button>
-
-                                                                @forelse ($exportOrder->consigneeData as $consigneeCount => $consignee)
-                                                                    <div id="removeConsigneeField{{++$consigneeCount}}">
-                                                                        <button type="button" class="btn btn-danger btn-xs" onclick="removeConsigneeField({{$consigneeCount}})">Remove</button>
-                                                                        <textarea rows="2" class="form-control" placeholder="" name="consignee[]" id="consignee{{$consigneeCount}}">{{$consignee->consignee}}</textarea>
-                                                                    </div>
-                                                                @empty
-                                                                    <textarea rows="2" class="form-control" placeholder="" name="consignee[]" id="consignee"></textarea>
-                                                                @endforelse
-
-                                                            </div>
+                                                            {{-- Consignee is stored on master record only (single select below). --}}
                                                             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="addMoreNotifyField">
                                                                 <label class="sf-label">Notify Party Details <span class="rflabelsteric"></span></label>
                                                                 <button class="btn btn-xs btn-primary" type="button" onclick="addMoreNotifyField()">Add More</button>
@@ -640,6 +627,13 @@ else{
                                                                             <option value="0" {{($isAdvance == 0)? 'selected' : ''}}>No</option>
                                                                             <option value="1" {{($isAdvance == 1)? 'selected' : ''}}>Yes</option>
                                                                         </select>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Mode of Production</td>
+                                                                    <td>
+                                                                        <input type="text" class="form-control"
+                                                                            name="mode_of_production" value="{{$exportOrder->mode_of_production ?? ''}}" placeholder="Enter mode of production">
                                                                     </td>
                                                                 </tr>
                                                                 <tr>
@@ -1021,7 +1015,7 @@ else{
     </div>
     <script>
         let counts = {{count($exportOrder->exportOrderData)}}
-        let consigneeCounter = {{count($exportOrder->consigneeData)}}
+        let consigneeCounter = 0
         let notifyCounter = {{count($exportOrder->notifyData)}}
         $(function() {
             // alert(counts);
@@ -1080,25 +1074,11 @@ else{
             for (let i = 1; i <= counts; i++) {
                 claculation(i);
             }
-            for (let index = 1; index <= consigneeCounter; index++) {
-                CKEDITOR.replace('consignee'+index);
-            }
+            // consignee details removed (stored on master record only)
         })
 
 
-        function addMoreConsigneeField(id){
-            $('#addMoreConsigneeField').append(
-                `<div id="removeConsigneeField${++consigneeCounter}">
-                    <button type="button" class="btn btn-danger btn-xs" onclick="removeConsigneeField(${consigneeCounter})">Remove</button>
-                    <textarea rows="2" class="form-control" placeholder="" name="consignee[]" id="consignee${consigneeCounter}"></textarea>
-                </div>`
-            );
-            CKEDITOR.replace('consignee'+consigneeCounter);
-        }
-
-        function removeConsigneeField(id) {
-            $('#removeConsigneeField'+id).remove();
-         }
+        // consignee add/remove removed (stored on master record only)
 
         function addMoreNotifyField(id){
             $('#addMoreNotifyField').append(

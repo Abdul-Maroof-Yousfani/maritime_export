@@ -1078,7 +1078,7 @@ class StoreController extends Controller
         $modeofterms =  ModeOfTerm::all();
         $modeoftransports =  ModeOfTransport::all();
         $conversions = Currency::where('status', 1)->get();
-        $banks = Bank::where('status', 1)->wherenull('beneficiary_id')->get();
+        $banks = Bank::where('status', 1)->get();
         $customers = Customer::where(['status' => 1, 'purchaser_type' => 2])->get();
         $printingBags = PrintingBags::select('pack_type')->where('status', 1)->groupBy('pack_type')->get();
         $ports = Port::all();

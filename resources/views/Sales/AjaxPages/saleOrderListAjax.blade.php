@@ -51,6 +51,7 @@ $counter =  1 ;
     {{-- <li><a onclick="showDetailModelOneParamerter('export/viewSalesOrderDetail',{{ $item->id}},@if($item->approved_status == 0)'View Export Order'@else 'Contract'  @endif)">View Deatils</a></li> --}}
     @if ($view)
     <li><a onclick="showDetailModelOneParamerter('export/viewSaleExportVoucher',{{ $item->id}},@if($item->approved_status == 0)'View Export Order'@else 'Contract'  @endif)"> View @if($item->approved_status == 0)Export Order @else  Contract @endif</a></li>
+    <li><a href="{{url('/export/printSaleOrderItems?id='.$item->id)}}" target="_blank">Print Items</a></li>
     @endif
     @if( $item->approved_status == 0 && $delete)
     <li><a onclick="sale_order_delete({{ $item->id}},{{$m}})">Delete</a></li>

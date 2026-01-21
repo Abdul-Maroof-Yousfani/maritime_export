@@ -105,13 +105,44 @@ class BankController extends Controller
     {
         DB::Connection('mysql2')->beginTransaction();
         try {
+
+            $parent_code = '1-1-4';
+            $max_id = DB::Connection('mysql2')->selectOne('SELECT max(`id`) as id  FROM `accounts` WHERE `parent_code` LIKE \''.$parent_code.'\' and status=1')->id;
+            if($max_id == ''){
+                $code = $parent_code.'-1';
+            }else{
+                $max_code2 = DB::Connection('mysql2')->selectOne('SELECT `code`  FROM `accounts` WHERE `id` LIKE \''.$max_id.'\' and status=1')->code;
+                $max_code2;
+                $max = explode('-',$max_code2);
+                $code = $parent_code.'-'.(end($max)+1);
+            }
+
+            $level_array = explode('-',$code);
+            $counter = 1;
+            foreach($level_array as $level):
+                $data1['level'.$counter] = $level;
+                $counter++;
+            endforeach;
+            $data1['code'] = $code;
+            $data1['name'] = $request->bank_name.' - ('.$request->account_no.')';
+            $data1['parent_code'] = $parent_code;
+            $data1['username'] 		 	= auth()->user()->username;
+            $data1['date']     		  = date("Y-m-d");
+            $data1['time']     		  = date("H:i:s");
+            $data1['action']     		  = 'create';
+            $data1['operational']		= 1;
+            $data1['type']		= 4;
+
+
+            $acc_id = DB::Connection('mysql2')->table('accounts')->insertGetId($data1);
+        
              
             $bank = new Bank;
+            $bank->acc_id = $acc_id;
             $bank->bank_name = $request->name;
             $bank->account_title = $request->account_title;
             $bank->IBAN_no = $request->ibn;
             $bank->account_no = $request->account_no;
-            $bank->beneficiary_id = $request->beneficiary_id;
             $bank->swift_code = $request->swift_code;
             $bank->bank_address = $request->Address;
             $bank->status = 1;

@@ -85,103 +85,61 @@ class SaleOrderExportController extends Controller
     {
         $request['due_date'] = $request['due_date'] . '-01';
         $request['delevery_date_to'] = $request['delevery_date_to'] . '-28';
-        //   dd($request->all());
+          dd($request->all());
         DB::Connection('mysql2')->beginTransaction();
         try {
             $sale_order = new SaleOrderExport;
             $sale_order->voucehr_no = $request->voucher_no;
             $sale_order->contract_no = $request->contract_no;
             $sale_order->voucher_date = $request->voucher_date;
-            $sale_order->voucher_heading = $request->voucher_heading;
             $sale_order->voucher_type = 0;
             $sale_order->buyer_id = $request->buyers_id; //??1;
-            $sale_order->quality_remarks = $request->quality_remarks;
-            $sale_order->product_specification = $request->product_specification;
-            $sale_order->shipment_delivery = $request->shipment_delivery;
-            // $sale_order->packing_view = $request->packing;
-            
             $sale_order->buyers_ntn = $request->buyers_ntn ?? 1;
-            $sale_order->model_terms_of_payment = $request->model_terms_of_payment;
             $sale_order->mode_of_term = $request->mode_of_term;
-            $sale_order->due_date = $request->due_date ?? date('Y-m-d');
-            $sale_order->delevery_date_to = $request->delevery_date_to ?? date('Y-m-d');
-            $sale_order->base_legnth = $request->base_legnth;
-            $sale_order->broken_grain = $request->broken_grain;
-            $sale_order->mosture_content = $request->mosture_content;
-            $sale_order->demand_yellow_grain = $request->demand_yellow_grain;
-            $sale_order->chalky_grain = $request->chalky_grain;
-            $sale_order->foreign_grain = $request->foreign_grain;
-            $sale_order->paddy_grain = $request->paddy_grain;
-            $sale_order->under_milled = $request->under_milled;
-            $sale_order->milled_double_polish = $request->milled_double_polish;
-            $sale_order->whiteness = $request->whiteness;
             $sale_order->incoterm = $request->incoterm ? (int)$request->incoterm : null;
-            $sale_order->mode_transport = $request->mode_transport;
             $sale_order->origin = $request->origin ? (int)$request->origin : null;
             $sale_order->port = $request->port ? (int)$request->port : null;
-            $sale_order->port_of_discharge = $request->port_of_discharge;
-            $sale_order->port_loading = $request->port_loading;
             $sale_order->grade = $request->grade ? (int)$request->grade : null;
             $sale_order->size = $request->size ? (int)$request->size : null;
             $sale_order->packing = $request->packing ? (int)$request->packing : null;
-            $sale_order->hs_code = $request->hs_code;
-            $sale_order->partial_payment = $request->partial_payment;
             $sale_order->bank = $request->beneficiary_bank ?? 1;
             $sale_order->proforma_status = 0;
-            //    $sale_order->delevery_date =$request->delevery_date;
-            $sale_order->transhipment = $request->transhipment;
-            $sale_order->part_shipment = $request->part_shipment;
-            $sale_order->insurance_coverd = $request->insurance_coverd;
             $sale_order->is_advance = $request->is_advance ?? 0;
-            $sale_order->payment_days = $request->payment_days;
+            $sale_order->mode_of_production = $request->mode_of_production ?? null;
             $sale_order->currencey_id = $request->rate_conversion;
             $sale_order->currencey_rate = $request->rate_of_conversion;
-
-            $sale_order->correspondent_bank = $request->correspondent_bank;
-            $sale_order->account_title = $request->account_title;
-            $sale_order->correspondent_account_usd = $request->correspondent_iban;
-            $sale_order->correspondent_account_no = $request->correspondent_account;
-            $sale_order->correspondent_bank_id = $request->bank;
-            $sale_order->correspondent_account_address = $request->correspondent_address;
-            $sale_order->correspondent_bank_swift = $request->correspondent_swift;
-            $sale_order->details_of_payment = $request->payment_details;
-
-
-            $sale_order->marking_labeling = $request->marking_labeling;
+           
             $sale_order->consignee = $request->consignee ? (int)$request->consignee : null;
-            // $sale_order->notify_party = $request->notify_party_details;
-            $sale_order->broker = $request->broker;
-            $sale_order->document_to_provided = $request->document_to_provide;
-            $sale_order->other_condition = $request->other_condition;
-            $sale_order->application_law = $request->application_law;
-            $sale_order->force_majure = $request->force_majure;
-            $sale_order->type_of_loading = $request->type_of_loading;
             $sale_order->save();
 
-            // Handle consignee details (for display purposes) - check if it's array (old format) or single value (new format)
-            if (isset($request->consignee_details) && is_array($request->consignee_details)) {
-                foreach ($request->consignee_details as $key => $consignee_detail) {
-                    if (!empty($consignee_detail)) {
-                        ExportOrderConsignee::create([
-                            'consignee' => $consignee_detail,
-                            'export_order_id' => $sale_order->id
-                        ]);
+            // Handle attachments (multiple files)
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    if (!$file) {
+                        continue;
                     }
-                }
-            } elseif (isset($request->consignee_details) && !empty($request->consignee_details)) {
-                ExportOrderConsignee::create([
-                    'consignee' => $request->consignee_details,
-                    'export_order_id' => $sale_order->id
-                ]);
-            }
-            foreach ($request->notify_party_details as $key => $notify_party_details) {
-                if (!empty($notify_party_details)) {
-                    ExportOrderNotify::create([
-                        'notify' => $notify_party_details,
-                        'export_order_id' => $sale_order->id
+
+                    $originalName = $file->getClientOriginalName();
+                    $extension = $file->getClientOriginalExtension();
+                    $size = $file->getSize();
+
+                    $fileName = time() . '_' . uniqid() . '.' . $extension;
+                    // Store in public disk under sale_order_export_attachments
+                    $path = $file->storeAs('sale_order_export_attachments', $fileName, 'public');
+
+                    SaleOrderExportAttachment::create([
+                        'sale_order_export_id' => $sale_order->id,
+                        'file_name'            => $fileName,
+                        'original_name'        => $originalName,
+                        'file_path'            => $path,
+                        'file_type'            => $extension,
+                        'file_size'            => $size,
+                        'description'          => null,
+                        'status'               => 1,
                     ]);
                 }
             }
+
             //    dd($request->all());
             foreach ($request->sub_ic_des as $key => $value) {
                 $sale_order_data = new SaleOrderDataExport;
@@ -198,15 +156,15 @@ class SaleOrderExportController extends Controller
 
                 $sale_order_data->total_qty = $request->total_qty[$key];
                 $sale_order_data->actual_qty = $request->actual_qty[$key];
-                $sale_order_data->flc_size = $request->flc_size[$key] ?? null;
-                $sale_order_data->flc_qty = $request->flc_qty[$key] ?? null;
-                $sale_order_data->no_of_container = $request->no_of_container[$key] ?? null;
+                $sale_order_data->flc_size = 0;//$request->flc_size[$key] ?? null;
+                $sale_order_data->flc_qty = 0;//$request->flc_qty[$key] ?? null;
+                $sale_order_data->no_of_container = 0;//$request->no_of_container[$key] ?? null;
 
-                $sale_order_data->qty_variation = $request->qty_variation[$key] ?? null;
+                $sale_order_data->qty_variation = 0;//$request->qty_variation[$key] ?? null;
                 $sale_order_data->rate = $request->rate[$key];
                 $sale_order_data->amount = $request->amount[$key];
-                $sale_order_data->tax = $request->tax_rate[$key] ?? null;
-                $sale_order_data->tax_amount = $request->tax_amount[$key] ?? null;
+                $sale_order_data->tax = 0;//$request->tax_rate[$key] ?? null;
+                $sale_order_data->tax_amount = 0;//$request->tax_amount[$key] ?? null;
                 $sale_order_data->after_dis_amount = $request->after_dis_amount[$key] ?? null;
                 $sale_order_data->sales_total = $request->after_dis_amount[$key] ?? null;
                 $sale_order_data->save();
@@ -286,10 +244,14 @@ class SaleOrderExportController extends Controller
 
         $sales_order_data = new SaleOrderDataExport();
         $sales_order_data = $sales_order_data->SetConnection('mysql2');
-        $sales_order_data =  $sales_order_data->where('sale_order_export_id', $id)->get();
+        $sales_order_data =  $sales_order_data->where('sale_order_export_id', $id)->where('status', 1)->get();
 
+        // Load attachments
+        $attachments = SaleOrderExportAttachment::where('sale_order_export_id', $id)
+            ->where('status', 1)
+            ->get();
 
-        return view('Sales.AjaxPages.viewSalesOrderDetailExport', compact('sales_order', 'sales_order_data'));
+        return view('Sales.AjaxPages.viewSalesOrderDetailExport', compact('sales_order', 'sales_order_data', 'attachments'));
     }
 
     public function updateApprovedStatus(Request $request)
@@ -336,8 +298,13 @@ class SaleOrderExportController extends Controller
             ->join('subitem', 'subitem.id', 'sale_order_data_exports.item_id')
             ->where('sale_order_data_exports.status', 1)
             ->get();
-        //    dd($sales_order_data);
-        return view('Sales.AjaxPages.viewSaleExportVoucher', compact('sales_order', 'sales_order_data'));
+
+        // Load attachments for this sale order
+        $attachments = SaleOrderExportAttachment::where('sale_order_export_id', $id)
+            ->where('status', 1)
+            ->get();
+
+        return view('Sales.AjaxPages.viewSaleExportVoucher', compact('sales_order', 'sales_order_data', 'attachments'));
     }
 
 
@@ -373,91 +340,28 @@ class SaleOrderExportController extends Controller
             // $sale_order->voucehr_no = $request->voucher_no;
             $sale_order->contract_no = $request->contract_no;
             $sale_order->voucher_date = $request->voucher_date;
-            $sale_order->voucher_heading = $request->voucher_heading;
             $sale_order->voucher_type = 0;
             $sale_order->buyer_id = $request->buyers_id; //??1;
-            $sale_order->quality_remarks = $request->quality_remarks;
-            $sale_order->product_specification = $request->product_specification;
-            $sale_order->shipment_delivery = $request->shipment_delivery;
-            $sale_order->quantity_view = $request->quantity_view;
-            $sale_order->packing_view = $request->packing;
-            $sale_order->unit_price_view = $request->unit_price_view;
-            $sale_order->total_price_view = $request->total_price_view;
             $sale_order->buyers_ntn = $request->buyers_ntn ?? 1;
-            $sale_order->model_terms_of_payment = $request->model_terms_of_payment;
             $sale_order->mode_of_term = $request->mode_of_term;
             $sale_order->due_date = $request->due_date ?? date('Y-m-d');
-            $sale_order->delevery_date_to = $request->delevery_date_to ?? date('Y-m-d');
-            $sale_order->base_legnth = $request->base_legnth;
-            $sale_order->broken_grain = $request->broken_grain;
-            $sale_order->mosture_content = $request->mosture_content;
-            $sale_order->demand_yellow_grain = $request->demand_yellow_grain;
-            $sale_order->chalky_grain = $request->chalky_grain;
-            $sale_order->foreign_grain = $request->foreign_grain;
-            $sale_order->paddy_grain = $request->paddy_grain;
-            $sale_order->under_milled = $request->under_milled;
-            $sale_order->milled_double_polish = $request->milled_double_polish;
-            $sale_order->whiteness = $request->whiteness;
             $sale_order->incoterm = $request->incoterm ? (int)$request->incoterm : null;
-            $sale_order->mode_transport = $request->mode_transport;
             $sale_order->origin = $request->origin ? (int)$request->origin : null;
             $sale_order->port = $request->port ? (int)$request->port : null;
-            $sale_order->port_of_discharge = $request->port_of_discharge;
-            $sale_order->port_loading = $request->port_loading;
             $sale_order->grade = $request->grade ? (int)$request->grade : null;
             $sale_order->size = $request->size ? (int)$request->size : null;
             $sale_order->packing = $request->packing ? (int)$request->packing : null;
-            $sale_order->hs_code = $request->hs_code;
-            $sale_order->partial_payment = $request->partial_payment;
             $sale_order->bank = $request->beneficiary_bank ?? 1;
             $sale_order->proforma_status = 0;
-            //    $sale_order->delevery_date =$request->delevery_date;
-            $sale_order->transhipment = $request->transhipment;
-            $sale_order->part_shipment = $request->part_shipment;
-            $sale_order->insurance_coverd = $request->insurance_coverd;
             $sale_order->is_advance = $request->is_advance ?? 0;
+            $sale_order->mode_of_production = $request->mode_of_production ?? null;
             $sale_order->payment_days = $request->payment_days;
             $sale_order->currencey_id = $request->rate_conversion;
             $sale_order->currencey_rate = $request->rate_of_conversion;
-
-            $sale_order->correspondent_bank = $request->correspondent_bank;
-            $sale_order->account_title = $request->account_title;;
-            $sale_order->correspondent_account_usd = $request->correspondent_iban;
-            $sale_order->correspondent_account_no = $request->correspondent_account;
-            $sale_order->correspondent_bank_id = $request->bank;
-            $sale_order->correspondent_account_address = $request->correspondent_address;
-            $sale_order->correspondent_bank_swift = $request->correspondent_swift;
-            $sale_order->details_of_payment = $request->payment_details;
-
-
-            $sale_order->marking_labeling = $request->marking_labeling;
+           
             $sale_order->consignee = $request->consignee ? (int)$request->consignee : null;
-            // $sale_order->notify_party = $request->notify_party_details;
-            $sale_order->broker = $request->broker;
-            $sale_order->document_to_provided = $request->document_to_provide;
-            $sale_order->other_condition = $request->other_condition;
-            $sale_order->application_law = $request->application_law;
-            $sale_order->force_majure = $request->force_majure;
-            $sale_order->type_of_loading = $request->type_of_loading;
             $sale_order->save();
 
-            ExportOrderConsignee::where('export_order_id', $sale_order->id)->delete();
-            // Handle consignee - check if it's array (old format) or single value (new format)
-            if (is_array($request->consignee)) {
-                foreach ($request->consignee as $key => $consignee) {
-                    if (!empty($consignee)) {
-                        ExportOrderConsignee::create([
-                            'consignee' => $consignee,
-                            'export_order_id' => $sale_order->id
-                        ]);
-                    }
-                }
-            } elseif (!empty($request->consignee)) {
-                ExportOrderConsignee::create([
-                    'consignee' => $request->consignee,
-                    'export_order_id' => $sale_order->id
-                ]);
-            }
             ExportOrderNotify::where('export_order_id', $sale_order->id)->delete();      
             foreach ($request->notify_party_details as $key => $notify_party_details) {
                 if (!empty($notify_party_details)) {
@@ -554,25 +458,17 @@ class SaleOrderExportController extends Controller
             
             // Get customer acc_id and liability_acc_id
             $customer = Customer::find($saleOrder->buyer_id);
-            $customer_acc_id = $customer->acc_id ?? null;
             $liability_acc_id = $customer->liability_acc_id ?? null;
             
             // Use liability_acc_id if available, otherwise fall back to customer acc_id
-            $credit_acc_id = $liability_acc_id ?? $customer_acc_id;
+            $credit_acc_id = $liability_acc_id ?? 0;
             
             // Get bank acc_id from banks table
             $bank = Bank::find($saleOrder->bank);
             $bank_acc_id = $bank->acc_id ?? null;
             
             // If bank doesn't have acc_id, try to get from accounts table based on bank name
-            if (!$bank_acc_id && $bank) {
-                $bank_account = DB::connection('mysql2')->table('accounts')
-                    ->where('name', 'like', '%' . $bank->bank_name . '%')
-                    ->where('status', 1)
-                    ->where('code', 'like', '1-2-6-3%') // Bank account code pattern
-                    ->first();
-                $bank_acc_id = $bank_account->id ?? null;
-            }
+            
             
             if (!$credit_acc_id) {
                 return response()->json(['success' => false, 'message' => 'Customer account ID not found'], 400);
@@ -634,5 +530,35 @@ class SaleOrderExportController extends Controller
                 'message' => 'Error: ' . $ex->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Print sale order items
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function printSaleOrderItems(Request $request)
+    {
+        $saleOrder = SaleOrderExport::find($request->id);
+        
+        if (!$saleOrder) {
+            return redirect()->back()->with('error', 'Sale order not found');
+        }
+        
+        // Get sale order items with item details
+        $saleOrderItems = SaleOrderDataExport::where('sale_order_export_id', $saleOrder->id)
+            ->where('status', 1)
+            ->with('item')
+            ->get();
+        
+        // Get customer/buyer details
+        $customer = Customer::find($saleOrder->buyer_id);
+        
+        // Get company/factory details
+        $m = Session::get('run_company');
+        $company = DB::table('company')->where('id', $m)->first();
+        
+        return view('Sales.printSaleOrderItems', compact('saleOrder', 'saleOrderItems', 'customer', 'company'));
     }
 }

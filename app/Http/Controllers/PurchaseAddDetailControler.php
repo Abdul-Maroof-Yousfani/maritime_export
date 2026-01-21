@@ -458,9 +458,7 @@ class PurchaseAddDetailControler extends Controller
             'sku_code' => 'nullable|string|unique:mysql2.subitem',
             // 'item_code' => 'unique:mysql2.subitem'
         ]);
-        $demandName = DemandType::find($request->maintain)->name;
-        $account = Account::where('name',  $demandName)->first();
-
+       
         $sub_item = new Subitem();
         $sub_item = $sub_item->SetConnection('mysql2');
         $sub_item->main_ic_id = $request->CategoryId;
@@ -470,16 +468,16 @@ class PurchaseAddDetailControler extends Controller
         $sub_item->item_code = $request->sku_code ?? '';
         $sub_item->uom = $request->uom_id;
         $sub_item->rate = $request->rate ?? 0;
-        $sub_item->batch_code = $request->batch_code;
-        $sub_item->min_stock = $request->min_stock ?? 0;
-        $sub_item->max_stock = $request->max_stock ?? 0;
-        $sub_item->type = $request->maintain;
-        $sub_item->pack_size = $request->pack_size;
-        $sub_item->pack_uom = $request->pack_uom_id;
-        $sub_item->pack_type = $request->pack_type;
-        $sub_item->hs_code = $request->hs_code;
-        $sub_item->stockType = $request->stockType??1;
-        $sub_item->acc_id = $account->id ?? 0;
+        $sub_item->batch_code = 0;//$request->batch_code;
+        $sub_item->min_stock = 0;//$request->min_stock ?? 0;
+        $sub_item->max_stock = 0;//$request->max_stock ?? 0;
+        $sub_item->type = '';//$request->maintain;
+        $sub_item->pack_size ='';// $request->pack_size;
+        $sub_item->pack_uom ='';// $request->pack_uom_id;
+        $sub_item->pack_type ='';// $request->pack_type;
+        $sub_item->hs_code =$request->hs_code;
+        $sub_item->stockType ='';// $request->stockType??1;
+        $sub_item->acc_id ='';// $account->id ?? 0;
         $sub_item->username = Auth::user()->name;
         $sub_item->date = date('Y-m-d');
         $sub_item->save();

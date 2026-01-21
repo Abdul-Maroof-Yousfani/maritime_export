@@ -72,6 +72,7 @@ use App\Helpers\CommonHelper;
                                                                 value="{{ old('scientific_name') }}" class="form-control" 
                                                                 placeholder="Enter Scientific Name" />
                                                         </div>
+                                                    </div>
 
 
                                                         {{-- <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
@@ -83,8 +84,8 @@ use App\Helpers\CommonHelper;
                                                         </span>
                                                     @endif
                                                 </div> --}}
-
-                                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                                <div class="row">
+                                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
                                                             <label>SKU Code :</label>
                                                             <span class="rflabelsteric"><strong>*</strong></span>
                                                             <input type="text" name="sku_code" id="sku_code"
@@ -96,6 +97,7 @@ use App\Helpers\CommonHelper;
                                                                 </span>
                                                             @endif
                                                         </div>
+                                                        
                                                         <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
                                                             <label>Unit of Measurement :</label>
                                                             <span class="rflabelsteric"><strong>*</strong></span>
@@ -117,63 +119,8 @@ use App\Helpers\CommonHelper;
                                                                 id="rate">
                                                         </div>
 
-                                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-                                                            <label>Type</label>
-                                                            <select style="width: 100%" name="maintain" id="maintain"
-                                                                class="form-control requiredField">
-                                                                <option value="">Select </option>
-                                                                @foreach (CommonHelper::get_all_demand_type() as $row)
-                                                                    <option value="{{ $row->id }}"
-                                                                        {{ old('maintain') == $row->id ? 'selected' : '' }}>
-                                                                        {{ ucwords($row->name) }}</option>
-                                                                @endforeach
-
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-                                                            <label>Batch Code</label>
-                                                            <select style="width: 100%" name="batch_code" id="batch_code"
-                                                                class="form-control requiredField">
-                                                                <option value="1"
-                                                                    {{ old('batch_code') == 1 ? 'selected' : '' }}>YES
-                                                                </option>
-                                                                <option value="0"
-                                                                    {{ old('batch_code') == 0 ? 'selected' : '' }}>NO
-                                                                </option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-                                                            <label>Packing Type</label>
-                                                            <input type="text" class="form-control" name="pack_type"
-                                                                value="{{ old('pack_type') }}">
-                                                        </div>
-                                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-                                                            <label>Packing Size</label>
-                                                            <input type="text" class="form-control" name="pack_size"
-                                                                value="{{ old('pack_size') }}">
-                                                        </div>
-                                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-                                                            <label>Pack UOM :</label>
-                                                            <select name="pack_uom_id" id="pack_uom_id"
-                                                                class="form-control select2">
-                                                                <option value="">Select UOM</option>
-                                                                @foreach ($uom as $key => $i)
-                                                                    <option value="{{ $i->id }}"
-                                                                        {{ old('pack_uom_id') == $i->id ? 'selected' : '' }}>
-                                                                        {{ $i->uom_name }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-                                                            <label>Min Stock</label>
-                                                            <input type="number" class="form-control" name="min_stock"
-                                                                step="0.01" value="{{ old('min_stock') }}">
-                                                        </div>
-                                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-                                                            <label>Max Stock</label>
-                                                            <input type="number" class="form-control" name="max_stock"
-                                                                step="0.01" value="{{ old('max_stock') }}">
-                                                        </div>
+                                                    
+                                                     
                                                         <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
                                                             <label>HS Code</label>
                                                             <input type="text" class="form-control" name="hs_code"

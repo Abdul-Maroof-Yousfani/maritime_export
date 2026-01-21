@@ -337,6 +337,10 @@ use App\Helpers\CommonHelper;
                                         <option value="1">Yes</option>
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <label class="form-label">Mode of Production</label>
+                                    <input type="text" class="form-control" name="mode_of_production" id="mode_of_production" placeholder="Enter mode of production">
+                                </div>
                             </div>
                             
                             <!-- Bank Details (Readonly) -->
@@ -505,14 +509,13 @@ use App\Helpers\CommonHelper;
                                                     <td>
                                                         <select name="sub_ic_des[]" class="form-control select2 item-select" onchange="getItemUOM(1)" required>
                                                             <option value="">Select Item</option>
-                                                            @foreach (CommonHelper::get_item_by_category(81) as $row)
+                                                            @foreach (CommonHelper::get_item_by_category(1) as $row)
                                                                 <?php
-                                                                $uom = CommonHelper::get_uom($row->id);
-                                                                $uom_name = CommonHelper::get_uom_name($uom);
+                                                                $uom_name = CommonHelper::get_uom_name($row->uom);
                                                                 $pack_uom = CommonHelper::get_uom_name($row->pack_uom);
                                                                 $hs_code = $row->hs_code ?? '';
                                                                 ?>
-                                                                <option value="{{ $row->id . ',' . $uom . ',' . $uom_name . ',' . $row->pack_type . ',' . $row->pack_size . ',' . $row->pack_uom . ',' . $pack_uom . ',' . $hs_code }}">{{ $row->sub_ic }}</option>
+                                                                <option value="{{ $row->id . ',' . $uom_name . ',' . $uom_name . ',' . $row->pack_type . ',' . $row->pack_size . ',' . $row->pack_uom . ',' . $pack_uom . ',' . $hs_code }}">{{ $row->sub_ic }}</option>
                                                             @endforeach
                                                         </select>
                                                         <input type="hidden" name="uom_id[]" class="uom-id-hidden" />
