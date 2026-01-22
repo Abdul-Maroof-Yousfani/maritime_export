@@ -28,7 +28,10 @@ textarea{border-style:none;border-color:Transparent;}
     .fa{font-size:small;!important;}
     .table-bordered{border:1px solid black;}
     table.table-bordered>thead>tr>th{border:1px solid blue !important;}
+    .page-break{page-break-before: always;}
+    .attachments-section{display: block !important;}
 }
+.attachments-section{display: none;}
 </style>
 
 <div class="row">
@@ -348,7 +351,7 @@ textarea{border-style:none;border-color:Transparent;}
 
     {{-- Attachments Section --}}
     @if(isset($attachments) && $attachments->count() > 0)
-    <div class="row" style="margin-top: 20px;">
+    <div class="row attachments-section page-break" id="attachmentsSection" style="margin-top: 20px;">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <h4 style="text-align: center; margin-bottom: 15px;"><u><b>ATTACHMENTS</b></u></h4>
             <div class="table-reponsive">
@@ -369,7 +372,7 @@ textarea{border-style:none;border-color:Transparent;}
                             <td style="border:1px solid;">{{ $attachment->original_name }}</td>
                             <td style="border:1px solid;text-align:center;">{{ strtoupper($attachment->file_type) }}</td>
                             <td style="border:1px solid;text-align:center;">{{ number_format($attachment->file_size / 1024, 2) }}</td>
-                            <td style="border:1px solid;text-align:center;">
+                            <td style="border:1px solid;text-align:center;" class="printHide">
                                 <a href="{{ Storage::url($attachment->file_path) }}" target="_blank" style="color: blue; text-decoration: underline;">View</a>
                             </td>
                         </tr>

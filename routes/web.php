@@ -788,6 +788,24 @@ Route::group(['prefix' => 'export', 'middleware' => 'mysql2', 'before' => 'csrf'
     Route::get('/getSaleOrderForAdvance', 'SaleOrderExportController@getSaleOrderForAdvance');
     Route::post('/receiveAdvancePayment', 'SaleOrderExportController@receiveAdvancePayment');
     Route::get('/printSaleOrderItems', 'SaleOrderExportController@printSaleOrderItems');
+    Route::get('/contractLoadingForm', 'SaleOrderExportController@contractLoadingForm')->name('contractLoadingForm');
+    Route::get('/contractLoadingList', 'SaleOrderExportController@contractLoadingList')->name('contractLoadingList');
+    Route::get('/getApprovedContracts', 'SaleOrderExportController@getApprovedContracts')->name('getApprovedContracts');
+    Route::get('/getExportOrderByOrderNo', 'SaleOrderExportController@getExportOrderByOrderNo')->name('getExportOrderByOrderNo');
+    Route::post('/storeContractLoading', 'SaleOrderExportController@storeContractLoading')->name('storeContractLoading');
+    Route::get('/getContractLoadingFilter', 'SaleOrderExportController@getContractLoadingFilter')->name('getContractLoadingFilter');
+    Route::get('/viewContractLoadingDetail/{id?}', 'SaleOrderExportController@viewContractLoadingDetail')->name('viewContractLoadingDetail');
+    Route::get('/deleteContractLoading', 'SaleOrderExportController@deleteContractLoading')->name('deleteContractLoading');
+    
+    // Commercial Invoice Routes
+    Route::get('/createCommercialInvoice', 'SaleOrderExportController@createCommercialInvoice')->name('createCommercialInvoice');
+    Route::get('/commercialInvoiceList', 'SaleOrderExportController@commercialInvoiceList')->name('commercialInvoiceList');
+    Route::get('/getLoadingsForCommercialInvoice', 'SaleOrderExportController@getLoadingsForCommercialInvoice')->name('getLoadingsForCommercialInvoice');
+    Route::get('/getLoadingDetailsForCommercialInvoice', 'SaleOrderExportController@getLoadingDetailsForCommercialInvoice')->name('getLoadingDetailsForCommercialInvoice');
+    Route::post('/storeCommercialInvoice', 'SaleOrderExportController@storeCommercialInvoice')->name('storeCommercialInvoice');
+    Route::get('/getCommercialInvoiceFilter', 'SaleOrderExportController@getCommercialInvoiceFilter')->name('getCommercialInvoiceFilter');
+    Route::get('/viewCommercialInvoice/{id?}', 'SaleOrderExportController@viewCommercialInvoice')->name('viewCommercialInvoice');
+    Route::get('/deleteCommercialInvoice', 'SaleOrderExportController@deleteCommercialInvoice')->name('deleteCommercialInvoice');
 
 
 

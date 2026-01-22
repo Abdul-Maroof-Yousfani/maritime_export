@@ -75,6 +75,107 @@ class SalesHelper
 
 
     }
+
+    public static function get_unique_export_order_no()
+    {
+        $currentYear = date('Y'); // Full year (2026)
+        $previousYear = $currentYear - 1; // Previous year (2025)
+        $yearCode = substr($previousYear, -2) . substr($currentYear, -2); // 2526
+        $prefix = 'ST' . $yearCode . '-'; // ST2526-
+        
+        // Get the last voucher number that matches ST + year pattern
+        $lastVoucher = DB::Connection('mysql2')->selectOne("
+            SELECT voucehr_no 
+            FROM sale_order_exports 
+            WHERE voucehr_no LIKE '" . $prefix . "%' 
+            ORDER BY CAST(SUBSTRING(voucehr_no, " . (strlen($prefix) + 1) . ") AS UNSIGNED) DESC, voucehr_no DESC
+            LIMIT 1
+        ");
+        
+        if ($lastVoucher && !empty($lastVoucher->voucehr_no)) {
+            // Extract the sequential number after the dash
+            $parts = explode('-', $lastVoucher->voucehr_no);
+            if (count($parts) == 2 && is_numeric($parts[1])) {
+                $lastNumber = (int)$parts[1];
+                $nextNumber = $lastNumber + 1;
+            } else {
+                $nextNumber = 1;
+            }
+        } else {
+            $nextNumber = 1;
+        }
+        
+        // Format: ST2526-001
+        $sequential = str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+        return $prefix . $sequential;
+    }
+
+    public static function get_unique_loading_no()
+    {
+        $currentYear = date('Y'); // Full year (2026)
+        $previousYear = $currentYear - 1; // Previous year (2025)
+        $yearCode = substr($previousYear, -2) . substr($currentYear, -2); // 2526
+        $prefix = 'LD' . $yearCode . '-'; // LD2526-
+        
+        // Get the last loading number that matches LD + year pattern
+        $lastLoading = DB::Connection('mysql2')->selectOne("
+            SELECT loading_no 
+            FROM contract_loadings 
+            WHERE loading_no LIKE '" . $prefix . "%' 
+            ORDER BY CAST(SUBSTRING(loading_no, " . (strlen($prefix) + 1) . ") AS UNSIGNED) DESC, loading_no DESC
+            LIMIT 1
+        ");
+        
+        if ($lastLoading && !empty($lastLoading->loading_no)) {
+            // Extract the sequential number after the dash
+            $parts = explode('-', $lastLoading->loading_no);
+            if (count($parts) == 2 && is_numeric($parts[1])) {
+                $lastNumber = (int)$parts[1];
+                $nextNumber = $lastNumber + 1;
+            } else {
+                $nextNumber = 1;
+            }
+        } else {
+            $nextNumber = 1;
+        }
+        
+        // Format: LD2526-001
+        $sequential = str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+        return $prefix . $sequential;
+    }
+
+    public static function get_unique_commercial_invoice_no()
+    {
+        $currentYearLastTwoDigits = date('y'); // e.g., 26 for 2026
+        $previousYearLastTwoDigits = date('y', strtotime('-1 year')); // e.g., 25 for 2025
+        $yearCode = $previousYearLastTwoDigits . $currentYearLastTwoDigits; // e.g., 2526
+        $prefix = 'SI' . $yearCode . '-'; // e.g., SI2526-
+        
+        $lastInvoice = DB::Connection('mysql2')->selectOne("
+            SELECT invoice_no 
+            FROM commercial_invoices 
+            WHERE invoice_no LIKE '" . $prefix . "%' 
+            ORDER BY CAST(SUBSTRING(invoice_no, " . (strlen($prefix) + 1) . ") AS UNSIGNED) DESC, invoice_no DESC
+            LIMIT 1
+        ");
+        
+        if ($lastInvoice && !empty($lastInvoice->invoice_no)) {
+            $parts = explode('-', $lastInvoice->invoice_no);
+            if (count($parts) == 2 && is_numeric($parts[1])) {
+                $lastNumber = (int)$parts[1];
+                $nextNumber = $lastNumber + 1;
+            } else {
+                $nextNumber = 1;
+            }
+        } else {
+            $nextNumber = 1;
+        }
+        
+        // Format: SI2526-001
+        $sequential = str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+        return $prefix . $sequential;
+    }
+
     public static function get_unique_invoice_no($year, $month)
     {
 

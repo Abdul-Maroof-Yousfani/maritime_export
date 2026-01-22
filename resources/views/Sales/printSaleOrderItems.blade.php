@@ -39,26 +39,7 @@ $m = Session::get('run_company');
         <!-- Static Company Details -->
         <table class="item-table" style="margin-bottom: 20px;">
             <tbody>
-                <tr>
-                    <th>Factory Name</th>
-                    <td>{{ $company->name ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <th>Registration No</th>
-                    <td>{{ $company->registration_no ?? $company->ntn ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <th>Factory Address</th>
-                    <td>{{ $company->address ?? $company->company_address ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <th>Importer</th>
-                    <td>{{ $customer->name ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <th>Importer Address</th>
-                    <td>{{ $customer->address ?? '-' }}</td>
-                </tr>
+                
             </tbody>
         </table>
 
@@ -69,11 +50,11 @@ $m = Session::get('run_company');
                     <tbody>
                         <tr>
                             <th>Name Of Product (品名)</th>
-                            <td>{{ $item->item->sub_ic ?? 'N/A' }}</td>
+                            <td>{{ strtoupper($item->item->sub_ic) ?? 'N/A' }}</td>
                         </tr>
                         <tr>
                             <th>Scientific Name (学名)</th>
-                            <td>{{ $item->item->scientific_name ?? 'N/A' }}</td>
+                            <td>{{ strtoupper($item->item->scientific_name) ?? 'N/A' }}</td>
                         </tr>
                         <tr>
                             <th>SIZE</th>
@@ -88,12 +69,33 @@ $m = Session::get('run_company');
                         </tr>
                         <tr>
                             <th>Mode of Production (生产方式)</th>
-                            <td>{{ $saleOrder->mode_of_production ?? '-' }}</td>
+                            <td>{{ strtoupper($saleOrder->mode_of_production) ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Factory Name</th>
+                            <td>{{ strtoupper($company->name) ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Registration No</th>
+                            <td>TEC-45/91</td>
+                        </tr>
+                        <tr>
+                            <th>Factory Address</th>
+                            <td>C1, C2 FISH HARBOUR WEST WHARF, KARACHI PAKISTAN</td>
+                        </tr>
+                        <tr>
+                            <th>Importer</th>
+                            <td>{{ $customer->name ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Importer Address</th>
+                            <td>{{ strtoupper($customer->address) ?? '-' }}</td>
                         </tr>
                         <tr>
                             <th>Storage Instruction</th>
                             <td>KEEP FROZEN AT -18°C OR BELOW</td>
                         </tr>
+
                     </tbody>
                 </table>
             </div>

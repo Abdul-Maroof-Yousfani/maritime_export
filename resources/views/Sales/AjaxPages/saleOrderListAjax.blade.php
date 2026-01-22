@@ -36,65 +36,61 @@ $counter =  1 ;
     <td>{{$term}}</td>    
     <td>{{$item->name}}</td>    
     <td class="text-center">
-
-     {{-- <button onclick="showDetailModelOneParamerter('export/viewSalesOrderDetail',{{ $item->id}},@if($item->approved_status == 0)'View Export Order'@else 'Contract'  @endif)"
-    type="button" class="btn btn-success btn-xs">View</button><br><br>
-   <button  onclick="showDetailModelOneParamerter('export/viewSaleExportVoucher',{{ $item->id}},@if($item->approved_status == 0)'View Export Order'@else 'Contract'  @endif)"
-    type="button" class="btn btn-success btn-xs">Contract Certificate
-   </button> --}}
-   <!-- Split button -->
-   <div class="btn-group">
-    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      Action <span class="caret"></span>
-    </button>
-  <ul class="dropdown-menu">
-    {{-- <li><a onclick="showDetailModelOneParamerter('export/viewSalesOrderDetail',{{ $item->id}},@if($item->approved_status == 0)'View Export Order'@else 'Contract'  @endif)">View Deatils</a></li> --}}
-    @if ($view)
-    <li><a onclick="showDetailModelOneParamerter('export/viewSaleExportVoucher',{{ $item->id}},@if($item->approved_status == 0)'View Export Order'@else 'Contract'  @endif)"> View @if($item->approved_status == 0)Export Order @else  Contract @endif</a></li>
-    <li><a href="{{url('/export/printSaleOrderItems?id='.$item->id)}}" target="_blank">Print Items</a></li>
-    @endif
-    @if( $item->approved_status == 0 && $delete)
-    <li><a onclick="sale_order_delete({{ $item->id}},{{$m}})">Delete</a></li>
-    @endif
-    @if( $item->approved_status == 0 && $edit)
-    <li><a href="{{url('/export/saleOrderEdit?id='.$item->id)}}">Edit</a></li>
-    @endif
-    {{-- @if( $item->approved_status == 1 && $item->proforma_status == 0)
-    <li><a  href="{{route('proformaCreateForm',$item->id)}}">Create Proforma</a></li>
-    @endif  --}}
-    @php
-        $isAdvance = 0;
-        if (isset($item->is_advance)) {
-            $isAdvance = $item->is_advance;
-        } elseif (isset($item->advance_payment)) {
-            // Handle old data: "Yes" = 1, "No" or empty = 0
-            $isAdvance = ($item->advance_payment == 'Yes' || $item->advance_payment == 1) ? 1 : 0;
-        }
-    @endphp
-    @if($isAdvance == 1)
-    <li><a onclick="openReceiveAdvanceModal({{ $item->id}})">Receive Advance</a></li>
-    @endif
-
-
-    {{-- @if ($edit)
-        Edit code write here
-    @endif --}}
-    
-    
-    @if( $item->approved_status == 0 && $approvedRight) 
-      <li> <a onclick="approved_record({{ $item->id}},{{$m}})">Approved</a></li>
-      @endif
-  </ul>
-</div>
-   {{-- @if( $item->approved_status == 0)
-     <button onclick="sale_order_delete({{ $item->id}},{{$m}})"
-      type="button" class="btn btn-danger btn-xs">Delete</button>
-   @endif --}}
-   {{-- @if( $item->approved_status == 1)
-        <a class="btn btn-primary btn-xs" href="{{route('proformaCreateForm',$item->id)}}">Create Proforma</a>
-   @endif --}}
-    {{-- <button style="display:{{( $item->approved_status == 0)? '': 'none'}} " onclick="approved_record({{ $item->id}},{{$m}})"
-      type="button" class="btn btn-primary btn-xs">Approved</button> --}}
+        <div style="display: flex; justify-content: center; gap: 5px; align-items: center;">
+            @if( $item->approved_status == 0 && $edit)
+            <a href="{{url('/export/saleOrderEdit?id='.$item->id)}}" 
+               title="Edit" 
+               style="display: inline-block; width: 32px; height: 32px; background-color: #17a2b8; border-radius: 4px; text-align: center; line-height: 32px; cursor: pointer; text-decoration: none;">
+                <i class="fa fa-pencil" style="color: white; font-size: 14px;"></i>
+            </a>
+            @endif
+            @if( $item->approved_status == 0 && $delete)
+            <a href="javascript:void(0)" 
+               onclick="sale_order_delete({{ $item->id}},{{$m}})" 
+               title="Delete" 
+               style="display: inline-block; width: 32px; height: 32px; background-color: #dc3545; border-radius: 4px; text-align: center; line-height: 32px; cursor: pointer; text-decoration: none;">
+                <i class="fa fa-trash" style="color: white; font-size: 14px;"></i>
+            </a>
+            @endif
+            @if ($view)
+            <a href="javascript:void(0)" 
+               onclick="showDetailModelOneParamerter('export/viewSaleExportVoucher',{{ $item->id}},@if($item->approved_status == 0)'View Export Order'@else 'Contract'  @endif)" 
+               title="View" 
+               style="display: inline-block; width: 32px; height: 32px; background-color: #28a745; border-radius: 4px; text-align: center; line-height: 32px; cursor: pointer; text-decoration: none;">
+                <i class="fa fa-eye" style="color: white; font-size: 14px;"></i>
+            </a>
+            <a href="{{url('/export/printSaleOrderItems?id='.$item->id)}}" 
+               target="_blank" 
+               title="Print Items" 
+               style="display: inline-block; width: 32px; height: 32px; background-color: #6c757d; border-radius: 4px; text-align: center; line-height: 32px; cursor: pointer; text-decoration: none;">
+                <i class="fa fa-print" style="color: white; font-size: 14px;"></i>
+            </a>
+            @endif
+            @php
+                $isAdvance = 0;
+                if (isset($item->is_advance)) {
+                    $isAdvance = $item->is_advance;
+                } elseif (isset($item->advance_payment)) {
+                    $isAdvance = ($item->advance_payment == 'Yes' || $item->advance_payment == 1) ? 1 : 0;
+                }
+            @endphp
+            @if($isAdvance == 1)
+            <a href="javascript:void(0)" 
+               onclick="openReceiveAdvanceModal({{ $item->id}})" 
+               title="Receive Advance" 
+               style="display: inline-block; width: 32px; height: 32px; background-color: #ffc107; border-radius: 4px; text-align: center; line-height: 32px; cursor: pointer; text-decoration: none;">
+                <i class="fa fa-money" style="color: white; font-size: 14px;"></i>
+            </a>
+            @endif
+            @if( $item->approved_status == 0 && $approvedRight) 
+            <a href="javascript:void(0)" 
+               onclick="approved_record({{ $item->id}},{{$m}})" 
+               title="Approve" 
+               style="display: inline-block; width: 32px; height: 32px; background-color: #007bff; border-radius: 4px; text-align: center; line-height: 32px; cursor: pointer; text-decoration: none;">
+                <i class="fa fa-check" style="color: white; font-size: 14px;"></i>
+            </a>
+            @endif
+        </div>
      </td>  
     </tr>
     @php 

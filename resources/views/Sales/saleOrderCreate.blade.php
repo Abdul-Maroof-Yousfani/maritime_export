@@ -247,7 +247,7 @@ use App\Helpers\CommonHelper;
                                 <div class="form-group">
                                     <label class="form-label">Export Order No <span class="rflabelsteric">*</span></label>
                                     <input type="text" class="form-control" name="voucher_no" id="voucher_no" 
-                                        value="{{ strtoupper(SalesHelper::get_unique_no_export(date('y'), date('m'))) }}" readonly />
+                                        value="{{ strtoupper(SalesHelper::get_unique_export_order_no()) }}" readonly />
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Contract No</label>
@@ -595,7 +595,7 @@ use App\Helpers\CommonHelper;
                                 <div class="form-group" style="flex: 1 1 50%; padding-right: 10px;">
                                     <label class="form-label" style="font-size: 16px;">Total Amount</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" name="total_amount" id="total_amount" readonly />
+                                        <input type="text" class="form-control" name="total_amount" id="total_amount" value="0.00" readonly style="text-align: right; font-weight: bold;" />
                                         <span class="input-group-addon" id="currencySymbolWrapper">
                                             <span id="currencySymbol"></span>
                                         </span>
@@ -603,7 +603,7 @@ use App\Helpers\CommonHelper;
                                 </div>
                                 <div class="form-group" style="flex: 1 1 50%; padding-left: 10px;">
                                     <label class="form-label" style="font-size: 16px;">Total Amount in PKR</label>
-                                    <input type="text" class="form-control" name="total_amount_pkr" id="total_amount_pkr" readonly />
+                                    <input type="text" class="form-control" name="total_amount_pkr" id="total_amount_pkr" value="0.00" readonly style="text-align: right; font-weight: bold;" />
                                 </div>
                             </div>
                             
@@ -682,6 +682,10 @@ use App\Helpers\CommonHelper;
     $(document).ready(function() {
         $('.select2').select2();
         
+        // Initialize total amount fields
+        $('#total_amount').val('0.00');
+        $('#total_amount_pkr').val('0.00');
+        
         // Set currency ID when currency is selected
         $('#currency_id').on('change', function() {
             updateCurrencyInfo();
@@ -694,6 +698,9 @@ use App\Helpers\CommonHelper;
         
         // Show remove button if more than one row
         updateRemoveButtons();
+        
+        // Initial calculation
+        calculateTotal();
     });
     
     function loadCustomerDetails() {
@@ -996,22 +1003,43 @@ use App\Helpers\CommonHelper;
         const amount = totalQuantity * unitRate;
         row.find('.amount').val(amount.toFixed(2));
         
+        // Force update the display
+        row.find('.amount').trigger('input');
+        
         calculateTotal();
     }
     
     function calculateTotal() {
         let total = 0;
         $('.amount').each(function() {
-            total += parseFloat($(this).val()) || 0;
+            const amountValue = parseFloat($(this).val()) || 0;
+            total += amountValue;
         });
 
         // Set total amount in selected currency
-        $('#total_amount').val(total.toFixed(2));
+        const formattedTotal = parseFloat(total.toFixed(2));
+        const formattedTotalStr = formattedTotal.toFixed(2);
+        
+        // Update total amount field
+        const totalAmountField = $('#total_amount');
+        totalAmountField.val(formattedTotalStr);
+        
+        // Force update display by triggering events
+        totalAmountField.trigger('input').trigger('change');
+        
+        // Ensure visibility
+        if (totalAmountField.is(':visible')) {
+            totalAmountField.focus().blur(); // Force repaint
+        }
 
         // Calculate PKR amount using exchange rate (for any currency)
         const currencyRate = parseFloat($('#currency_rate').val()) || 1;
         const totalPKR = total * currencyRate;
-        $('#total_amount_pkr').val(totalPKR.toFixed(2));
+        const formattedPKR = totalPKR.toFixed(2);
+        $('#total_amount_pkr').val(formattedPKR);
+        
+        // Debug: log to console (can be removed later)
+        console.log('Total Amount:', formattedTotalStr, 'Currency Rate:', currencyRate, 'Total PKR:', formattedPKR);
     }
 </script>
 

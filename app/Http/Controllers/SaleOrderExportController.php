@@ -21,7 +21,17 @@ use App\Models\SaleOrderExport;
 use App\Models\SaleOrderDataExport;
 use App\Models\SaleOrderExportAttachment;
 use App\Models\Transactions;
+use App\Models\ContractLoading;
+use App\Models\ContractLoadingData;
+use App\Models\ContractLoadingAttachment;
+use App\Models\ContractLoadingContainer;
+use App\Models\ContractLoadingVehicle;
+use App\Models\CommercialInvoice;
+use App\Models\CommercialInvoiceData;
+use App\Models\Subitem;
 use App\Helpers\FinanceHelper;
+use App\Helpers\CommonHelper;
+use App\Helpers\SalesHelper;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -85,11 +95,11 @@ class SaleOrderExportController extends Controller
     {
         $request['due_date'] = $request['due_date'] . '-01';
         $request['delevery_date_to'] = $request['delevery_date_to'] . '-28';
-          dd($request->all());
         DB::Connection('mysql2')->beginTransaction();
         try {
             $sale_order = new SaleOrderExport;
-            $sale_order->voucehr_no = $request->voucher_no;
+            // Auto-generate export order number in format ST2526-001
+            $sale_order->voucehr_no = SalesHelper::get_unique_export_order_no();
             $sale_order->contract_no = $request->contract_no;
             $sale_order->voucher_date = $request->voucher_date;
             $sale_order->voucher_type = 0;
@@ -259,17 +269,7 @@ class SaleOrderExportController extends Controller
 
         DB::Connection('mysql2')->beginTransaction();
         try {
-            // $str = DB::Connection('mysql2')->selectOne("select max(convert(substr(`contract_no`,7,length(substr(`contract_no`,3))-3),signed integer)) reg
-            // from `sale_order_exports` where substr(`contract_no`,3,2) = " . date('y')  . " and substr(`contract_no`,5,2) = " . date('m')  . "")->reg;
-
-
-            $str = DB::connection('mysql2')->selectOne("select max(convert(substr(`contract_no`,4,length(substr(`contract_no`,4))-4),signed integer)) reg from `sale_order_exports` where substr(`contract_no`,-4,2) = " . date('m') . " and substr(`contract_no`,-2,2) = " . date('y') . "")->reg;
-            $contract = 'CON' . ($str + 1) . date('my');
-
-            // $str = $str + 1;
-            // dd($str);
-            // $str = sprintf("%'03d", $str);
-            // $contract = 'CON' . date('y') . date('m') . $str ;
+            
 
             $data['approved_status'] = 1;
             // $data['contract_no']=$contract;
@@ -325,7 +325,7 @@ class SaleOrderExportController extends Controller
         $grades = Grade::all();
         $sizes = Size::all();
         $packings = Packing::all();
-        return view('export.sales.saleOrderEdit', compact('exportOrder', 'incoterms', 'printingBags', 'modeofterms', 'modeoftransports', 'conversions', 'banks', 'customers', 'ports', 'origins', 'consignees', 'grades', 'sizes', 'packings'));
+        return view('export.sales.saleOrderEdit', compact('exportOrder', 'exportOrderData', 'incoterms', 'printingBags', 'modeofterms', 'modeoftransports', 'conversions', 'banks', 'customers', 'ports', 'origins', 'consignees', 'grades', 'sizes', 'packings'));
     }
 
 
@@ -514,6 +514,9 @@ class SaleOrderExportController extends Controller
             $transaction_bank->voucher_type = 21; // Export Sale Order voucher type
             $transaction_bank->master_id = $saleOrder->id;
             $transaction_bank->save();
+
+            $saleOrder->advance_payment = $advance_amount;
+            $saleOrder->save();
             
             DB::Connection('mysql2')->commit();
             
@@ -560,5 +563,767 @@ class SaleOrderExportController extends Controller
         $company = DB::table('company')->where('id', $m)->first();
         
         return view('Sales.printSaleOrderItems', compact('saleOrder', 'saleOrderItems', 'customer', 'company'));
+    }
+
+    /**
+     * Show contract loading form
+     */
+    public function contractLoadingForm()
+    {
+        return view('Sales.contractLoadingForm');
+    }
+
+    /**
+     * Get approved contracts (approved_status = 1) - by order number
+     * Exclude order numbers that have complete loading (all qty loaded)
+     * Include order numbers that have partial loading (some qty remaining)
+     */
+    public function getApprovedContracts(Request $request)
+    {
+        // Get all approved contracts
+        $allContracts = SaleOrderExport::where('approved_status', 1)
+            ->where('status', 1)
+            ->whereNotNull('voucehr_no')
+            ->where('voucehr_no', '!=', '')
+            ->select('id', 'contract_no', 'voucehr_no', 'voucher_date')
+            ->get();
+
+        // Filter contracts: exclude only those with complete loading
+        $contracts = $allContracts->filter(function($contract) {
+            // Get all loadings for this order
+            $loadings = ContractLoading::where('sale_order_export_id', $contract->id)
+                ->where('status', 1)
+                ->get();
+
+            // If no loading exists, include this contract
+            if ($loadings->isEmpty()) {
+                return true;
+            }
+
+            // Get original order qty for each item
+            $saleOrderData = SaleOrderDataExport::where('sale_order_export_id', $contract->id)
+                ->where('status', 1)
+                ->get();
+
+            // Calculate total original qty
+            $totalOriginalQty = $saleOrderData->sum(function($item) {
+                return $item->total_qty ?? $item->actual_qty ?? 0;
+            });
+
+            // Calculate total loaded qty from all loadings
+            $totalLoadedQty = 0;
+            foreach ($loadings as $loading) {
+                $loadingData = ContractLoadingData::where('contract_loading_id', $loading->id)
+                    ->where('status', 1)
+                    ->get();
+                $totalLoadedQty += $loadingData->sum('qty');
+            }
+
+            // Include if partial loading (loaded qty < original qty)
+            // Use a small tolerance (0.01) to handle floating point comparison
+            return $totalLoadedQty < ($totalOriginalQty - 0.01);
+        })->values();
+
+        // Sort by order number descending
+        $contracts = $contracts->sortByDesc('voucehr_no')->values();
+
+        return response()->json($contracts);
+    }
+
+    /**
+     * Get export order details by order number
+     */
+    public function getExportOrderByOrderNo(Request $request)
+    {
+        $orderNo = $request->order_no;
+        
+        $saleOrder = SaleOrderExport::join('customers', 'customers.id', 'sale_order_exports.buyer_id')
+            ->leftJoin('ports', 'ports.id', 'sale_order_exports.port')
+            ->leftJoin('origins', 'origins.id', 'sale_order_exports.origin')
+            ->leftJoin('currency', 'currency.id', 'sale_order_exports.currencey_id')
+            ->where('sale_order_exports.voucehr_no', $orderNo)
+            ->where('sale_order_exports.approved_status', 1)
+            ->where('sale_order_exports.status', 1)
+            ->select(
+                'sale_order_exports.*',
+                'customers.name',
+                'customers.address',
+                'ports.name as port_name',
+                'origins.name as origin_name',
+                'currency.curreny as currency_name'
+            )
+            ->first();
+
+        if (!$saleOrder) {
+            return response()->json(['error' => 'Order not found'], 404);
+        }
+
+        $saleOrderData = SaleOrderDataExport::where('sale_order_export_id', $saleOrder->id)
+            ->where('status', 1)
+            ->get();
+
+        // Get all existing loadings for this order
+        $existingLoadings = ContractLoading::where('sale_order_export_id', $saleOrder->id)
+            ->where('status', 1)
+            ->pluck('id')
+            ->toArray();
+
+        // Calculate already loaded qty for each item
+        $loadedQtysByItem = [];
+        if (!empty($existingLoadings)) {
+            $loadingData = ContractLoadingData::whereIn('contract_loading_id', $existingLoadings)
+                ->where('status', 1)
+                ->get()
+                ->groupBy('sale_order_data_export_id');
+            
+            foreach ($loadingData as $saleOrderDataId => $loadingItems) {
+                $loadedQtysByItem[$saleOrderDataId] = $loadingItems->sum('qty');
+            }
+        }
+
+        // Calculate total amount
+        $totalAmount = 0;
+        foreach ($saleOrderData as $item) {
+            $amount = $item->amount ?? ($item->actual_qty * $item->rate);
+            $totalAmount += $amount;
+        }
+
+        // Calculate total in PKR
+        $totalAmountPKR = $totalAmount * ($saleOrder->currencey_rate ?? 1);
+
+        // Add item names and loaded qty to sale order data
+        $saleOrderDataWithNames = $saleOrderData->map(function($item) use ($loadedQtysByItem) {
+            $item->item_name = CommonHelper::get_item_name($item->item_id);
+            $item->total_qty = $item->total_qty ?? $item->actual_qty ?? 0; // Original order qty
+            $item->previous_sent_qty = $loadedQtysByItem[$item->id] ?? 0; // Already loaded qty
+            $item->remaining_qty = $item->total_qty - $item->previous_sent_qty; // Remaining qty
+            return $item;
+        });
+
+        return response()->json([
+            'sale_order' => $saleOrder,
+            'sale_order_data' => $saleOrderDataWithNames,
+            'total_amount' => $totalAmount,
+            'total_amount_pkr' => $totalAmountPKR
+        ]);
+    }
+
+    /**
+     * Store contract loading
+     */
+    public function storeContractLoading(Request $request)
+    {
+        DB::connection('mysql2')->beginTransaction();
+        try {
+            // Create contract loading with auto-generated loading number
+            $data = [
+                'loading_no' => SalesHelper::get_unique_loading_no(),
+                'sale_order_export_id' => $request->sale_order_export_id,
+                'contract_no' => $request->contract_no,
+                'loading_date' => $request->loading_date,
+                'status' => 1
+            ];
+
+            $contractLoading = ContractLoading::create($data);
+
+            // Save vehicles (multiple)
+            if ($request->vehicles) {
+                $vehicles = json_decode($request->vehicles, true);
+                foreach ($vehicles as $vehicle) {
+                    if (!empty($vehicle['vehicle_no']) || !empty($vehicle['name'])) {
+                        ContractLoadingVehicle::create([
+                            'contract_loading_id' => $contractLoading->id,
+                            'vehicle_no' => $vehicle['vehicle_no'] ?? null,
+                            'name' => $vehicle['name'] ?? null,
+                            'status' => 1
+                        ]);
+                    }
+                }
+            }
+
+            // Save containers (multiple)
+            if ($request->containers) {
+                $containers = json_decode($request->containers, true);
+                foreach ($containers as $container) {
+                    if (!empty($container['container_no']) || !empty($container['seal_no'])) {
+                        ContractLoadingContainer::create([
+                            'contract_loading_id' => $contractLoading->id,
+                            'container_no' => $container['container_no'] ?? null,
+                            'seal_no' => $container['seal_no'] ?? null,
+                            'status' => 1
+                        ]);
+                    }
+                }
+            }
+
+            // Save loading data (layers, item_id, qty)
+            if ($request->layers) {
+                $layers = json_decode($request->layers, true);
+                foreach ($layers as $layerData) {
+                    ContractLoadingData::create([
+                        'contract_loading_id' => $contractLoading->id,
+                        'sale_order_data_export_id' => $layerData['sale_order_data_export_id'],
+                        'item_id' => $layerData['item_id'],
+                        'layer' => $layerData['layer'] ?? null,
+                        'qty' => $layerData['qty'] ?? 0,
+                        'status' => 1
+                    ]);
+                }
+            }
+
+            // Handle attachments (multiple files)
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    if (!$file) {
+                        continue;
+                    }
+
+                    $originalName = $file->getClientOriginalName();
+                    $extension = $file->getClientOriginalExtension();
+                    $size = $file->getSize();
+
+                    $fileName = time() . '_' . uniqid() . '.' . $extension;
+                    // Store in public disk under contract_loading_attachments
+                    $path = $file->storeAs('contract_loading_attachments', $fileName, 'public');
+
+                    ContractLoadingAttachment::create([
+                        'contract_loading_id' => $contractLoading->id,
+                        'file_name'            => $fileName,
+                        'original_name'        => $originalName,
+                        'file_path'            => $path,
+                        'file_type'            => $extension,
+                        'file_size'            => $size,
+                        'description'          => null,
+                        'status'               => 1,
+                    ]);
+                }
+            }
+
+            DB::connection('mysql2')->commit();
+            return response()->json(['success' => true, 'message' => 'Contract loading saved successfully']);
+        } catch (Exception $ex) {
+            DB::connection('mysql2')->rollBack();
+            return response()->json(['success' => false, 'message' => 'Error: ' . $ex->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Show contract loading list
+     */
+    public function contractLoadingList()
+    {
+        return view('Sales.contractLoadingList');
+    }
+
+    /**
+     * Get contract loading filter data
+     */
+    public function getContractLoadingFilter(Request $request)
+    {
+        $query = ContractLoading::join('sale_order_exports', 'sale_order_exports.id', 'contract_loadings.sale_order_export_id')
+            ->leftJoin('currency', 'currency.id', 'sale_order_exports.currencey_id')
+            ->where('contract_loadings.status', 1)
+            ->select(
+                'contract_loadings.*',
+                'sale_order_exports.voucehr_no',
+                'sale_order_exports.currencey_rate',
+                'currency.curreny as currency_name'
+            );
+
+        if (!empty($request->contract)) {
+            $query->where('contract_loadings.contract_no', 'LIKE', '%' . $request->contract . '%');
+        }
+
+        if (!empty($request->from)) {
+            $query->where('contract_loadings.loading_date', '>=', $request->from);
+        }
+
+        if (!empty($request->to)) {
+            $query->where('contract_loadings.loading_date', '<=', $request->to);
+        }
+
+        $contract_loadings = $query->orderBy('contract_loadings.id', 'desc')->get();
+
+        // Calculate total amounts for each loading
+        $contract_loadings = $contract_loadings->map(function($loading) {
+            $saleOrderData = SaleOrderDataExport::where('sale_order_export_id', $loading->sale_order_export_id)
+                ->where('status', 1)
+                ->get();
+
+            $totalAmount = 0;
+            foreach ($saleOrderData as $item) {
+                $amount = $item->amount ?? ($item->actual_qty * $item->rate);
+                $totalAmount += $amount;
+            }
+
+            $loading->total_amount = $totalAmount;
+            $loading->total_amount_pkr = $totalAmount * ($loading->currencey_rate ?? 1);
+
+            return $loading;
+        });
+
+        $m = Session::get('run_company');
+
+        return view('Sales.AjaxPages.contractLoadingListAjax', compact('contract_loadings', 'm'));
+    }
+
+    /**
+     * View contract loading detail
+     */
+    public function viewContractLoadingDetail(Request $request)
+    {
+        $id = $request->id;
+        
+        $contract_loading = ContractLoading::with('saleOrderExport')
+            ->where('id', $id)
+            ->first();
+
+        if (!$contract_loading) {
+            return response()->json(['error' => 'Contract loading not found'], 404);
+        }
+
+        // Get sale order with currency info
+        $saleOrder = SaleOrderExport::leftJoin('currency', 'currency.id', 'sale_order_exports.currencey_id')
+            ->where('sale_order_exports.id', $contract_loading->sale_order_export_id)
+            ->select('sale_order_exports.*', 'currency.curreny as currency_name', 'sale_order_exports.currencey_rate')
+            ->first();
+
+        // Get sale order data
+        $sale_order_data = SaleOrderDataExport::where('sale_order_export_id', $contract_loading->sale_order_export_id)
+            ->where('status', 1)
+            ->get();
+
+        // Calculate total amounts
+        $totalAmount = 0;
+        foreach ($sale_order_data as $item) {
+            $amount = $item->amount ?? ($item->actual_qty * $item->rate);
+            $totalAmount += $amount;
+        }
+        $totalAmountPKR = $totalAmount * ($saleOrder->currencey_rate ?? 1);
+
+        // Get attachments from contract loading
+        $attachments = ContractLoadingAttachment::where('contract_loading_id', $contract_loading->id)
+            ->where('status', 1)
+            ->get();
+
+        return view('Sales.AjaxPages.viewContractLoadingDetail', compact('contract_loading', 'sale_order_data', 'attachments', 'saleOrder', 'totalAmount', 'totalAmountPKR'));
+    }
+
+    /**
+     * Delete contract loading
+     */
+    public function deleteContractLoading(Request $request)
+    {
+        DB::connection('mysql2')->beginTransaction();
+        try {
+            $contract_loading = ContractLoading::find($request->id);
+            if ($contract_loading) {
+                $contract_loading->status = 0;
+                $contract_loading->save();
+                DB::connection('mysql2')->commit();
+                return $request->id;
+            } else {
+                DB::connection('mysql2')->rollBack();
+                return '0';
+            }
+        } catch (Exception $ex) {
+            DB::connection('mysql2')->rollBack();
+            return '0';
+        }
+    }
+
+    /**
+     * Show commercial invoice form
+     */
+    public function createCommercialInvoice()
+    {
+        return view('Sales.commercialInvoiceForm');
+    }
+
+    /**
+     * Get loadings for commercial invoice
+     */
+    public function getLoadingsForCommercialInvoice(Request $request)
+    {
+        $loadings = ContractLoading::join('sale_order_exports', 'sale_order_exports.id', 'contract_loadings.sale_order_export_id')
+            ->leftJoin('currency', 'currency.id', 'sale_order_exports.currencey_id')
+            ->where('contract_loadings.status', 1)
+            ->whereNotExists(function($query) {
+                $query->select(DB::raw(1))
+                    ->from('commercial_invoices')
+                    ->whereColumn('commercial_invoices.contract_loading_id', 'contract_loadings.id')
+                    ->where('commercial_invoices.status', 1);
+            })
+            ->select(
+                'contract_loadings.*',
+                'sale_order_exports.voucehr_no',
+                'sale_order_exports.contract_no',
+                'sale_order_exports.buyer_id',
+                'sale_order_exports.currencey_id',
+                'sale_order_exports.currencey_rate',
+                'currency.curreny as currency_name'
+            )
+            ->orderBy('contract_loadings.id', 'desc')
+            ->get();
+
+        return response()->json($loadings);
+    }
+
+    /**
+     * Get loading details for commercial invoice
+     */
+    public function getLoadingDetailsForCommercialInvoice(Request $request)
+    {
+        $loadingId = $request->loading_id;
+        
+        $loading = ContractLoading::with(['saleOrderExport', 'containers', 'vehicles'])
+            ->where('id', $loadingId)
+            ->first();
+
+        if (!$loading) {
+            return response()->json(['error' => 'Loading not found'], 404);
+        }
+
+        $saleOrder = SaleOrderExport::leftJoin('customers', 'customers.id', 'sale_order_exports.buyer_id')
+            ->leftJoin('ports', 'ports.id', 'sale_order_exports.port')
+            ->leftJoin('currency', 'currency.id', 'sale_order_exports.currencey_id')
+            ->leftJoin('consignees', 'consignees.id', 'sale_order_exports.consignee')
+            ->where('sale_order_exports.id', $loading->sale_order_export_id)
+            ->select(
+                'sale_order_exports.*',
+                'customers.name as buyer_name',
+                'customers.address as buyer_address',
+                'ports.name as port_name',
+                'currency.curreny as currency_name',
+                'currency.id as currency_id',
+                'sale_order_exports.currencey_rate',
+                'consignees.name as consignee_name'
+            )
+            ->first();
+
+        // Get loading data (partial qty based on loading)
+        $loadingData = ContractLoadingData::where('contract_loading_id', $loading->id)
+            ->where('status', 1)
+            ->get();
+
+        // Get sale order data items for reference (rate, description, etc.)
+        $saleOrderData = SaleOrderDataExport::where('sale_order_export_id', $loading->sale_order_export_id)
+            ->where('status', 1)
+            ->get()
+            ->keyBy('id'); // Key by id for easy lookup
+
+        // Combine loading data with sale order data
+        $loadingDataWithNames = $loadingData->map(function($loadingItem) use ($saleOrderData) {
+            $saleOrderItem = $saleOrderData->get($loadingItem->sale_order_data_export_id);
+            
+            if (!$saleOrderItem) {
+                return null;
+            }
+            
+            $item = clone $saleOrderItem;
+            $item->item_name = CommonHelper::get_item_name($item->item_id);
+            $itemName = $item->item_name;
+            $scientificName = '';
+            if ($item->item_id) {
+                $subitem = Subitem::find($item->item_id);
+                $scientificName = $subitem->scientific_name ?? '';
+            }
+            $item->description = $itemName . ($scientificName ? ' (' . $scientificName . ')' : '');
+            $item->grade_size = ($item->item_size ?? '') . ($item->quality ? '-' . $item->quality : '');
+            
+            // Use loading qty instead of sale order qty
+            $item->loading_qty = $loadingItem->qty ?? 0;
+            $item->layer = $loadingItem->layer ?? '';
+            
+            // Calculate amount based on loading qty
+            $rate = $item->rate ?? 0;
+            $item->amount = $item->loading_qty * $rate;
+            
+            return $item;
+        })->filter(); // Remove null items
+
+        // Calculate totals based on loading qty
+        $totalAmount = 0;
+        foreach ($loadingDataWithNames as $item) {
+            $totalAmount += $item->amount;
+        }
+
+
+        // Check if commercial invoice already exists for this sale_order_export_id
+        $existingInvoices = CommercialInvoice::where('sale_order_export_id', $loading->sale_order_export_id)
+            ->where('status', 1)
+            ->get();
+        
+        $hasExistingInvoice = $existingInvoices->count() > 0;
+        
+    
+        
+        // Calculate remaining amount (current loading amount - already invoiced)
+        $exchangeRate = $saleOrder->currencey_rate ?? 1;
+        
+        // Get advance payment from sale_order_exports table (advance_amount column)
+        // Advance is received against export order (sale_order_export_id), not against individual loadings
+        $advanceAmountPKR = $saleOrder->advance_payment ?? 0; // Advance amount in PKR from sale_order_exports table
+        // IMPORTANT: Advance amount should only be deducted ONCE across all commercial invoices
+        // for the same sale_order_export_id, even if there are multiple loadings
+        // If there's an existing invoice, the advance was already deducted in the first invoice
+        // But we still show the advance amount for information (just don't deduct it from balance)
+        if ($hasExistingInvoice) {
+            // Subsequent invoices: Balance = remaining amount (advance already deducted in first invoice)
+            // Don't deduct advance again - it was already considered in the first commercial invoice
+            // But still show the advance amount for reference
+            $totalAmountPKR = $totalAmount * $exchangeRate;
+            $balanceAmountPKR = $totalAmountPKR ;
+            // Keep advance amount for display (don't set to 0) - it's shown but not deducted
+        } else {
+            // First invoice for this export order: Balance = total - advance
+            // This is the ONLY invoice that should deduct the advance amount
+            $totalAmountPKR = $totalAmount * $exchangeRate;
+            $balanceAmountPKR = $totalAmountPKR - $advanceAmountPKR;
+        }
+        
+        // Get containers and vehicles for display
+        $containers = $loading->containers ?? collect([]);
+        $vehicles = $loading->vehicles ?? collect([]);
+
+        return response()->json([
+            'loading' => $loading,
+            'sale_order' => $saleOrder,
+            'sale_order_data' => $loadingDataWithNames->values()->toArray(), // Use loading data instead of sale order data
+            'total_amount' => $totalAmount, // Based on loading qty
+            'advance_amount' => $advanceAmountPKR, // Advance amount in PKR from sale_order_exports.advance_amount column
+            'balance_amount_pkr' => $balanceAmountPKR, // Calculated balance amount in PKR
+            'containers' => $containers->map(function($container) {
+                return [
+                    'container_no' => $container->container_no ?? '',
+                    'seal_no' => $container->seal_no ?? ''
+                ];
+            })->toArray(),
+            'vehicles' => $vehicles->map(function($vehicle) {
+                return [
+                    'vehicle_no' => $vehicle->vehicle_no ?? '',
+                    'name' => $vehicle->name ?? ''
+                ];
+            })->toArray()
+        ]);
+    }
+
+    /**
+     * Store commercial invoice
+     */
+    public function storeCommercialInvoice(Request $request)
+    {
+        DB::connection('mysql2')->beginTransaction();
+        try {
+            $commercialInvoice = new CommercialInvoice();
+            $commercialInvoice->contract_loading_id = $request->contract_loading_id;
+            $commercialInvoice->sale_order_export_id = $request->sale_order_export_id;
+            $commercialInvoice->invoice_no = SalesHelper::get_unique_commercial_invoice_no();
+            $commercialInvoice->invoice_date = $request->invoice_date;
+            $commercialInvoice->gd_no = $request->gd_no;
+            $commercialInvoice->container_no = $request->container_no ?? $request->container_no_from_loading;
+            $commercialInvoice->consignee_name = $request->consignee_name;
+            $commercialInvoice->consignee_address = $request->consignee_address;
+            $commercialInvoice->vessel_voyage = $request->vessel_voyage;
+            $commercialInvoice->port_from = $request->port_from;
+            $commercialInvoice->port_to = $request->port_to;
+            $commercialInvoice->payment_term = $request->payment_term;
+            $commercialInvoice->grand_total = $request->grand_total;
+            
+            // Check if this is the first commercial invoice for this sale_order_export_id
+            // Advance should only be stored in the FIRST invoice
+            $isFirstInvoice = !CommercialInvoice::where('sale_order_export_id', $request->sale_order_export_id)
+                ->where('status', 1)
+                ->where('id', '!=', $commercialInvoice->id ?? 0)
+                ->exists();
+            
+            // Only store advance amount if this is the first invoice
+            $commercialInvoice->advance_amount = $isFirstInvoice ? ($request->advance_amount ?? 0) : 0;
+            $commercialInvoice->balance_amount = $request->balance_amount ?? 0;
+            $commercialInvoice->currency_id = $request->currency_id;
+            $commercialInvoice->exchange_rate = $request->exchange_rate ?? 1;
+            $commercialInvoice->status = 1;
+            $commercialInvoice->save();
+
+            // Save invoice data items
+            if ($request->has('items') && is_array($request->items)) {
+                foreach ($request->items as $item) {
+                    CommercialInvoiceData::create([
+                        'commercial_invoice_id' => $commercialInvoice->id,
+                        'sale_order_data_export_id' => $item['sale_order_data_export_id'] ?? null,
+                        'item_id' => $item['item_id'] ?? null,
+                        'description' => $item['description'] ?? '',
+                        'grade_size' => $item['grade_size'] ?? '',
+                        'total_cartons' => $item['total_cartons'] ?? 0,
+                        'total_net_kgs' => $item['total_net_kgs'] ?? 0,
+                        'rate_cfr_per_kg' => $item['rate_cfr_per_kg'] ?? 0,
+                        'amount_usd' => $item['amount_usd'] ?? 0,
+                        'status' => 1
+                    ]);
+                }
+            }
+
+            // Create transaction entries
+            $saleOrder = SaleOrderExport::find($request->sale_order_export_id);
+            $customer = Customer::find($saleOrder->buyer_id);
+            $bank = Bank::find($saleOrder->bank);
+
+            if ($customer && $bank) {
+                $voucher_no = $commercialInvoice->invoice_no;
+                $v_date = $commercialInvoice->invoice_date;
+
+                // Get PKR amounts directly from request (already calculated in frontend)
+                // The frontend calculates balance_amount_pkr correctly:
+                // - First invoice: balance = grand_total_pkr - advance_amount_pkr
+                // - Subsequent invoices: balance = remaining_amount_pkr (advance already deducted in first invoice)
+                $grandTotalPKR = $request->grand_total_pkr ?? ($commercialInvoice->grand_total * ($commercialInvoice->exchange_rate ?? 1));
+                $advanceAmountPKR = $request->advance_amount_pkr ?? 0; // Advance amount in PKR from sale_order_exports.advance_amount (0 if not first invoice)
+                $balanceAmountPKR = $request->balance_amount_pkr ?? $grandTotalPKR; // Use balance from request (already calculated correctly)
+
+                // Customer Debit (Receivable) - balance amount in PKR
+                $customer_acc_id = $customer->acc_id ?? null;
+                if ($customer_acc_id) {
+                    $transaction_customer = new Transactions();
+                    $transaction_customer = $transaction_customer->SetConnection('mysql2');
+                    $transaction_customer->voucher_no = $voucher_no;
+                    $transaction_customer->v_date = $v_date;
+                    $transaction_customer->acc_id = $customer_acc_id;
+                    $transaction_customer->acc_code = FinanceHelper::getAccountCodeByAccId($customer_acc_id);
+                    $transaction_customer->particulars = 'Commercial Invoice - ' . $voucher_no;
+                    $transaction_customer->opening_bal = 0;
+                    $transaction_customer->debit_credit = 1; // Debit - customer owes
+                    $transaction_customer->amount = $balanceAmountPKR; // Balance in PKR (no conversion needed)
+                    $transaction_customer->username = Auth::user()->name;
+                    $transaction_customer->status = 1;
+                    $transaction_customer->voucher_type = 22; // Commercial Invoice voucher type
+                    $transaction_customer->master_id = $commercialInvoice->id;
+                    $transaction_customer->save();
+                }
+
+                // Sales Revenue Credit - grand total in PKR
+                // Assuming there's a sales revenue account (you may need to adjust this)
+                $sales_revenue_acc_id = 1; // Adjust based on your chart of accounts
+                $transaction_sales = new Transactions();
+                $transaction_sales = $transaction_sales->SetConnection('mysql2');
+                $transaction_sales->voucher_no = $voucher_no;
+                $transaction_sales->v_date = $v_date;
+                $transaction_sales->acc_id = $sales_revenue_acc_id;
+                $transaction_sales->acc_code = FinanceHelper::getAccountCodeByAccId($sales_revenue_acc_id);
+                $transaction_sales->particulars = 'Commercial Invoice - ' . $voucher_no;
+                $transaction_sales->opening_bal = 0;
+                $transaction_sales->debit_credit = 0; // Credit - revenue
+                $transaction_sales->amount = $grandTotalPKR; // Grand total in PKR (no conversion needed)
+                $transaction_sales->username = Auth::user()->name;
+                $transaction_sales->status = 1;
+                $transaction_sales->voucher_type = 22;
+                $transaction_sales->master_id = $commercialInvoice->id;
+                $transaction_sales->save();
+            }
+
+            DB::connection('mysql2')->commit();
+            return response()->json(['success' => true, 'message' => 'Commercial invoice created successfully', 'invoice_id' => $commercialInvoice->id]);
+        } catch (Exception $ex) {
+            DB::connection('mysql2')->rollBack();
+            return response()->json(['success' => false, 'message' => 'Error: ' . $ex->getMessage()], 500);
+        }
+    }
+
+    /**
+     * View commercial invoice
+     */
+    public function viewCommercialInvoice(Request $request)
+    {
+        $id = $request->id;
+        
+        $commercialInvoice = CommercialInvoice::with(['contractLoading.containers', 'contractLoading.vehicles', 'saleOrderExport', 'invoiceData', 'currency'])
+            ->where('id', $id)
+            ->first();
+
+        if (!$commercialInvoice) {
+            return response()->json(['error' => 'Commercial invoice not found'], 404);
+        }
+
+        // Get sale order details
+        $saleOrder = SaleOrderExport::leftJoin('customers', 'customers.id', 'sale_order_exports.buyer_id')
+            ->leftJoin('ports', 'ports.id', 'sale_order_exports.port')
+            ->where('sale_order_exports.id', $commercialInvoice->sale_order_export_id)
+            ->select(
+                'sale_order_exports.*',
+                'customers.name as buyer_name',
+                'customers.address as buyer_address',
+                'ports.name as port_name'
+            )
+            ->first();
+
+        return view('Sales.AjaxPages.viewCommercialInvoice', compact('commercialInvoice', 'saleOrder'));
+    }
+
+    /**
+     * Show commercial invoice list
+     */
+    public function commercialInvoiceList()
+    {
+        return view('Sales.commercialInvoiceList');
+    }
+
+    /**
+     * Get commercial invoice filter data
+     */
+    public function getCommercialInvoiceFilter(Request $request)
+    {
+        $query = CommercialInvoice::join('contract_loadings', 'contract_loadings.id', 'commercial_invoices.contract_loading_id')
+            ->join('sale_order_exports', 'sale_order_exports.id', 'commercial_invoices.sale_order_export_id')
+            ->leftJoin('currency', 'currency.id', 'commercial_invoices.currency_id')
+            ->where('commercial_invoices.status', 1)
+            ->select(
+                'commercial_invoices.*',
+                'contract_loadings.loading_no',
+                'sale_order_exports.voucehr_no',
+                'currency.curreny as currency_name'
+            );
+
+        if (!empty($request->invoice_no)) {
+            $query->where('commercial_invoices.invoice_no', 'LIKE', '%' . $request->invoice_no . '%');
+        }
+
+        if (!empty($request->loading_no)) {
+            $query->where('contract_loadings.loading_no', 'LIKE', '%' . $request->loading_no . '%');
+        }
+
+        if (!empty($request->from)) {
+            $query->where('commercial_invoices.invoice_date', '>=', $request->from);
+        }
+
+        if (!empty($request->to)) {
+            $query->where('commercial_invoices.invoice_date', '<=', $request->to);
+        }
+
+        $commercial_invoices = $query->orderBy('commercial_invoices.id', 'desc')->get();
+        $m = Session::get('run_company');
+
+        return view('Sales.AjaxPages.commercialInvoiceListAjax', compact('commercial_invoices', 'm'));
+    }
+
+    /**
+     * Delete commercial invoice
+     */
+    public function deleteCommercialInvoice(Request $request)
+    {
+        DB::connection('mysql2')->beginTransaction();
+        try {
+            $commercialInvoice = CommercialInvoice::find($request->id);
+            if ($commercialInvoice) {
+                $commercialInvoice->status = 0;
+                $commercialInvoice->save();
+                DB::connection('mysql2')->commit();
+                return $request->id;
+            } else {
+                DB::connection('mysql2')->rollBack();
+                return '0';
+            }
+        } catch (Exception $ex) {
+            DB::connection('mysql2')->rollBack();
+            return '0';
+        }
     }
 }
