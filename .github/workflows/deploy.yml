@@ -20,9 +20,9 @@ jobs:
           host: ${{ secrets.SFTP_HOST }}
           username: 'maritimedeploy'
           password: 'asdf44534%%^dfgrgGdtUI9**unvG'
-          source: project.tar.gz
-          target: /var/www/maritime-export.inplsoftwares.com
-          tar_tmp_path: /tmp
+          source: "project.tar.gz"
+          target: "/var/www/maritime-export.inplsoftwares.com"
+          rm: true  # Purani file ko remove karne ke liye
           debug: true
 
       - name: Extract archive on server
