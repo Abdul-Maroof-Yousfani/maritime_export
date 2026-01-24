@@ -7,46 +7,49 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      # 1️⃣ Checkout code
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2️⃣ Copy Laravel project via SCP
-      - name: Copy project via SCP
+      - name: Copy project files via SCP
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: 'maritimedeploy'
-          password: 'asdf44534%%^dfgrgGdtUI9**unvG'
-          # rm: true ko hata diya hai taake purani files (like .env) delete na hon
-          rm: false 
-          # Saari files bhej raha hai (Hidden files ke liye wildcard ya explicit name)
-          source: ".,!node_modules,!vendor,!.git" 
+          password: ${{ secrets.SFTP_PASSWORD }}
+          # In files ko copy karega, vendor aur node_modules ko chorr kar
+          source: ".,!node_modules,!vendor,!.git"
           target: "/var/www/maritime-export.inplsoftwares.com"
+          rm: false # Taake .env delete na ho
           strip_components: 0
           debug: true
-          
 
-      # 3️⃣ Post-deploy commands via SSH
-      - name: Post-deployment SSH
+      - name: Post-Deployment Commands (Permissions & Cache)
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: 'maritimedeploy'
-          password: 'asdf44534%%^dfgrgGdtUI9**unvG'
+          password: ${{ secrets.SFTP_PASSWORD }}
           script: |
             cd /var/www/maritime-export.inplsoftwares.com
+            
+            # 1. Ownership set karein
+            # Hum maritimedeploy ko owner aur www-data (web server) ko group bana rahay hain
+            sudo chown -R maritimedeploy:www-data .
 
-            # Composer install (only if composer.json exists)
+            # 2. Storage aur Cache ki permissions sahi karein
+            sudo find storage -type d -exec chmod 775 {} \;
+            sudo find storage -type f -exec chmod 664 {} \;
+            sudo find bootstrap/cache -type d -exec chmod 775 {} \;
+            
+            # 3. Composer install (agar composer.json change hui hai)
             if [ -f composer.json ]; then
                 php7.4 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
             fi
 
-            # Permissions & Cache
-            sudo chmod -R 775 storage bootstrap/cache
-            php7.4 artisan config:clear
+            # 4. Laravel Optimization
+            php7.4 artisan config:cache
+            php7.4 artisan route:cache
             php7.4 artisan view:clear
-
-            echo "🚀 Deployment complete!"
+            
+            echo "Deployment Complete and Permissions Fixed!"
