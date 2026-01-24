@@ -17,17 +17,10 @@ jobs:
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: 'maritimedeploy'
-          key: 'asdf44534%%^dfgrgGdtUI9**unvGasdf44534%%^dfgrgGdtUI9**unvG'
+          password: 'asdf44534%%^dfgrgGdtUI9**unvG'
           port: 22
-          source: |
-            app
-            bootstrap
-            config
-            public
-            resources
-            routes
-            composer.json
-            artisan
+          source: app bootstrap config public resources routes composer.json artisan
+
           target: "/var/www/maritime-export.inplsoftwares.com"
           tar_tmp_path: "/tmp"
           debug: true
@@ -37,7 +30,7 @@ jobs:
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: maritimedeploy
-          key: 'asdf44534%%^dfgrgGdtUI9**unvGasdf44534%%^dfgrgGdtUI9**unvG'
+          password: 'asdf44534%%^dfgrgGdtUI9**unvG'
           script: |
             cd /var/www/maritime-export.inplsoftwares.com
 
