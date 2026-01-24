@@ -52,7 +52,7 @@ jobs:
             fi
             
             php7.4 artisan config:cache
-            php7.4 artisan route:cache
+            php7.4 artisan route:clear
             php7.4 artisan view:clear
 
             echo "🚀 Deployment Successful and Permissions Restored!"
