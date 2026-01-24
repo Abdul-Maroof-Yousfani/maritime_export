@@ -16,7 +16,7 @@ jobs:
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: 'maritimedeploy'
-          password: ${{ secrets.SFTP_PASSWORD }}
+          password: 'asdf44534%%^dfgrgGdtUI9**unvG'
           # In files ko copy karega, vendor aur node_modules ko chorr kar
           source: ".,!node_modules,!vendor,!.git"
           target: "/var/www/maritime-export.inplsoftwares.com"
@@ -29,7 +29,7 @@ jobs:
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: 'maritimedeploy'
-          password: ${{ secrets.SFTP_PASSWORD }}
+          password: 'asdf44534%%^dfgrgGdtUI9**unvG'
           script: |
             cd /var/www/maritime-export.inplsoftwares.com
             
