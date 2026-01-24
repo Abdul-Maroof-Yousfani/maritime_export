@@ -7,25 +7,26 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      # 1️⃣ Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Create project archive
-        run: tar -czf project.tar.gz app bootstrap config public resources routes composer.json artisan index.php server.php site.css package.json storage
-
-      - name: Copy project archive via SCP
+      # 2️⃣ Copy Laravel project via SCP
+      - name: Copy Laravel files via SCP
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: 'maritimedeploy'
           password: 'asdf44534%%^dfgrgGdtUI9**unvG'
-          source: "project.tar.gz"
-          target: "/var/www/maritime-export.inplsoftwares.com"
-          rm: true  # Purani file ko remove karne ke liye
+          source: app,bootstrap,config,public,resources,routes,composer.json,artisan,index.php,server.php,site.css,package.json,storage
+          target: /var/www/maritime-export.inplsoftwares.com
+          tar_tmp_path: /tmp
           debug: true
 
-      - name: Extract archive on server
+      # 3️⃣ Post-deploy commands via SSH
+      - name: Post-deployment SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SFTP_HOST }}
@@ -33,12 +34,15 @@ jobs:
           password: 'asdf44534%%^dfgrgGdtUI9**unvG'
           script: |
             cd /var/www/maritime-export.inplsoftwares.com
-            tar -xzf project.tar.gz
-            rm project.tar.gz
+
+            # Composer install (only if composer.json exists)
             if [ -f composer.json ]; then
                 php7.4 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
             fi
+
+            # Permissions & Cache
             sudo chmod -R 775 storage bootstrap/cache
             php7.4 artisan config:clear
             php7.4 artisan view:clear
-            echo "Deployment complete!"
+
+            echo "🚀 Deployment complete!"
