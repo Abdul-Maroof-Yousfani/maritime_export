@@ -26,7 +26,7 @@ jobs:
           username: 'maritimedeploy'
           password: 'asdf44534%%^dfgrgGdtUI9**unvG'
           port: 22
-          source: app,bootstrap,config,public,resources,routes,composer.json,artisan
+          source: "*"
 
           target: "/var/www/maritime-export.inplsoftwares.com"
           tar_tmp_path: "/tmp"
