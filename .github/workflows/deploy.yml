@@ -11,20 +11,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 1: Files copy karna (Is se permissions temporary kharab ho jati hain)
       - name: Copy project files via SCP
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: 'maritimedeploy'
           password: 'asdf44534%%^dfgrgGdtUI9**unvG'
-          # In files ko copy karega, vendor aur node_modules ko chorr kar
+          # Sab files bhej raha hai siwaye vendor/git/node_modules ke
           source: ".,!node_modules,!vendor,!.git"
           target: "/var/www/maritime-export.inplsoftwares.com"
-          rm: false # Taake .env delete na ho
+          rm: false # .env aur .htaccess ko delete hone se bachany ke liye
           strip_components: 0
           debug: true
 
-      - name: Post-Deployment Commands (Permissions & Cache)
+      # Step 2: Permissions ko foran theek karna aur Laravel ko refresh karna
+      - name: Post-Deployment Permissions & Cleanup
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SFTP_HOST }}
@@ -33,23 +35,24 @@ jobs:
           script: |
             cd /var/www/maritime-export.inplsoftwares.com
             
-            # 1. Ownership set karein
-            # Hum maritimedeploy ko owner aur www-data (web server) ko group bana rahay hain
+            # 1. Ownership fix (maritimedeploy user aur www-data group)
             sudo chown -R maritimedeploy:www-data .
 
-            # 2. Storage aur Cache ki permissions sahi karein
-            sudo find storage -type d -exec chmod 775 {} \;
-            sudo find storage -type f -exec chmod 664 {} \;
-            sudo find bootstrap/cache -type d -exec chmod 775 {} \;
-            
-            # 3. Composer install (agar composer.json change hui hai)
+            # 2. Storage aur Cache folders ko write permission (775)
+            sudo chmod -R 775 storage bootstrap/cache
+
+            # 3. Log file ko special permission dena taake Laravel write kar saky
+            if [ -f storage/logs/laravel.log ]; then
+                sudo chmod 666 storage/logs/laravel.log
+            fi
+
+            # 4. Composer aur Laravel cache optimize karna
             if [ -f composer.json ]; then
                 php7.4 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
             fi
-
-            # 4. Laravel Optimization
+            
             php7.4 artisan config:cache
             php7.4 artisan route:cache
             php7.4 artisan view:clear
-            
-            echo "Deployment Complete and Permissions Fixed!"
+
+            echo "🚀 Deployment Successful and Permissions Restored!"
