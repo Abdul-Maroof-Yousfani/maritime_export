@@ -26,11 +26,12 @@ jobs:
           username: 'maritimedeploy'
           password: 'asdf44534%%^dfgrgGdtUI9**unvG'
           port: 22
-          source: "*"
+          source: app,bootstrap,config,public,resources,routes,composer.json,artisan,index.php,server.php,site.css,package.json,storage
 
           target: "/var/www/maritime-export.inplsoftwares.com"
           tar_tmp_path: "/tmp"
           debug: true
+
 
       - name: Post-Deployment Commands
         uses: appleboy/ssh-action@master
