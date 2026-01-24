@@ -37,7 +37,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SFTP_HOST }}
-          username: maritimedeploy
+          username: 'maritimedeploy'
           password: 'asdf44534%%^dfgrgGdtUI9**unvG'
           script: |
             cd /var/www/maritime-export.inplsoftwares.com
