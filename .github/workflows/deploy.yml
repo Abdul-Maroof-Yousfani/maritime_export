@@ -14,15 +14,16 @@ jobs:
         uses: actions/checkout@v3
 
       # 2️⃣ Copy Laravel project via SCP
-      - name: Copy Laravel files via SCP
+      - name: Copy project archive via SCP
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: 'maritimedeploy'
-          password: 'asdf44534%%^dfgrgGdtUI9**unvG'
-          source: app,bootstrap,config,public,resources,routes,composer.json,artisan,index.php,server.php,site.css,package.json,storage
-          target: /var/www/maritime-export.inplsoftwares.com
-          tar_tmp_path: /tmp
+          password: 'asdf44534%%^dfgrgGdtUI9**unvG' # Bhai isey SECRET mein daal dein (Risk hai!)
+          source: "project.tar.gz" # Sirf zip file bhejein
+          target: "/var/www/maritime-export.inplsoftwares.com"
+          rm: true # Purani file remove karne ke liye
+          strip_components: 0
           debug: true
 
       # 3️⃣ Post-deploy commands via SSH
