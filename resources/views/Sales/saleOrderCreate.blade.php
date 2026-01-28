@@ -299,41 +299,47 @@ use App\Helpers\CommonHelper;
                                     <input type="text" class="form-control" id="customer_ntn" readonly />
                                 </div>
                             </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Currency <span class="rflabelsteric">*</span></label>
-                                    <select class="form-control select2" name="currency_id" id="currency_id" onchange="updateCurrencyInfo()" required>
-                                        <option value="">Select Currency</option>
-                                        @foreach ($conversions as $conversion)
-                                            <option value="{{ $conversion->id }}" data-rate="{{ $conversion->rate }}" data-name="{{ $conversion->curreny }}">{{ $conversion->curreny }}</option>
-                                        @endforeach
-                                    </select>
-                                    <input type="hidden" id="currency_rate" value="1" />
-                                    <input type="hidden" id="currency_name" value="" />
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Mode of Transport <span class="rflabelsteric">*</span></label>
+                                        <select class="form-control select2" name="mode_transport" id="mode_transport" required>
+                                            <option value="">Select Mode of Transport</option>
+                                            @foreach ($modeoftransports as $modeoftransport)
+                                                <option value="{{ $modeoftransport->id }}">{{ $modeoftransport->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="form-group" id="exchangeRateGroup" style="display: none;">
-                                    <label class="form-label">Exchange Rate (PKR) <span class="rflabelsteric">*</span></label>
-                                    <input type="number" class="form-control" name="exchange_rate" id="exchange_rate" 
-                                        step="0.01" min="0" onchange="updateExchangeRate()" onkeyup="updateExchangeRate()" 
-                                        placeholder="Enter exchange rate" required />
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Currency <span class="rflabelsteric">*</span></label>
+                                        <select class="form-control select2" name="currency_id" id="currency_id" onchange="updateCurrencyInfo()" required>
+                                            <option value="">Select Currency</option>
+                                            @foreach ($conversions as $conversion)
+                                                <option value="{{ $conversion->id }}" data-rate="{{ $conversion->rate }}" data-name="{{ $conversion->curreny }}">{{ $conversion->curreny }}</option>
+                                            @endforeach
+                                        </select>
+                                        <input type="hidden" id="currency_rate" value="1" />
+                                        <input type="hidden" id="currency_name" value="" />
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label">Mode of Transport <span class="rflabelsteric">*</span></label>
-                                    <select class="form-control select2" name="mode_transport" id="mode_transport" required>
-                                        <option value="">Select Mode of Transport</option>
-                                        @foreach ($modeoftransports as $modeoftransport)
-                                            <option value="{{ $modeoftransport->id }}">{{ $modeoftransport->name }}</option>
-                                        @endforeach
-                                    </select>
+                                <div class="col-md-4">
+                                    <div class="form-group" id="exchangeRateGroup" style="display: none;">
+                                        <label class="form-label">Exchange Rate (PKR) <span class="rflabelsteric">*</span></label>
+                                        <input type="number" class="form-control" name="exchange_rate" id="exchange_rate" 
+                                            step="0.01" min="0" onchange="updateExchangeRate()" onkeyup="updateExchangeRate()" 
+                                            placeholder="Enter exchange rate" required />
+                                    </div>
                                 </div>
                             </div>
                             
+                            
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Mode of Payment <span class="rflabelsteric">*</span></label>
+                                    <label class="form-label">Payment Terms <span class="rflabelsteric">*</span></label>
                                     <select class="form-control select2" name="mode_of_term" id="mode_of_term" required>
-                                        <option value="">Select Mode of Payment</option>
+                                        <option value="">Select Payment Terms</option>
                                         @foreach ($modeofterms as $modeofterm)
                                             <option value="{{ $modeofterm->id }}">{{ $modeofterm->name }}</option>
                                         @endforeach
