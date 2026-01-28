@@ -315,9 +315,9 @@ use App\Helpers\CommonHelper;
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Mode of Payment <span class="rflabelsteric">*</span></label>
+                                    <label class="form-label">Payment Term<span class="rflabelsteric">*</span></label>
                                     <select class="form-control select2" name="mode_of_term" id="mode_of_term" required>
-                                        <option value="">Select Mode of Payment</option>
+                                        <option value="">Select Payment Term</option>
                                         @foreach ($modeofterms as $modeofterm)
                                             <option value="{{ $modeofterm->id }}" {{ $exportOrder->mode_of_term == $modeofterm->id ? 'selected' : '' }}>{{ $modeofterm->name }}</option>
                                         @endforeach
