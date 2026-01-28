@@ -70,7 +70,7 @@ $m = Session::get('run_company');
                                                 <div class="row">
                                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
                                                         <label>Select Order No <span class="rflabelsteric"><strong>*</strong></span></label>
-                                                        <select class="form-control select2" name="order_no" id="order_no" required>
+                                                        <select class="form-control select2" name="order_no" id="order_no">
                                                             <option value="">Select Order No</option>
                                                         </select>
                                                     </div>
@@ -140,7 +140,7 @@ $m = Session::get('run_company');
                                                     <div class="row">
                                                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                                             <label>Loading Date <span class="rflabelsteric"><strong>*</strong></span></label>
-                                                            <input type="date" class="form-control" name="loading_date" id="loading_date" required>
+                                                            <input type="date" class="form-control" name="loading_date" id="loading_date">
                                                         </div>
                                                     </div>
                                                     
@@ -162,7 +162,7 @@ $m = Session::get('run_company');
                                                                             <th>Layer</th>
                                                                             <th>Item Name</th>
                                                                             <th>Size</th>
-                                                                            <th>Quality</th>
+                                                                            <th>Grades</th>
                                                                             <th>Total Qty</th>
                                                                             <th>Previous Sent Qty</th>
                                                                             <th>Final Qty</th>
@@ -341,7 +341,7 @@ function loadExportOrderByOrderNo(orderNo) {
                         
                         itemsHtml += '<tr>';
                         itemsHtml += '<td>' + (index + 1) + '</td>';
-                        itemsHtml += '<td><input type="text" class="form-control layer-input" name="layer[]" data-item-id="' + (item.item_id || '') + '" data-sale-order-data-id="' + (item.id || '') + '" style="width: 100%; padding: 5px; font-size: 11px;"></td>';
+                        itemsHtml += '<td><input type="text" class="form-control layer-input" name="layer[]" data-item-id="' + (item.item_id || '') + '" data-sale-order-data-id="' + (item.id || '') + '" data-item-name="' + (itemName || '') + '" style="width: 100%; padding: 5px; font-size: 11px;"></td>';
                         itemsHtml += '<td>' + itemName + '</td>';
                         itemsHtml += '<td>' + itemSize + '</td>';
                         itemsHtml += '<td>' + quality + '</td>';
@@ -370,6 +370,68 @@ function loadExportOrderByOrderNo(orderNo) {
 
 
 function submitContractLoading() {
+
+    // Sum layer qty per item
+    var layerQtyByItem = {};
+    var layerQtyByItem = {};
+
+    $('.layer-input').each(function () {
+        var row = $(this).closest('tr');
+        var qtyInput = row.find('.qty-input');
+        var qty = parseFloat(qtyInput.val()) || 0;
+
+        var itemId = $(this).data('item-id');
+
+        if (!layerQtyByItem[itemId]) {
+            layerQtyByItem[itemId] = 0;
+        }
+
+        layerQtyByItem[itemId] += qty;
+    });
+
+
+    // Sum container qty per item
+    var containerQtyByItem = {};
+
+    $('#containersTableBody tr').each(function () {
+        var itemId = $(this).find('.container_item_select option:selected').val();
+        var qty = parseFloat($(this).find('.container_quantity').val()) || 0;
+
+        if (!itemId) return; // safety
+
+        if (!containerQtyByItem[itemId]) {
+            containerQtyByItem[itemId] = 0;
+        }
+
+        containerQtyByItem[itemId] += qty;
+    });
+
+
+   
+    for (var itemId in containerQtyByItem) {
+        var containerTotal = containerQtyByItem[itemId];
+        var layerTotal = layerQtyByItem[itemId] || 0;
+
+        if (containerTotal > layerTotal) {
+
+            var itemName = $('.layer-input[data-item-id="' + itemId + '"]')
+                            .data('item-name') || 'Unknown Item';
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Quantity Exceeded',
+                html: `
+                    <b>Item:</b> ${itemName}<br><br>
+                    <b>Actual Quantity:</b> ${layerTotal.toFixed(2)}<br><br>
+                    <b>Container Quantity:</b> ${containerTotal.toFixed(2)}
+                `,
+                confirmButtonText: 'OK'
+            });
+
+            return false; // ❌ STOP SUBMIT
+        }
+    }
+
     // Collect layer data
     var layers = [];
     $('.layer-input').each(function() {
@@ -471,21 +533,21 @@ function addContainerVehicleRow() {
             <td style="border:1px solid;padding:8px;">${containerVehicleRowCounter}</td>
             <td style="border:1px solid;padding:8px;">
                 <select class="form-control select2 container_item_select"
-                    name="items[${containerVehicleRowCounter}][item]" required>
+                    name="items[${containerVehicleRowCounter}][item]">
                     ${optionsHtml}
                 </select>
             </td>
             <td style="border:1px solid;padding:8px;">
-                <input type="text" class="form-control container_no" name="items[${containerVehicleRowCounter}][container_no]" placeholder="Container No" required>
+                <input type="text" class="form-control container_no" name="items[${containerVehicleRowCounter}][container_no]" placeholder="Container No">
             </td>
             <td style="border:1px solid;padding:8px;">
-                <input type="text" class="form-control vehicle_no" name="items[${containerVehicleRowCounter}][vehicle_no]" placeholder="Vehicle No" required>
+                <input type="text" class="form-control vehicle_no" name="items[${containerVehicleRowCounter}][vehicle_no]" placeholder="Vehicle No">
             </td>
             <td style="border:1px solid;padding:8px;">
-                <input type="text" class="form-control seal_no" name="items[${containerVehicleRowCounter}][seal_no]" placeholder="Seal No" required>
+                <input type="text" class="form-control seal_no" name="items[${containerVehicleRowCounter}][seal_no]" placeholder="Seal No">
             </td>
             <td style="border:1px solid;padding:8px;">
-                <input type="number" class="form-control container_quantity" name="items[${containerVehicleRowCounter}][quantity]" placeholder="Quantity" step="0.01" min="0" required>
+                <input type="number" class="form-control container_quantity" name="items[${containerVehicleRowCounter}][quantity]" placeholder="Quantity" step="0.01" min="0">
             </td>
             <td style="border:1px solid;padding:8px;text-align:center;">
                 <button type="button" class="btn btn-sm btn-danger" onclick="removeContainerVehicleRow(${containerVehicleRowCounter})">
