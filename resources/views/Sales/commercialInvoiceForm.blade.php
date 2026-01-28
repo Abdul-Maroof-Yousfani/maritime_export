@@ -103,35 +103,27 @@ $m = Session::get('run_company');
                                                                                     <td style="border:1px solid;padding:8px;">
                                                                                         <input type="text" class="form-control" name="gd_no" id="gd_no">
                                                                                     </td>
-                                                                                    <th style="border:1px solid;padding:8px;">Containers</th>
-                                                                                    <td style="border:1px solid;padding:8px;">
-                                                                                        <div id="containers_display" style="max-height: 100px; overflow-y: auto;">
-                                                                                            <table class="table table-bordered" style="margin-bottom: 0;">
-                                                                                                <thead>
-                                                                                                    <tr>
-                                                                                                        <th style="padding: 5px; font-size: 11px; text-align: center;">S.No</th>
-                                                                                                        <th style="padding: 5px; font-size: 11px; text-align: center;">Container No</th>
-                                                                                                        <th style="padding: 5px; font-size: 11px; text-align: center;">Seal No</th>
-                                                                                                    </tr>
-                                                                                                </thead>
-                                                                                                <tbody id="containers_table_body">
-                                                                                                    <tr><td colspan="3" style="text-align: center; padding: 5px;">No containers</td></tr>
-                                                                                                </tbody>
-                                                                                            </table>
-                                                                                        </div>
-                                                                                        <input type="hidden" name="container_no" id="container_no">
-                                                                                    </td>
-                                                                                </tr>
-                                                                                <tr>
                                                                                     <th style="border:1px solid;padding:8px;">Consignee Name</th>
                                                                                     <td style="border:1px solid;padding:8px;" colspan="3">
                                                                                         <input type="text" class="form-control" name="consignee_name" id="consignee_name" readonly style="background-color: #f5f5f5;">
                                                                                     </td>
                                                                                 </tr>
                                                                                 <tr>
-                                                                                    <th style="border:1px solid;padding:8px;">Consignee Address</th>
+                                                                                   
+                                                                                     <th style="border:1px solid;padding:8px;">Consignee Address</th>
                                                                                     <td style="border:1px solid;padding:8px;" colspan="3">
                                                                                         <textarea class="form-control" name="consignee_address" id="consignee_address" rows="2" readonly style="background-color: #f5f5f5;"></textarea>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                   
+                                                                                    <th style="border:1px solid;padding:8px;">From</th>
+                                                                                    <td style="border:1px solid;padding:8px;">
+                                                                                        <input type="text" class="form-control" name="port_from" id="port_from" readonly style="background-color: #f5f5f5;">
+                                                                                    </td>
+                                                                                    <th style="border:1px solid;padding:8px;">To</th>
+                                                                                    <td style="border:1px solid;padding:8px;">
+                                                                                        <input type="text" class="form-control" name="port_to" id="port_to" style="background-color: #f5f5f5;">
                                                                                     </td>
                                                                                 </tr>
                                                                                 <tr>
@@ -144,19 +136,29 @@ $m = Session::get('run_company');
                                                                                         <input type="text" class="form-control" name="payment_term" id="payment_term">
                                                                                     </td>
                                                                                 </tr>
-                                                                                <tr>
-                                                                                    <th style="border:1px solid;padding:8px;">From</th>
-                                                                                    <td style="border:1px solid;padding:8px;">
-                                                                                        <input type="text" class="form-control" name="port_from" id="port_from" readonly style="background-color: #f5f5f5;">
-                                                                                    </td>
-                                                                                    <th style="border:1px solid;padding:8px;">To</th>
-                                                                                    <td style="border:1px solid;padding:8px;">
-                                                                                        <input type="text" class="form-control" name="port_to" id="port_to" readonly style="background-color: #f5f5f5;">
-                                                                                    </td>
-                                                                                </tr>
+                                                                                
                                                                             </tbody>
                                                                         </table>
                                                                     </div>
+                                                                    <div id="containers_display" style="max-height: 100px; overflow-y: auto;">
+                                                                        <h4 style="text-align: center; margin-bottom: 15px;"><u><b>CONTAINERS DETAILS</b></u></h4>
+                                                                        <table class="table table-bordered" style="margin-bottom: 0;">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th style="padding: 5px; font-size: 11px; text-align: center;">S.No</th>
+                                                                                    <th style="padding: 5px; font-size: 11px; text-align: center;">Item Name</th>
+                                                                                    <th style="padding: 5px; font-size: 11px; text-align: center;">Container No</th>
+                                                                                    <th style="padding: 5px; font-size: 11px; text-align: center;">Vehicle No</th>
+                                                                                    <th style="padding: 5px; font-size: 11px; text-align: center;">Seal No</th>
+                                                                                    <th style="padding: 5px; font-size: 11px; text-align: center;">Quantity</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody id="containers_table_body">
+                                                                                <tr><td colspan="3" style="text-align: center; padding: 5px;">No containers</td></tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                    <input type="hidden" name="container_no" id="container_no">
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -331,22 +333,20 @@ function loadLoadingDetails(loadingId) {
                 // Populate containers
                 var containersHtml = '';
                 if (response.containers && response.containers.length > 0) {
-                    var containerNos = [];
                     response.containers.forEach(function(container, index) {
                         containersHtml += '<tr>';
                         containersHtml += '<td style="padding: 5px; text-align: center; font-size: 11px;">' + (index + 1) + '</td>';
+                        containersHtml += '<td style="padding: 5px; text-align: center; font-size: 11px;">' + (container.item_id || '-') + '</td>';
                         containersHtml += '<td style="padding: 5px; text-align: center; font-size: 11px;">' + (container.container_no || '-') + '</td>';
+                        containersHtml += '<td style="padding: 5px; text-align: center; font-size: 11px;">' + (container.vehicle_no || '-') + '</td>';
                         containersHtml += '<td style="padding: 5px; text-align: center; font-size: 11px;">' + (container.seal_no || '-') + '</td>';
+                        containersHtml += '<td style="padding: 5px; text-align: center; font-size: 11px;">' + (container.quantity || '-') + '</td>';
                         containersHtml += '</tr>';
-                        if (container.container_no) {
-                            containerNos.push(container.container_no);
-                        }
+    
                     });
                     $('#containers_table_body').html(containersHtml);
-                    $('#container_no').val(containerNos.join(', ')); // Store comma-separated for database
                 } else {
-                    $('#containers_table_body').html('<tr><td colspan="3" style="text-align: center; padding: 5px;">No containers</td></tr>');
-                    $('#container_no').val('');
+                    $('#containers_table_body').html('<tr><td colspan="6" style="text-align: center; padding: 5px;">No containers</td></tr>');
                 }
                 
                 // Populate invoice details

@@ -969,7 +969,7 @@ class SaleOrderExportController extends Controller
     {
         $loadingId = $request->loading_id;
         
-        $loading = ContractLoading::with(['saleOrderExport', 'containers', 'vehicles'])
+        $loading = ContractLoading::with(['saleOrderExport', 'containers'])
             ->where('id', $loadingId)
             ->first();
 
@@ -1077,7 +1077,6 @@ class SaleOrderExportController extends Controller
         
         // Get containers and vehicles for display
         $containers = $loading->containers ?? collect([]);
-        $vehicles = $loading->vehicles ?? collect([]);
 
         return response()->json([
             'loading' => $loading,
@@ -1088,16 +1087,14 @@ class SaleOrderExportController extends Controller
             'balance_amount_pkr' => $balanceAmountPKR, // Calculated balance amount in PKR
             'containers' => $containers->map(function($container) {
                 return [
+                    'item_id' => CommonHelper::get_item_name($container->item_id ?? ''),
                     'container_no' => $container->container_no ?? '',
-                    'seal_no' => $container->seal_no ?? ''
+                    'vehicle_no' => $container->vehicle_no ?? '',
+                    'seal_no' => $container->seal_no ?? '',
+                    'quantity' => $container->quantity ?? ''
                 ];
             })->toArray(),
-            'vehicles' => $vehicles->map(function($vehicle) {
-                return [
-                    'vehicle_no' => $vehicle->vehicle_no ?? '',
-                    'name' => $vehicle->name ?? ''
-                ];
-            })->toArray()
+            
         ]);
     }
 
