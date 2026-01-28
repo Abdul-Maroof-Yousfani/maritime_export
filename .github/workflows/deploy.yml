@@ -11,22 +11,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 1. Fast Upload (Zip karke bhejega)
-      - name: Copy files via SCP (Fast)
+      # Step 1: Files copy karna (Is se permissions temporary kharab ho jati hain)
+      - name: Copy project files via SCP
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: 'maritimedeploy'
           password: 'asdf44534%%^dfgrgGdtUI9**unvG'
-          port: 22
-          source: "./*"
-          # vendor folder ko skip karein taake upload foran ho jaye
-          rm: false 
-          target: "/var/www/maritime-export.inplsoftwares.com/"
-          tar_tmp_path: "/tmp"
+          # Sab files bhej raha hai siwaye vendor/git/node_modules ke
+          source: ".,!node_modules,!vendor,!.git"
+          target: "/var/www/maritime-export.inplsoftwares.com"
+          rm: false # .env aur .htaccess ko delete hone se bachany ke liye
+          strip_components: 0
+          debug: true
 
-      # 2. Commands Execution
-      - name: Post-Deployment Execution
+      # Step 2: Permissions ko foran theek karna aur Laravel ko refresh karna
+      - name: Post-Deployment Permissions & Cleanup
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SFTP_HOST }}
@@ -35,13 +35,24 @@ jobs:
           script: |
             cd /var/www/maritime-export.inplsoftwares.com
             
-            # Composer sirf tab chalega jab zaroorat ho (Ye server pe fast hai)
+            # 1. Ownership fix (maritimedeploy user aur www-data group)
+            sudo chown -R maritimedeploy:www-data .
+
+            # 2. Storage aur Cache folders ko write permission (775)
+            sudo chmod -R 775 storage bootstrap/cache
+
+            # 3. Log file ko special permission dena taake Laravel write kar saky
+            if [ -f storage/logs/laravel.log ]; then
+                sudo chmod 666 storage/logs/laravel.log
+            fi
+
+            # 4. Composer aur Laravel cache optimize karna
             if [ -f composer.json ]; then
                 php7.4 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
             fi
-
-            # Permissions & Cache
-            sudo chmod -R 775 storage bootstrap/cache
-            php7.4 artisan config:clear
+            
+            php7.4 artisan config:cache
+            php7.4 artisan route:clear
             php7.4 artisan view:clear
-            echo "Bhai, speed check karo ab!"
+
+            echo "🚀 Deployment Successful and Permissions Restored!"
