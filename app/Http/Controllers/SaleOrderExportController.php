@@ -981,6 +981,7 @@ class SaleOrderExportController extends Controller
             ->leftJoin('ports', 'ports.id', 'sale_order_exports.port')
             ->leftJoin('currency', 'currency.id', 'sale_order_exports.currencey_id')
             ->leftJoin('consignees', 'consignees.id', 'sale_order_exports.consignee')
+            ->leftJoin('mode_of_terms', 'mode_of_terms.id', 'sale_order_exports.mode_of_term')
             ->where('sale_order_exports.id', $loading->sale_order_export_id)
             ->select(
                 'sale_order_exports.*',
@@ -990,7 +991,8 @@ class SaleOrderExportController extends Controller
                 'currency.curreny as currency_name',
                 'currency.id as currency_id',
                 'sale_order_exports.currencey_rate',
-                'consignees.name as consignee_name'
+                'consignees.name as consignee_name',
+                'mode_of_terms.name as mode_of_term_name'
             )
             ->first();
 

@@ -180,7 +180,7 @@ $m = Session::get('run_company');
                                                                                     <th style="border:1px solid;padding:8px;">Total Cartons</th>
                                                                                     <th style="border:1px solid;padding:8px;">Total Net Kgs</th>
                                                                                     <th style="border:1px solid;padding:8px;">Rate CFR Per kg</th>
-                                                                                    <th style="border:1px solid;padding:8px;">Amount in USD</th>
+                                                                                    <th style="border:1px solid;padding:8px;">Amount</th>
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody id="productTableBody">
@@ -351,7 +351,7 @@ function loadLoadingDetails(loadingId) {
                 
                 // Populate invoice details
                 $('#consignee_name').val(response.sale_order.consignee_name || '');
-                $('#consignee_address').val(''); // Consignees table only has name, not address
+                $('#payment_term').val(response.sale_order.mode_of_term_name); // Consignees table only has name, not address
                 $('#port_from').val(response.sale_order.port_name || '');
                 $('#port_to').val(''); // Only one port column exists
                 
