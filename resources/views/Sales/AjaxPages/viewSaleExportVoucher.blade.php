@@ -207,34 +207,17 @@ textarea{border-style:none;border-color:Transparent;}
                             <td style="border:1px solid">{{ $sales_order->buyers_ntn ?? '-' }}</td>
                         </tr>
                         <tr>
-                            <th style="border:1px solid">Grade</th>
+                            <th style="border:1px solid">Tolerance Percentage</th>
                             <td style="border:1px solid">
-                                @if(!empty($sales_order->grade))
-                                    {{ App\Models\Grade::find($sales_order->grade)->name ?? '-' }}
-                                @else
-                                    -
-                                @endif
-                            </td>
-                            <th style="border:1px solid">Size</th>
-                            <td style="border:1px solid">
-                                @if(!empty($sales_order->size))
-                                    {{ App\Models\Size::find($sales_order->size)->name ?? '-' }}
-                                @else
-                                    -
-                                @endif
-                            </td>
-                        </tr>
-                        <tr>
-                            <th style="border:1px solid">Packing</th>
-                            <td style="border:1px solid">
-                                @if(!empty($sales_order->packing))
-                                    {{ App\Models\Packing::find($sales_order->packing)->name ?? '-' }}
+                                @if(!empty($sales_order->tolerance_percentage))
+                                    {{ $sales_order->tolerance_percentage }} %
                                 @else
                                     -
                                 @endif
                             </td>
                            
                         </tr>
+                       
                         <tr>
                             <th style="border:1px solid">Consignee</th>
                             <td style="border:1px solid">
@@ -286,7 +269,7 @@ textarea{border-style:none;border-color:Transparent;}
                             <th style="border:1px solid;text-align:center;">S.No</th>
                             <th style="border:1px solid;text-align:center;">Item Name</th>
                             <th style="border:1px solid;text-align:center;">Item Size</th>
-                            <th style="border:1px solid;text-align:center;">Quality</th>
+                            <th style="border:1px solid;text-align:center;">Grade</th>
                             <th style="border:1px solid;text-align:center;">UOM</th>
                             <th style="border:1px solid;text-align:center;">HS Code</th>
                             <th style="border:1px solid;text-align:center;">Pack UOM</th>
