@@ -12,6 +12,9 @@ class ContractLoadingContainer extends Model
     protected $fillable = [
         'contract_loading_id',
         'container_no',
+        'item_id',
+        'vehicle_no',
+        'quantity',
         'seal_no',
         'status'
     ];

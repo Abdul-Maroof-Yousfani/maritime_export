@@ -104,6 +104,7 @@ class SaleOrderExportController extends Controller
             $sale_order->voucher_date = $request->voucher_date;
             $sale_order->voucher_type = 0;
             $sale_order->buyer_id = $request->buyers_id; //??1;
+            $sale_order->tolerance_percentage = $request->tolerance_percentage;
             $sale_order->buyers_ntn = $request->buyers_ntn ?? 1;
             $sale_order->mode_of_term = $request->mode_of_term;
             $sale_order->incoterm = $request->incoterm ? (int)$request->incoterm : null;
@@ -344,6 +345,7 @@ class SaleOrderExportController extends Controller
             $sale_order->buyer_id = $request->buyers_id; //??1;
             $sale_order->buyers_ntn = $request->buyers_ntn ?? 1;
             $sale_order->mode_of_term = $request->mode_of_term;
+            $sale_order->tolerance_percentage = $request->tolerance_percentage;
             $sale_order->due_date = $request->due_date ?? date('Y-m-d');
             $sale_order->incoterm = $request->incoterm ? (int)$request->incoterm : null;
             $sale_order->origin = $request->origin ? (int)$request->origin : null;
@@ -721,36 +723,27 @@ class SaleOrderExportController extends Controller
                 'sale_order_export_id' => $request->sale_order_export_id,
                 'contract_no' => $request->contract_no,
                 'loading_date' => $request->loading_date,
+                'forme_no' => $request->forme_no ?? null,
                 'status' => 1
             ];
 
             $contractLoading = ContractLoading::create($data);
 
             // Save vehicles (multiple)
-            if ($request->vehicles) {
-                $vehicles = json_decode($request->vehicles, true);
-                foreach ($vehicles as $vehicle) {
-                    if (!empty($vehicle['vehicle_no']) || !empty($vehicle['name'])) {
-                        ContractLoadingVehicle::create([
-                            'contract_loading_id' => $contractLoading->id,
-                            'vehicle_no' => $vehicle['vehicle_no'] ?? null,
-                            'name' => $vehicle['name'] ?? null,
-                            'status' => 1
-                        ]);
-                    }
-                }
-            }
+         
 
-            // Save containers (multiple)
+         
             if ($request->containers) {
                 $containers = json_decode($request->containers, true);
                 foreach ($containers as $container) {
                     if (!empty($container['container_no']) || !empty($container['seal_no'])) {
                         ContractLoadingContainer::create([
                             'contract_loading_id' => $contractLoading->id,
+                            'item_id' => $container['container_item_select'] ?? null,
                             'container_no' => $container['container_no'] ?? null,
+                            'vehicle_no' => $container['vehicle_no'] ?? null,
                             'seal_no' => $container['seal_no'] ?? null,
-                            'status' => 1
+                            'quantity' => $container['quantity'] ?? null,
                         ]);
                     }
                 }

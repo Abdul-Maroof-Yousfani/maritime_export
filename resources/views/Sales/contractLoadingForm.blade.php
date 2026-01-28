@@ -99,18 +99,22 @@ $m = Session::get('run_company');
                                                                                     </td>
                                                                                 </tr>
                                                                                 <tr>
+                                                                                    <th style="width:25%;border:1px solid;padding:8px;">FORME No</th>
+                                                                                    <td style="width:25%;border:1px solid;padding:8px;">
+                                                                                        <input type="text" class="form-control" id="forme_no" style="background-color: #f5f5f5;">
+                                                                                    </td>
                                                                                     <th style="width:25%;border:1px solid;padding:8px;">Buyer Name</th>
                                                                                     <td style="width:25%;border:1px solid;padding:8px;" id="master_buyer_name">-</td>
+                                                                                   
+                                                                                </tr>
+                                                                                <tr>
                                                                                     <th style="width:25%;border:1px solid;padding:8px;">Port</th>
                                                                                     <td style="width:25%;border:1px solid;padding:8px;">
                                                                                         <input type="text" class="form-control" id="master_port" readonly style="background-color: #f5f5f5;">
                                                                                     </td>
-                                                                                </tr>
-                                                                                <tr>
                                                                                     <th style="border:1px solid;padding:8px;">Origin</th>
                                                                                     <td style="border:1px solid;padding:8px;" id="master_origin">-</td>
-                                                                                    <th style="border:1px solid;padding:8px;"></th>
-                                                                                    <td style="border:1px solid;padding:8px;"></td>
+                                                                                   
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <th style="border:1px solid;padding:8px;">Total Amount</th>
@@ -142,67 +146,10 @@ $m = Session::get('run_company');
                                                     
                                                     <div class="lineHeight">&nbsp;</div>
                                                     
-                                                    {{-- Vehicles Table --}}
-                                                    <div class="row">
-                                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                            <div class="panel">
-                                                                <div class="panel-body">
-                                                                    <h4 style="text-align: center; margin-bottom: 15px;"><u><b>VEHICLES</b></u></h4>
-                                                                    <div class="table-responsive">
-                                                                        <table class="table table-bordered" id="vehiclesTable">
-                                                                            <thead>
-                                                                                <tr>
-                                                                                    <th style="border:1px solid;padding:8px;">S.No</th>
-                                                                                    <th style="border:1px solid;padding:8px;">Vehicle No</th>
-                                                                                    <th style="border:1px solid;padding:8px;">Name</th>
-                                                                                    <th style="border:1px solid;padding:8px;">Action</th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody id="vehiclesTableBody">
-                                                                                <!-- Vehicles will be added here -->
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </div>
-                                                                    <button type="button" class="btn btn-sm btn-success" onclick="addVehicleRow()" style="margin-top: 10px;">
-                                                                        <i class="fa fa-plus"></i> Add Vehicle
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                 
                                                     
                                                     <div class="lineHeight">&nbsp;</div>
                                                     
-                                                    {{-- Containers Table --}}
-                                                    <div class="row">
-                                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                            <div class="panel">
-                                                                <div class="panel-body">
-                                                                    <h4 style="text-align: center; margin-bottom: 15px;"><u><b>CONTAINERS</b></u></h4>
-                                                                    <div class="table-responsive">
-                                                                        <table class="table table-bordered" id="containersTable">
-                                                                            <thead>
-                                                                                <tr>
-                                                                                    <th style="border:1px solid;padding:8px;">S.No</th>
-                                                                                    <th style="border:1px solid;padding:8px;">Container No</th>
-                                                                                    <th style="border:1px solid;padding:8px;">Seal No</th>
-                                                                                    <th style="border:1px solid;padding:8px;">Action</th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody id="containersTableBody">
-                                                                                <!-- Containers will be added here -->
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </div>
-                                                                    <button type="button" class="btn btn-sm btn-success" onclick="addContainerRow()" style="margin-top: 10px;">
-                                                                        <i class="fa fa-plus"></i> Add Container
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div class="lineHeight">&nbsp;</div>
                                                     
                                                     {{-- Items Table --}}
                                                     <div class="row">
@@ -228,6 +175,44 @@ $m = Session::get('run_company');
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    {{-- Containers Table --}}
+                                                    <div class="row">
+                                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            <div class="panel">
+                                                                <div class="panel-body">
+                                                                    <h4 style="text-align: center; margin-bottom: 15px;"><u><b>CONTAINERS & VEHICLES DETAIL</b></u></h4>
+                                                                    <div class="table-responsive">
+                                                                        <table class="table table-bordered" id="containersTable">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th colspan="6"></th>
+                                                                                    <th >
+                                                                                         <button type="button" class="btn btn-sm btn-success" onclick="addContainerVehicleRow()" style="margin-top: 10px;">
+                                                                                            <i class="fa fa-plus"></i> Add Container & Vehicle
+                                                                                        </button>
+                                                                                    </th>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th style="border:1px solid;padding:8px;">S.No</th>
+                                                                                    <th style="border:1px solid;padding:8px;">Item</th>
+                                                                                    <th style="border:1px solid;padding:8px;">Container No</th>
+                                                                                    <th style="border:1px solid;padding:8px;">Vehicle No</th>
+                                                                                    <th style="border:1px solid;padding:8px;">Seal No</th>
+                                                                                    <th style="border:1px solid;padding:8px;">Quantity</th>
+                                                                                    <th style="border:1px solid;padding:8px;text-align:center;">Action</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody id="containersTableBody">
+                                                                                <!-- Containers will be added here -->
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="lineHeight">&nbsp;</div>
                                                     
                                                     <div class="lineHeight">&nbsp;</div>
                                                     
@@ -265,6 +250,8 @@ $m = Session::get('run_company');
         </div>
     </div>
 </div>
+
+
 
 <script>
 $(document).ready(function() {
@@ -311,7 +298,7 @@ function loadApprovedContracts() {
         }
     });
 }
-
+let saleOrderItems = [];
 function loadExportOrderByOrderNo(orderNo) {
     $.ajax({
         url: '{{ url("/export/getExportOrderByOrderNo") }}',
@@ -342,6 +329,8 @@ function loadExportOrderByOrderNo(orderNo) {
                 // Populate items table
                 var itemsHtml = '';
                 if (response.sale_order_data && response.sale_order_data.length > 0) {
+                    saleOrderItems = response.sale_order_data || [];
+                    addContainerVehicleRow();
                     $.each(response.sale_order_data, function(index, item) {
                         var itemName = item.item_name || '-';
                         var itemSize = item.item_size || '-';
@@ -376,65 +365,9 @@ function loadExportOrderByOrderNo(orderNo) {
     });
 }
 
-// Vehicle row counter
-var vehicleRowCounter = 0;
 
-function addVehicleRow() {
-    vehicleRowCounter++;
-    var row = '<tr id="vehicle_row_' + vehicleRowCounter + '">' +
-        '<td style="border:1px solid;padding:8px;">' + vehicleRowCounter + '</td>' +
-        '<td style="border:1px solid;padding:8px;">' +
-        '<input type="text" class="form-control vehicle_no" name="vehicles[' + vehicleRowCounter + '][vehicle_no]" placeholder="Vehicle No">' +
-        '</td>' +
-        '<td style="border:1px solid;padding:8px;">' +
-        '<input type="text" class="form-control vehicle_name" name="vehicles[' + vehicleRowCounter + '][name]" placeholder="Name">' +
-        '</td>' +
-        '<td style="border:1px solid;padding:8px;text-align:center;">' +
-        '<button type="button" class="btn btn-sm btn-danger" onclick="removeVehicleRow(' + vehicleRowCounter + ')">' +
-        '<i class="fa fa-trash"></i> Remove' +
-        '</button>' +
-        '</td>' +
-        '</tr>';
-    $('#vehiclesTableBody').append(row);
-}
 
-function removeVehicleRow(rowId) {
-    $('#vehicle_row_' + rowId).remove();
-    // Renumber rows
-    $('#vehiclesTableBody tr').each(function(index) {
-        $(this).find('td:first').text(index + 1);
-    });
-}
 
-// Container row counter
-var containerRowCounter = 0;
-
-function addContainerRow() {
-    containerRowCounter++;
-    var row = '<tr id="container_row_' + containerRowCounter + '">' +
-        '<td style="border:1px solid;padding:8px;">' + containerRowCounter + '</td>' +
-        '<td style="border:1px solid;padding:8px;">' +
-        '<input type="text" class="form-control container_no" name="containers[' + containerRowCounter + '][container_no]" placeholder="Container No">' +
-        '</td>' +
-        '<td style="border:1px solid;padding:8px;">' +
-        '<input type="text" class="form-control seal_no" name="containers[' + containerRowCounter + '][seal_no]" placeholder="Seal No">' +
-        '</td>' +
-        '<td style="border:1px solid;padding:8px;text-align:center;">' +
-        '<button type="button" class="btn btn-sm btn-danger" onclick="removeContainerRow(' + containerRowCounter + ')">' +
-        '<i class="fa fa-trash"></i> Remove' +
-        '</button>' +
-        '</td>' +
-        '</tr>';
-    $('#containersTableBody').append(row);
-}
-
-function removeContainerRow(rowId) {
-    $('#container_row_' + rowId).remove();
-    // Renumber rows
-    $('#containersTableBody tr').each(function(index) {
-        $(this).find('td:first').text(index + 1);
-    });
-}
 
 function submitContractLoading() {
     // Collect layer data
@@ -451,28 +384,22 @@ function submitContractLoading() {
         });
     });
     
-    // Collect vehicles data
-    var vehicles = [];
-    $('#vehiclesTableBody tr').each(function() {
-        var vehicleNo = $(this).find('.vehicle_no').val();
-        var name = $(this).find('.vehicle_name').val();
-        if (vehicleNo || name) {
-            vehicles.push({
-                vehicle_no: vehicleNo,
-                name: name
-            });
-        }
-    });
     
     // Collect containers data
     var containers = [];
     $('#containersTableBody tr').each(function() {
+        var container_item_select = $(this).find('.container_item_select option:selected').val();
         var containerNo = $(this).find('.container_no').val();
+        var vehicleNo = $(this).find('.vehicle_no').val();
         var sealNo = $(this).find('.seal_no').val();
+        var containerQuantity = $(this).find('.container_quantity').val();
         if (containerNo || sealNo) {
             containers.push({
+                container_item_select: container_item_select,
                 container_no: containerNo,
-                seal_no: sealNo
+                vehicle_no: vehicleNo,
+                seal_no: sealNo,
+                quantity: containerQuantity
             });
         }
     });
@@ -481,8 +408,8 @@ function submitContractLoading() {
     var formData = new FormData();
     formData.append('sale_order_export_id', $('#sale_order_export_id').val());
     formData.append('contract_no', $('#order_no').find('option:selected').data('contract-no') || '');
+    formData.append('forme_no', $('#forme_no').val());
     formData.append('loading_date', $('#loading_date').val());
-    formData.append('vehicles', JSON.stringify(vehicles));
     formData.append('containers', JSON.stringify(containers));
     formData.append('layers', JSON.stringify(layers));
     
@@ -525,6 +452,57 @@ function submitContractLoading() {
             }
             alert(errorMsg);
         }
+    });
+}
+
+// Container & Vehicle Details row counter
+let containerVehicleRowCounter = 0;
+
+function addContainerVehicleRow() {
+    containerVehicleRowCounter++;
+    let optionsHtml = '<option value="">Select Item</option>';
+
+    $.each(saleOrderItems, function (index, item) {
+        let itemName = item.item_name || '-';
+        optionsHtml += `<option value="${item.item_id}">${itemName}</option>`;
+    });
+    const row = `
+        <tr id="container_vehicle_row_${containerVehicleRowCounter}">
+            <td style="border:1px solid;padding:8px;">${containerVehicleRowCounter}</td>
+            <td style="border:1px solid;padding:8px;">
+                <select class="form-control select2 container_item_select"
+                    name="items[${containerVehicleRowCounter}][item]" required>
+                    ${optionsHtml}
+                </select>
+            </td>
+            <td style="border:1px solid;padding:8px;">
+                <input type="text" class="form-control container_no" name="items[${containerVehicleRowCounter}][container_no]" placeholder="Container No" required>
+            </td>
+            <td style="border:1px solid;padding:8px;">
+                <input type="text" class="form-control vehicle_no" name="items[${containerVehicleRowCounter}][vehicle_no]" placeholder="Vehicle No" required>
+            </td>
+            <td style="border:1px solid;padding:8px;">
+                <input type="text" class="form-control seal_no" name="items[${containerVehicleRowCounter}][seal_no]" placeholder="Seal No" required>
+            </td>
+            <td style="border:1px solid;padding:8px;">
+                <input type="number" class="form-control container_quantity" name="items[${containerVehicleRowCounter}][quantity]" placeholder="Quantity" step="0.01" min="0" required>
+            </td>
+            <td style="border:1px solid;padding:8px;text-align:center;">
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeContainerVehicleRow(${containerVehicleRowCounter})">
+                    <i class="fa fa-trash"></i> Remove
+                </button>
+            </td>
+        </tr>
+    `;
+    $('#containersTableBody').append(row);
+    $('.select2').select2();
+}
+
+function removeContainerVehicleRow(rowId) {
+    $(`#container_vehicle_row_${rowId}`).remove();
+    // Renumber rows
+    $('#containersTableBody tr').each(function(index) {
+        $(this).find('td:first').text(index + 1);
     });
 }
 </script>

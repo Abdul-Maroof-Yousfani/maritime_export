@@ -12,10 +12,8 @@ $counter = 1;
     <td>{{$item->contract_no ?? '-'}}</td>  
     <td>{{$item->voucehr_no ?? '-'}}</td>     
     <td>{{ $item->loading_date ?? '-'}}</td>  
-    <td>{{ $item->vehicle_no ?? '-'}}</td>  
-    <td>{{ $item->name ?? '-'}}</td>  
-    <td>{{ $item->container_no ?? '-'}}</td>  
-    <td>{{ $item->seal_no ?? '-'}}</td>
+    <td>{{ $item->forme_no ?? '-'}}</td>  
+
     <td style="text-align: right;">{{ number_format($item->total_amount ?? 0, 2) }} {{ $item->currency_name ?? '' }}</td>
     <td style="text-align: right;">{{ number_format($item->total_amount_pkr ?? 0, 2) }} PKR</td>  
     <td class="text-center">

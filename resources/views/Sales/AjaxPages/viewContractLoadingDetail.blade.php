@@ -62,6 +62,11 @@ textarea{border-style:none;border-color:Transparent;}
                                 @endif
                             </td>
                         </tr>
+                         <tr>
+                            <th style="width:25%;border:1px solid">FORME No</th>
+                            <td style="width:25%;border:1px solid">{{ $contract_loading->forme_no ?? '-' }}</td>
+                           
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -69,65 +74,9 @@ textarea{border-style:none;border-color:Transparent;}
     </div>
 
     {{-- Vehicles Table --}}
-    @if(isset($contract_loading->vehicles) && $contract_loading->vehicles->count() > 0)
-    <div class="row" style="margin-top: 20px;">
-        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <h4 style="text-align: center; margin-bottom: 15px;"><u><b>VEHICLES</b></u></h4>
-            <div class="table-reponsive">
-                <table class="table" style="width:100%;border:1px solid">
-                    <thead>
-                        <tr>
-                            <th style="border:1px solid;text-align:center;">S.No</th>
-                            <th style="border:1px solid;text-align:center;">Vehicle No</th>
-                            <th style="border:1px solid;text-align:center;">Name</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php $count = 1; @endphp
-                        @foreach($contract_loading->vehicles as $vehicle)
-                        <tr>
-                            <td style="border:1px solid;text-align:center;">{{ $count++ }}</td>
-                            <td style="border:1px solid;">{{ $vehicle->vehicle_no ?? '-' }}</td>
-                            <td style="border:1px solid;">{{ $vehicle->name ?? '-' }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    @endif
+   
 
-    {{-- Containers Table --}}
-    @if(isset($contract_loading->containers) && $contract_loading->containers->count() > 0)
-    <div class="row" style="margin-top: 20px;">
-        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <h4 style="text-align: center; margin-bottom: 15px;"><u><b>CONTAINERS</b></u></h4>
-            <div class="table-reponsive">
-                <table class="table" style="width:100%;border:1px solid">
-                    <thead>
-                        <tr>
-                            <th style="border:1px solid;text-align:center;">S.No</th>
-                            <th style="border:1px solid;text-align:center;">Container No</th>
-                            <th style="border:1px solid;text-align:center;">Seal No</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php $count = 1; @endphp
-                        @foreach($contract_loading->containers as $container)
-                        <tr>
-                            <td style="border:1px solid;text-align:center;">{{ $count++ }}</td>
-                            <td style="border:1px solid;">{{ $container->container_no ?? '-' }}</td>
-                            <td style="border:1px solid;">{{ $container->seal_no ?? '-' }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    @endif
-
+    
     {{-- Export Order Items Detail Table --}}
     @if(isset($sale_order_data) && $sale_order_data->count() > 0)
     <div class="row" style="margin-top: 20px;">
@@ -166,6 +115,43 @@ textarea{border-style:none;border-color:Transparent;}
         </div>
     </div>
     @endif
+
+    {{-- Containers Table --}}
+    @if(isset($contract_loading->containers) && $contract_loading->containers->count() > 0)
+    <div class="row" style="margin-top: 20px;">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h4 style="text-align: center; margin-bottom: 15px;"><u><b>CONTAINERS & VEHICLES DETAIL</b></u></h4>
+            <div class="table-reponsive">
+                <table class="table" style="width:100%;border:1px solid">
+                    <thead>
+                        <tr>
+                            <th style="border:1px solid;padding:8px;">S.No</th>
+                            <th style="border:1px solid;padding:8px;">Item</th>
+                            <th style="border:1px solid;padding:8px;">Container No</th>
+                            <th style="border:1px solid;padding:8px;">Vehicle No</th>
+                            <th style="border:1px solid;padding:8px;">Seal No</th>
+                            <th style="border:1px solid;padding:8px;">Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php $count = 1; @endphp
+                        @foreach($contract_loading->containers as $container)
+                        <tr>
+                            <td style="border:1px solid;text-align:center;">{{ $count++ }}</td>
+                            <td style="border:1px solid;">{{ CommonHelper::get_item_name($container->item_id) ?? '-' }}</td>
+                            <td style="border:1px solid;">{{ $container->container_no ?? '-' }}</td>
+                            <td style="border:1px solid;">{{ $container->vehicle_no ?? '-' }}</td>
+                            <td style="border:1px solid;">{{ $container->seal_no ?? '-' }}</td>
+                            <td style="border:1px solid;">{{ $container->quantity ?? '-' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @endif
+
 
     {{-- Total Amount Section --}}
     <div class="row" style="margin-top: 20px;">

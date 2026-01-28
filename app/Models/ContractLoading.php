@@ -11,6 +11,7 @@ class ContractLoading extends Model
 
     protected $fillable = [
         'loading_no',
+        'forme_no',
         'sale_order_export_id',
         'contract_no',
         'loading_date',
@@ -41,9 +42,5 @@ class ContractLoading extends Model
         return $this->hasMany(ContractLoadingContainer::class, 'contract_loading_id')->where('status', 1);
     }
 
-    public function vehicles()
-    {
-        return $this->hasMany(ContractLoadingVehicle::class, 'contract_loading_id')->where('status', 1);
-    }
 }
 

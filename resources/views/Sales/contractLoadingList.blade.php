@@ -69,10 +69,8 @@ $AccYearTo = $AccYearDate->accyearto;
                                                     <th>Contract No</th>
                                                     <th>Export Order No</th>
                                                     <th>Loading Date</th>
-                                                    <th>Vehicle No</th>
-                                                    <th>Name</th>
-                                                    <th>Container No</th>
-                                                    <th>Seal No</th>
+                                                    <th>FORME No</th>
+                                                    
                                                     <th>Total Amount</th>
                                                     <th>Total Amount (PKR)</th>
                                                     <th>Action</th>
