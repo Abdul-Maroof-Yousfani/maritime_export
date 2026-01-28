@@ -218,6 +218,24 @@ use App\Helpers\CommonHelper;
     .attachment-remove-btn:hover {
         background-color: #c82333;
     }
+
+    /* Adjust layout for Total Amount and Total Amount in PKR fields */
+    .form-row .form-group {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        width: 50%;
+    }
+
+    .form-row .form-group input {
+        text-align: right;
+        width: 100%;
+    }
+
+    .form-row .form-group label {
+        text-align: right;
+        width: 100%;
+    }
 </style>
 
 <div class="container-fluid">
@@ -418,37 +436,12 @@ use App\Helpers\CommonHelper;
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label">Grade</label>
-                                    <select class="form-control select2" name="grade" id="grade">
-                                        <option value="">Select Grade</option>
-                                        @foreach ($grades as $grade)
-                                            <option value="{{ $grade->id }}">{{ $grade->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Size</label>
-                                    <select class="form-control select2" name="size" id="size">
-                                        <option value="">Select Size</option>
-                                        @foreach ($sizes as $size)
-                                            <option value="{{ $size->id }}">{{ $size->name }}</option>
-                                        @endforeach
-                                    </select>
+                               <div class="form-group">
+                                    <label class="form-label">Tolerance percentage(%)</label>
+                                    <input type="text" class="form-control" name="tolerance_percentage" id="tolerance_percentage" />
                                 </div>
                             </div>
                             
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Packing</label>
-                                    <select class="form-control select2" name="packing" id="packing">
-                                        <option value="">Select Packing</option>
-                                        @foreach ($packings as $packing)
-                                            <option value="{{ $packing->id }}">{{ $packing->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
                             
                             <!-- Attachments Section -->
                             <div class="form-row">
@@ -492,7 +485,7 @@ use App\Helpers\CommonHelper;
                                                 <tr>
                                                     <th class="text-center" style="width: 25%; min-width: 250px;">Item Name</th>
                                                     <th class="text-center" style="width: 12%; min-width: 120px;">Item Size</th>
-                                                    <th class="text-center" style="width: 10%; min-width: 100px;">Quality</th>
+                                                    <th class="text-center" style="width: 10%; min-width: 100px;">Grades</th>
                                                     <th class="text-center" style="width: 10%; min-width: 100px;">UOM</th>
                                                     <th class="text-center" style="width: 10%; min-width: 100px;">HS Code</th>
                                                     <th class="text-center" style="width: 10%; min-width: 100px;">Pack UOM</th>
@@ -592,16 +585,16 @@ use App\Helpers\CommonHelper;
                             
                             <!-- Total Amount -->
                             <div class="form-row">
-                                <div class="form-group" style="flex: 1 1 50%; padding-right: 10px;">
+                                <div class="form-group">
                                     <label class="form-label" style="font-size: 16px;">Total Amount</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" name="total_amount" id="total_amount" value="0.00" readonly style="text-align: right; font-weight: bold;" />
+                                        <input type="text" class="form-control" name="total_amount" id="total_amount_cuurency" value="0.00" readonly style="text-align: right; font-weight: bold;" />
                                         <span class="input-group-addon" id="currencySymbolWrapper">
                                             <span id="currencySymbol"></span>
                                         </span>
                                     </div>
                                 </div>
-                                <div class="form-group" style="flex: 1 1 50%; padding-left: 10px;">
+                                <div class="form-group">
                                     <label class="form-label" style="font-size: 16px;">Total Amount in PKR</label>
                                     <input type="text" class="form-control" name="total_amount_pkr" id="total_amount_pkr" value="0.00" readonly style="text-align: right; font-weight: bold;" />
                                 </div>
@@ -683,7 +676,7 @@ use App\Helpers\CommonHelper;
         $('.select2').select2();
         
         // Initialize total amount fields
-        $('#total_amount').val('0.00');
+        $('#total_amount_cuurency').val('0.00');
         $('#total_amount_pkr').val('0.00');
         
         // Set currency ID when currency is selected
@@ -699,8 +692,7 @@ use App\Helpers\CommonHelper;
         // Show remove button if more than one row
         updateRemoveButtons();
         
-        // Initial calculation
-        calculateTotal();
+      
     });
     
     function loadCustomerDetails() {
@@ -1016,21 +1008,15 @@ use App\Helpers\CommonHelper;
             total += amountValue;
         });
 
+        console.log('Calculated total before formatting:', total);
         // Set total amount in selected currency
         const formattedTotal = parseFloat(total.toFixed(2));
-        const formattedTotalStr = formattedTotal.toFixed(2);
         
         // Update total amount field
-        const totalAmountField = $('#total_amount');
-        totalAmountField.val(formattedTotalStr);
+        $('#total_amount_cuurency').val(total.toFixed(2));
         
         // Force update display by triggering events
-        totalAmountField.trigger('input').trigger('change');
-        
-        // Ensure visibility
-        if (totalAmountField.is(':visible')) {
-            totalAmountField.focus().blur(); // Force repaint
-        }
+      
 
         // Calculate PKR amount using exchange rate (for any currency)
         const currencyRate = parseFloat($('#currency_rate').val()) || 1;
@@ -1039,7 +1025,6 @@ use App\Helpers\CommonHelper;
         $('#total_amount_pkr').val(formattedPKR);
         
         // Debug: log to console (can be removed later)
-        console.log('Total Amount:', formattedTotalStr, 'Currency Rate:', currencyRate, 'Total PKR:', formattedPKR);
     }
 </script>
 

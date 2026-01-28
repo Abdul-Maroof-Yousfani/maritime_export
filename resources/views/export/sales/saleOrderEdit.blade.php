@@ -422,36 +422,12 @@ use App\Helpers\CommonHelper;
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Grade</label>
-                                    <select class="form-control select2" name="grade" id="grade">
-                                        <option value="">Select Grade</option>
-                                        @foreach ($grades as $grade)
-                                            <option value="{{ $grade->id }}" {{ $exportOrder->grade == $grade->id ? 'selected' : '' }}>{{ $grade->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Size</label>
-                                    <select class="form-control select2" name="size" id="size">
-                                        <option value="">Select Size</option>
-                                        @foreach ($sizes as $size)
-                                            <option value="{{ $size->id }}" {{ $exportOrder->size == $size->id ? 'selected' : '' }}>{{ $size->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <label class="form-label">Tolerance percentage(%)</label>
+                                    <input type="text" class="form-control" id="tolerance_percentage" name="tolerance_percentage" value="{{ $exportOrder->tolerance_percentage }}" />
                                 </div>
                             </div>
                             
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Packing</label>
-                                    <select class="form-control select2" name="packing" id="packing">
-                                        <option value="">Select Packing</option>
-                                        @foreach ($packings as $packing)
-                                            <option value="{{ $packing->id }}" {{ $exportOrder->packing == $packing->id ? 'selected' : '' }}>{{ $packing->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
+                           
                             
                             <!-- Attachments Section -->
                             <div class="form-row">
@@ -495,7 +471,7 @@ use App\Helpers\CommonHelper;
                                                 <tr>
                                                     <th class="text-center" style="width: 25%; min-width: 250px;">Item Name</th>
                                                     <th class="text-center" style="width: 12%; min-width: 120px;">Item Size</th>
-                                                    <th class="text-center" style="width: 10%; min-width: 100px;">Quality</th>
+                                                    <th class="text-center" style="width: 10%; min-width: 100px;">Grades</th>
                                                     <th class="text-center" style="width: 10%; min-width: 100px;">UOM</th>
                                                     <th class="text-center" style="width: 10%; min-width: 100px;">HS Code</th>
                                                     <th class="text-center" style="width: 10%; min-width: 100px;">Pack UOM</th>

@@ -348,9 +348,9 @@ class SaleOrderExportController extends Controller
             $sale_order->incoterm = $request->incoterm ? (int)$request->incoterm : null;
             $sale_order->origin = $request->origin ? (int)$request->origin : null;
             $sale_order->port = $request->port ? (int)$request->port : null;
-            $sale_order->grade = $request->grade ? (int)$request->grade : null;
-            $sale_order->size = $request->size ? (int)$request->size : null;
-            $sale_order->packing = $request->packing ? (int)$request->packing : null;
+            $sale_order->grade = null;// $request->grade ? (int)$request->grade : null;
+            $sale_order->size = null;// $request->size ? (int)$request->size : null;
+            $sale_order->packing = null;// $request->packing ? (int)$request->packing : null;
             $sale_order->bank = $request->beneficiary_bank ?? 1;
             $sale_order->proforma_status = 0;
             $sale_order->is_advance = $request->is_advance ?? 0;
