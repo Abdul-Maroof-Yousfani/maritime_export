@@ -27,10 +27,16 @@ $counter = 1;
         <div style="display: flex; justify-content: center; gap: 5px; align-items: center;">
             @if ($view)
             <a href="javascript:void(0)" 
-               onclick="showDetailModelOneParamerter('export/viewPackingList',{{ $item->id}},'View Packing List')" 
+               onclick="var url='export/viewPackingListDetail'; showDetailModelOneParamerter(url,{{ $item->id}},'View Packing List');" 
                title="View" 
                style="display: inline-block; width: 32px; height: 32px; background-color: #28a745; border-radius: 4px; text-align: center; line-height: 32px; cursor: pointer; text-decoration: none;">
                 <i class="fa fa-eye" style="color: white; font-size: 14px;"></i>
+            </a>
+            <a href="{{ url('/export/viewPackingListDetailPrint') }}?id={{ $item->id }}" 
+               target="_blank"
+               title="View & Print" 
+               style="display: inline-block; width: 32px; height: 32px; background-color: #17a2b8; border-radius: 4px; text-align: center; line-height: 32px; cursor: pointer; text-decoration: none;">
+                <i class="fa fa-print" style="color: white; font-size: 14px;"></i>
             </a>
             @endif
             @if($edit)

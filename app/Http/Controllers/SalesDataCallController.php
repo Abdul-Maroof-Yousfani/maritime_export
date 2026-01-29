@@ -524,24 +524,27 @@ class SalesDataCallController extends Controller
         $ClientId = $_GET['ClientId'];
         $m = $_GET['m'];
 
-
-        $Invoice = new SalesTaxInvoice();
-        $Invoice = $Invoice->SetConnection('mysql2');
+        // Changed from SalesTaxInvoice to CommercialInvoice
+        $Invoice = DB::Connection('mysql2')->table('commercial_invoices')
+            ->join('sale_order_exports', 'sale_order_exports.id', '=', 'commercial_invoices.sale_order_export_id')
+            ->where('commercial_invoices.status', 1)
+            ->select('commercial_invoices.*', 'sale_order_exports.buyer_id');
 
         if($ClientId !="")
         {
-            $Invoice = $Invoice->where('status',1)->where('buyers_id',$ClientId)->get();
+            $Invoice = $Invoice->where('sale_order_exports.buyer_id', $ClientId)->get();
         }
         else
         {
-            $Invoice = $Invoice->where('status',1)->get();
+            $Invoice = $Invoice->get();
         }
+        
         $client = new Customer();
         $client = $client->SetConnection('mysql2');
         $client = $client->where('status',1)->get();
 
         
-        return view('Sales.AjaxPages.getRecieptDataClientWise', compact('Invoice','client','ClientId','m'));
+        return view('Sales.AjaxPages.getRecieptDataClientWiseCommercial', compact('Invoice','client','ClientId','m'));
 
     }
 

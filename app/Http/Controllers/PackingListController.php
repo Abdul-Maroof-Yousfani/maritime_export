@@ -195,12 +195,14 @@ class PackingListController extends Controller
     {
         $id = $request->id;
 
+       
         $packingList = PackingList::with(['commercialInvoice.contractLoading.containers', 'packingListData'])
             ->where('id', $id)
+            ->where('status', 1)
             ->first();
 
         if (!$packingList) {
-            return response()->json(['error' => 'Packing list not found'], 404);
+            return response('<div class="alert alert-danger">Packing list not found</div>', 404);
         }
 
         // Get containers grouped by item_id
@@ -216,6 +218,41 @@ class PackingListController extends Controller
         }
 
         return view('Sales.AjaxPages.viewPackingList', compact('packingList', 'containersByItem'));
+    }
+
+    /**
+     * View packing list for printing
+     */
+    public function viewPackingListPrint(Request $request)
+    {
+        $id = $request->id;
+
+        if (!$id) {
+            return redirect()->route('packingListList')->with('error', 'Packing list ID is required');
+        }
+
+        $packingList = PackingList::with(['commercialInvoice.contractLoading.containers', 'packingListData'])
+            ->where('id', $id)
+            ->where('status', 1)
+            ->first();
+
+        if (!$packingList) {
+            return redirect()->route('packingListList')->with('error', 'Packing list not found');
+        }
+
+        // Get containers grouped by item_id
+        $containersByItem = [];
+        if ($packingList->commercialInvoice && $packingList->commercialInvoice->contractLoading && $packingList->commercialInvoice->contractLoading->containers) {
+            foreach ($packingList->commercialInvoice->contractLoading->containers as $container) {
+                $itemId = $container->item_id;
+                if (!isset($containersByItem[$itemId])) {
+                    $containersByItem[$itemId] = [];
+                }
+                $containersByItem[$itemId][] = $container;
+            }
+        }
+
+        return view('Sales.viewPackingListPrint', compact('packingList', 'containersByItem'));
     }
 
     /**

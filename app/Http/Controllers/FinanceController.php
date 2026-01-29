@@ -1499,6 +1499,24 @@ class FinanceController extends Controller
 
 	}
 
+	public function CreateReceiptVoucherForCommercialInvoice(Request $request)
+	{
+		$val=$request->checkbox;
+
+		$accounts = new Account;
+		$accounts=$accounts->SetConnection('mysql2');
+		$accounts = $accounts->where('status',1)->select('id','name','code')->orderBy('level1', 'ASC')
+			->orderBy('level2', 'ASC')
+			->orderBy('level3', 'ASC')
+			->orderBy('level4', 'ASC')
+			->orderBy('level5', 'ASC')
+			->orderBy('level6', 'ASC')
+			->orderBy('level7', 'ASC')
+			->get();
+		
+		return view('Finance.CreateCommercialInvoiceReceipt',compact('accounts','val'));
+	}
+
 	public function viewOutstanding_bills_through_jvs()
 	{
 		$supplier= new Supplier();

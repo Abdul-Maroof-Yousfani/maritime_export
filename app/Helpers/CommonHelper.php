@@ -541,16 +541,13 @@ class CommonHelper
     {
         $current_date = date('d-m-Y');
         ?>
-        <div class="row">
+        <div class="row" style="display: flex; align-items: center;">
             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-4">
                 <label style="border-bottom:2px solid #000 !important;">Printed On Date&nbsp;:&nbsp;</label><label style="border-bottom:2px solid #000 !important;"><?php echo static::changeDateFormat($current_date); ?></label>
             </div>
-            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-5">
-                <div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-center" style="font-size: 30px !important; font-style: inherit;
-font-family: -webkit-body; font-weight: bold;">
-                        <?php echo static::getCompanyName(Session::get('run_company')); ?>
-                    </div>
+            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-5" style="text-align: center; display: flex; justify-content: center; align-items: center;">
+                <div style="font-size: 30px !important; font-style: inherit; font-family: -webkit-body; font-weight: bold; text-align: center; width: 100%;">
+                    <?php echo static::getCompanyName(Session::get('run_company')); ?>
                 </div>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-right">

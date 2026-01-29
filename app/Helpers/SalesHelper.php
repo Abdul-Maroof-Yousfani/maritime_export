@@ -498,6 +498,12 @@ class SalesHelper
         return DB::Connection('mysql2')->selectOne('select sum(received_amount)amount from  received_paymet where sales_tax_invoice_id='.$id.' and status = 1')->amount;
     }
 
+    public static function get_received_payment_commercial_invoice($id)
+    {
+        $result = DB::Connection('mysql2')->selectOne('select sum(received_amount)amount from  received_paymet where commercial_invoice_id='.$id.' and status = 1');
+        return $result ? $result->amount : 0;
+    }
+
     public static function get_received_payment_for_pos($id)
     {
         return DB::Connection('mysql2')->selectOne('select sum(received_amount)amount from  received_paymet where pos_id='.$id.' and status = 1')->amount;

@@ -55,7 +55,7 @@ $m =Session::get('run_company');
     <script type="text/javascript">
         function viewPackingList(){
             $('#viewPackingList').html('<tr><td colspan="4"><div class="row"><div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-center"><div class="loader"></div></div></div></div></td><tr>');
-            var m = '<?php echo $m =Session::get('run_company');?>';
+            var m = '{{$m}}';
             html ='';
             var counter =1;
             $.ajax({

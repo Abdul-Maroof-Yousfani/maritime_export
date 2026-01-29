@@ -397,7 +397,7 @@ CommonHelper::reconnectMasterDatabase();
             ?>
         var pageType = '<?php echo $_GET['pageType']; ?>';
         var parentCode = '<?php echo $_GET['parentCode']; ?>';
-        var m = '<?php echo $_GET['m']; ?>';
+        var m = '<?php echo Session::get('run_company'); ?>';
             <?php
         }else{
             ?>
@@ -449,7 +449,7 @@ CommonHelper::reconnectMasterDatabase();
             ?>
         var pageType = '<?php echo $_GET['pageType']; ?>';
         var parentCode = '<?php echo $_GET['parentCode']; ?>';
-        var m = '<?php echo $_GET['m']; ?>';
+        var m = '<?php echo Session::get('run_company'); ?>';
             <?php
         }else{
             ?>
@@ -462,7 +462,7 @@ CommonHelper::reconnectMasterDatabase();
 
 
         $.ajax({
-            url: '<?php echo url('/'); ?>/' + url + '',
+            url: '<?php echo url('/'); ?>/' + url + '?t=' + new Date().getTime(),
             type: "GET",
             data: {
                 id: id,
@@ -472,6 +472,7 @@ CommonHelper::reconnectMasterDatabase();
                 EmailPrintSetting: EmailPrintSetting,
                 type: type
             },
+            cache: false,
             success: function(data) {
 
                 jQuery('#showDetailModelOneParamerter').modal('show', {
@@ -542,7 +543,7 @@ CommonHelper::reconnectMasterDatabase();
             ?>
         var pageType = '<?php echo $_GET['pageType']; ?>';
         var parentCode = '<?php echo $_GET['parentCode']; ?>';
-        var m = '<?php echo $_GET['m']; ?>';
+        var m = '<?php echo Session::get('run_company'); ?>';
             <?php
         }else{
             ?>
@@ -589,7 +590,7 @@ CommonHelper::reconnectMasterDatabase();
         {?>
         var pageType = '<?php echo $_GET['pageType']; ?>';
         var parentCode = '<?php echo $_GET['parentCode']; ?>';
-        var m = '<?php echo $_GET['m']; ?>';
+        var m = '<?php echo Session::get('run_company'); ?>';
             <?php
         }else{?>
         var pageType = true;
@@ -626,7 +627,7 @@ CommonHelper::reconnectMasterDatabase();
             ?>
         var pageType = '<?php echo $_GET['pageType']; ?>';
         var parentCode = '<?php echo $_GET['parentCode']; ?>';
-        var m = '<?php echo $_GET['m']; ?>';
+        var m = '<?php echo Session::get('run_company'); ?>';
             <?php
         }else{
             ?>
@@ -672,7 +673,7 @@ CommonHelper::reconnectMasterDatabase();
             ?>
         var pageType = '<?php echo $_GET['pageType']; ?>';
         var parentCode = '<?php echo $_GET['parentCode']; ?>';
-        var m = '<?php echo $_GET['m']; ?>';
+        var m = '<?php echo Session::get('run_company'); ?>';
             <?php
         }else{
             ?>

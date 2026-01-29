@@ -340,6 +340,7 @@ Route::group(['prefix' => 'finance', 'middleware' => 'mysql2', 'before' => 'csrf
     Route::get('/viewOutstanding_bills_through_jvs', 'FinanceController@viewOutstanding_bills_through_jvs');
     //for sales receipt voucher
     Route::post('/CreateReceiptVoucherForSales/{id?}', 'FinanceController@CreateReceiptVoucherForSales');
+    Route::post('/CreateReceiptVoucherForCommercialInvoice', 'FinanceController@CreateReceiptVoucherForCommercialInvoice');
 
     Route::get('/viewBookDay', 'FinanceController@viewBookDay');
     //end amir
@@ -362,6 +363,7 @@ Route::group(['prefix' => 'fad', 'middleware' => 'mysql2', 'before' => 'csrf'], 
     Route::post('/addPaidTo', 'FinanceAddDetailControler@addPaidTo');
     Route::post('/add_role', 'FinanceAddDetailControler@add_role');
     Route::post('/addSalesReceipt', 'FinanceAddDetailControler@addSalesReceipt');
+    Route::post('/addCommercialInvoiceReceipt', 'FinanceAddDetailControler@addCommercialInvoiceReceipt');
     Route::post('/addJournalVoucherDetail', 'FinanceAddDetailControler@addJournalVoucherDetail');
     Route::post('/updateJournalVoucherDetail', 'FinanceEditDetailControler@updateJournalVoucherDetail');
     //amir
@@ -814,7 +816,9 @@ Route::group(['prefix' => 'export', 'middleware' => 'mysql2', 'before' => 'csrf'
     Route::get('/getCommercialInvoiceDetailsForPackingList', 'PackingListController@getCommercialInvoiceDetailsForPackingList')->name('getCommercialInvoiceDetailsForPackingList');
     Route::post('/storePackingList', 'PackingListController@storePackingList')->name('storePackingList');
     Route::get('/getPackingListFilter', 'PackingListController@getPackingListFilter')->name('getPackingListFilter');
-    Route::get('/viewPackingList', 'PackingListController@viewPackingList')->name('viewPackingList');
+    // Use distinct URLs to avoid conflict with PackingController routes
+    Route::get('/viewPackingListDetail', 'PackingListController@viewPackingList')->name('viewPackingListDetail');
+    Route::get('/viewPackingListDetailPrint', 'PackingListController@viewPackingListPrint')->name('viewPackingListDetailPrint');
     Route::get('/editPackingList', 'PackingListController@editPackingList')->name('editPackingList');
     Route::post('/updatePackingList', 'PackingListController@updatePackingList')->name('updatePackingList');
     Route::get('/deletePackingList', 'PackingListController@deletePackingList')->name('deletePackingList');

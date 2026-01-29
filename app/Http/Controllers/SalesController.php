@@ -1056,9 +1056,10 @@ class SalesController extends Controller
     public function CreateReceiptVoucherList()
     {
         $Customer = DB::Connection('mysql2')->table('customers')->where('status', 1)->get();
-        $SiMaster = DB::Connection('mysql2')->table('sales_tax_invoice')->where('status', 1)->get();
+        // Changed from sales_tax_invoice to commercial_invoices
+        $CommercialInvoices = DB::Connection('mysql2')->table('commercial_invoices')->where('status', 1)->get();
 
-        return view('Sales.CreateReceiptVoucherList', compact('Customer', 'SiMaster'));
+        return view('Sales.CreateReceiptVoucherList', compact('Customer', 'CommercialInvoices'));
     }
     public function receiptVoucherList()
     {
