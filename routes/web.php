@@ -807,7 +807,17 @@ Route::group(['prefix' => 'export', 'middleware' => 'mysql2', 'before' => 'csrf'
     Route::get('/viewCommercialInvoice/{id?}', 'SaleOrderExportController@viewCommercialInvoice')->name('viewCommercialInvoice');
     Route::get('/deleteCommercialInvoice', 'SaleOrderExportController@deleteCommercialInvoice')->name('deleteCommercialInvoice');
 
-
+    // Packing List Routes
+    Route::get('/createPackingList', 'PackingListController@createPackingList')->name('createPackingList');
+    Route::get('/packingListList', 'PackingListController@packingListList')->name('packingListList');
+    Route::get('/getCommercialInvoicesForPackingList', 'PackingListController@getCommercialInvoicesForPackingList')->name('getCommercialInvoicesForPackingList');
+    Route::get('/getCommercialInvoiceDetailsForPackingList', 'PackingListController@getCommercialInvoiceDetailsForPackingList')->name('getCommercialInvoiceDetailsForPackingList');
+    Route::post('/storePackingList', 'PackingListController@storePackingList')->name('storePackingList');
+    Route::get('/getPackingListFilter', 'PackingListController@getPackingListFilter')->name('getPackingListFilter');
+    Route::get('/viewPackingList', 'PackingListController@viewPackingList')->name('viewPackingList');
+    Route::get('/editPackingList', 'PackingListController@editPackingList')->name('editPackingList');
+    Route::post('/updatePackingList', 'PackingListController@updatePackingList')->name('updatePackingList');
+    Route::get('/deletePackingList', 'PackingListController@deletePackingList')->name('deletePackingList');
 
     // Rate conversion
     Route::get('/viewRateList', 'CurrencyRateController@viewRateList')->name('viewRateList');

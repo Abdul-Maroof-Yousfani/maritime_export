@@ -176,6 +176,38 @@ class SalesHelper
         return $prefix . $sequential;
     }
 
+    public static function get_unique_packing_list_no()
+    {
+        $currentYearLastTwoDigits = date('y'); // e.g., 26 for 2026
+        $previousYearLastTwoDigits = date('y', strtotime('-1 year')); // e.g., 25 for 2025
+        $yearCode = $previousYearLastTwoDigits . $currentYearLastTwoDigits; // e.g., 2526
+        $prefix = 'PL' . $yearCode . '-'; // e.g., PL2526-
+        
+        $lastPackingList = DB::Connection('mysql2')->selectOne("
+            SELECT packing_list_no 
+            FROM packing_lists 
+            WHERE packing_list_no LIKE '" . $prefix . "%' 
+            ORDER BY CAST(SUBSTRING(packing_list_no, " . (strlen($prefix) + 1) . ") AS UNSIGNED) DESC, packing_list_no DESC
+            LIMIT 1
+        ");
+        
+        if ($lastPackingList && !empty($lastPackingList->packing_list_no)) {
+            $parts = explode('-', $lastPackingList->packing_list_no);
+            if (count($parts) == 2 && is_numeric($parts[1])) {
+                $lastNumber = (int)$parts[1];
+                $nextNumber = $lastNumber + 1;
+            } else {
+                $nextNumber = 1;
+            }
+        } else {
+            $nextNumber = 1;
+        }
+        
+        // Format: PL2526-001
+        $sequential = str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+        return $prefix . $sequential;
+    }
+
     public static function get_unique_invoice_no($year, $month)
     {
 
