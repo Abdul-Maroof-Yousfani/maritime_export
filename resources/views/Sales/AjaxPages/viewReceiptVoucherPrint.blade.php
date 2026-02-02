@@ -169,19 +169,74 @@
 
 
 
-                                    <?php $breakup=DB::Connection('mysql2')->table('brige_table_sales_receipt as a')
+                                    <?php 
+                                    // Check for commercial invoices first
+                                    $breakupCommercial=DB::Connection('mysql2')->table('brige_table_sales_receipt as a')
+                                            ->join('commercial_invoices as c','a.commercial_invoice_id','=','c.id')
+                                            ->where('a.status',1)
+                                            ->where('a.rv_id',$row->id)
+                                            ->whereNotNull('a.commercial_invoice_id')
+                                            ->select('a.*','c.invoice_no','c.invoice_date','c.grand_total','c.exchange_rate');
+                                    
+                                    // Check for sales tax invoices
+                                    $breakup=DB::Connection('mysql2')->table('brige_table_sales_receipt as a')
                                             ->join('sales_tax_invoice as c','a.si_id','=','c.id')
                                             ->where('a.status',1)
                                             ->where('a.rv_id',$row->id)
+                                            ->whereNotNull('a.si_id')
                                             ->select('a.*','c.gi_no','c.so_type','c.description','c.so_no','c.sales_tax','c.sales_tax_further');
 
-
-
                                     $count=1;
-
                                     ?>
 
-                                    @if ($breakup->count()>0)
+                                    @if ($breakupCommercial->count()>0)
+                                        <table  class="table table-bordered table-striped table-condensed tableMargin">
+                                            <thead>
+                                            <tr>
+                                                <th class="text-center" style="width:50px;">S.No</th>
+                                                <th class="text-center">Invoice No</th>
+                                                <th class="text-center" style="width:150px;">Invoice Date</th>
+                                                <th class="text-center" style="width:150px;">Invoice Amount (PKR)</th>
+                                                <th class="text-center" style="width:150px;">Received Amount</th>
+                                                <th class="text-center" style="width:150px;">Net Amount</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <?php
+                                            $data =$breakupCommercial->get();
+                                            $invoice_amount = 0;
+                                            $received_amount=0;
+                                            $net_amount = 0;
+                                           ?>
+                                            @foreach($data as $row3)
+                                                <?php 
+                                                // Calculate invoice amount in PKR
+                                                $ci_invoice_amount = $row3->grand_total * ($row3->exchange_rate ?? 1);
+                                                ?>
+                                                <tr>
+                                                    <td>{{$count++}}</td>
+                                                    <td>{{ strtoupper($row3->invoice_no)}}</td>
+                                                    <td>{{ $row3->invoice_date ? date('d-m-Y', strtotime($row3->invoice_date)) : '-' }}</td>
+                                                    <td class="text-right">{{number_format($ci_invoice_amount,2)}}</td>
+                                                    <td class="text-right">{{number_format($row3->received_amount,2)}}</td>
+                                                    <td class="text-right">{{number_format($row3->net_amount,2)}}</td>
+                                                <?php
+                                                    $invoice_amount+=$ci_invoice_amount;
+                                                    $received_amount+=$row3->received_amount;
+                                                    $net_amount+=$row3->net_amount;
+                                                ?>
+                                                </tr>
+                                            @endforeach
+                                            <tr>
+                                                <td colspan="3">Total</td>
+                                                <td class="text-right">{{number_format($invoice_amount,2)}}</td>
+                                                <td class="text-right">{{number_format($received_amount,2)}}</td>
+                                                <td class="text-right">{{number_format($net_amount,2)}}</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+
+                                    @elseif ($breakup->count()>0)
                                         <table  class="table table-bordered table-striped table-condensed tableMargin">
                                             <thead>
                                             <tr>
@@ -237,10 +292,9 @@
 
                                     @else
                                         <?php $breakup=DB::Connection('mysql2')->table('brige_table_sales_receipt as a')
-                                                ->join('pos as c','a.pos_id','=','c.id')
                                                 ->where('a.status',1)
                                                 ->where('a.rv_id',$row->id)
-                                                ->select('a.*','c.pos_no');
+                                                ->select('a.*');
 
 
 

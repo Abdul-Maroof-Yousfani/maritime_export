@@ -29,7 +29,7 @@ echo Form::open(array('url' => 'finance/CreateReceiptVoucherForCommercialInvoice
         <?php
         CommonHelper::companyDatabaseConnection($_GET['m']);
         // Get commercial invoice total amount
-        $invoice_amount = $row->grand_total ?? 0;
+        $invoice_amount = $row->grand_total * ($row->exchange_rate ?? 0);
         // Get received payment for this commercial invoice
         $rece = SalesHelper::get_received_payment_commercial_invoice($row->id);
         // Get customer name
@@ -57,7 +57,7 @@ echo Form::open(array('url' => 'finance/CreateReceiptVoucherForCommercialInvoice
             <td class="text-center">
                 <?php 
                 $so = DB::Connection('mysql2')->table('sale_order_exports')->where('id', $row->sale_order_export_id)->first();
-                echo $so ? strtoupper($so->so_no ?? '-') : '-';
+                echo $so ? strtoupper($so->voucehr_no ?? '-') : '-';
                 ?>
             </td>
             <td class="text-center">{{$row->payment_term ?? '-'}}</td>
@@ -67,12 +67,12 @@ echo Form::open(array('url' => 'finance/CreateReceiptVoucherForCommercialInvoice
             $inv = $invoice_amount;
             ?>
 
-            <td class="text-right">$ {{number_format($inv,2)}}</td>
+            <td class="text-right"> {{number_format($inv,2)}}</td>
             <?php
             $rema = $invoice_amount - $rece;
             ?>
             <td class="text-right">{{number_format($rece,2)}}</td>
-            <td class="text-right">$ {{number_format($rema,2)}}</td>
+            <td class="text-right">{{number_format($rema,2)}}</td>
 
             <?php
 

@@ -1227,7 +1227,7 @@ class SaleOrderExportController extends Controller
     {
         $id = $request->id;
         
-        $commercialInvoice = CommercialInvoice::with(['contractLoading.containers', 'contractLoading.vehicles', 'saleOrderExport', 'invoiceData', 'currency'])
+        $commercialInvoice = CommercialInvoice::with(['contractLoading.containers', 'saleOrderExport', 'invoiceData', 'currency'])
             ->where('id', $id)
             ->first();
 
