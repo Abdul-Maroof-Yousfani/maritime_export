@@ -212,7 +212,7 @@ $m = Session::get('run_company');
                         <th>Total Cartons</th>
                         <th>Total Net Kgs</th>
                         <th>Rate C F R Per kg</th>
-                        <th>Amount in USD</th>
+                        <th>Amount</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -221,6 +221,24 @@ $m = Session::get('run_company');
                         $totalNetKgs = 0;
                         $grandTotal = 0;
                         $count = 1;
+                        $currencyName = $commercialInvoice->currency ? $commercialInvoice->currency->curreny : 'USD';
+                        // Get currency symbol - if not available, use common symbols or currency name
+                        $currencySymbol = '$'; // Default
+                        if ($commercialInvoice->currency) {
+                            $currencyCode = strtoupper($currencyName);
+                            // Map common currency codes to symbols
+                            $currencySymbols = [
+                                'USD' => '$',
+                                'EUR' => '€',
+                                'GBP' => '£',
+                                'PKR' => 'PKR ',
+                                'AED' => 'AED ',
+                                'SAR' => 'SAR ',
+                            ];
+                            $currencySymbol = isset($currencySymbols[$currencyCode]) 
+                                ? $currencySymbols[$currencyCode] 
+                                : ($currencyCode . ' ');
+                        }
                     @endphp
                     @foreach($commercialInvoice->invoiceData as $item)
                         @php
@@ -234,7 +252,7 @@ $m = Session::get('run_company');
                             <td>{{ $item->total_cartons ?? 0 }}</td>
                             <td>{{ number_format($item->total_net_kgs ?? 0, 2) }}</td>
                             <td>{{ number_format($item->rate_cfr_per_kg ?? 0, 2) }}</td>
-                            <td>$ {{ number_format($item->amount_usd ?? 0, 2) }}</td>
+                            <td>{{ $currencySymbol }} {{ number_format($item->amount_usd ?? 0, 2) }}</td>
                         </tr>
                     @endforeach
                     {{-- Empty rows for additional items --}}
@@ -255,7 +273,7 @@ $m = Session::get('run_company');
                         <td style="text-align: center; font-weight: bold;">{{ $totalCartons }}</td>
                         <td style="text-align: center; font-weight: bold;">{{ number_format($totalNetKgs, 2) }}</td>
                         <td>&nbsp;</td>
-                        <td style="text-align: right; font-weight: bold;">$ {{ number_format($grandTotal, 2) }}</td>
+                        <td style="text-align: right; font-weight: bold;">{{ $currencySymbol }} {{ number_format($grandTotal, 2) }}</td>
                     </tr>
                 </tfoot>
             </table>
@@ -265,22 +283,24 @@ $m = Session::get('run_company');
                 <table class="grand-total-table">
                     <tr>
                         <td><strong>Grand Total:-</strong></td>
-                        <td>$ {{ number_format($grandTotal, 2) }}</td>
+                        <td>{{ $currencySymbol }} {{ number_format($grandTotal, 2) }}</td>
                     </tr>
                 </table>
                 
                 <div class="amount-in-words">
                     @php
-                        $advanceAmount = $commercialInvoice->advance_amount ?? 0;
+                        // Advance amount is stored in PKR, convert to selected currency
+                        $advanceAmountPKR = $commercialInvoice->advance_amount ?? 0;
+                        $exchangeRate = $commercialInvoice->exchange_rate ?? 1;
+                        $advanceAmount = $exchangeRate > 0 ? ($advanceAmountPKR / $exchangeRate) : 0;
                         $balanceAmount = $commercialInvoice->balance_amount ?? $grandTotal;
-                        $currencyName = $commercialInvoice->currency ? $commercialInvoice->currency->curreny : 'USD';
                     @endphp
                     
                     @if($advanceAmount > 0)
-                        <div><strong>ADVANCE IN USD:</strong> {{ CommonHelper::AmountInWords($advanceAmount, $currencyName) }}. ($ {{ number_format($advanceAmount, 2) }})</div>
+                        <div><strong>ADVANCE IN {{ strtoupper($currencyName) }}:</strong> {{ CommonHelper::AmountInWords($advanceAmount, $currencyName) }}. ({{ $currencySymbol }} {{ number_format($advanceAmount, 2) }})</div>
                     @endif
                     
-                    <div><strong>USD:</strong> {{ CommonHelper::AmountInWords($balanceAmount, $currencyName) }}. ($ {{ number_format($balanceAmount, 2) }})</div>
+                    <div><strong>{{ strtoupper($currencyName) }}:</strong> {{ CommonHelper::AmountInWords($balanceAmount, $currencyName) }}. ({{ $currencySymbol }} {{ number_format($balanceAmount, 2) }})</div>
                 </div>
             </div>
         </div>

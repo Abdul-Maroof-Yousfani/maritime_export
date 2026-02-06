@@ -37,7 +37,7 @@ $m=Session::get('run_company');
                                                     <option value="2" selected>Export </option>
                                                    </select>
                                                 </div>
-                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="display: none;">
                                                     <label>Account Head :</label>
                                                     <span class="rflabelsteric"><strong>*</strong></span>
 
@@ -54,6 +54,7 @@ $m=Session::get('run_company');
                                                             @endif
                                                     </select>
                                                 </div>
+                                                <input type="hidden" name="account_head" value="1-1-1" id="account_head_hidden">
                                                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
                                                     <label>Customer Name :</label>
                                                     <span class="rflabelsteric"><strong>*</strong></span>
@@ -245,6 +246,9 @@ $m=Session::get('run_company');
             $('#country').select2();
             $('#state').select2();
             $('#city').select2();
+            // Set account head to 1-1-1 and trigger nature type check
+            $('#account_id').val('1-1-1');
+            get_nature_type();
             $(".btn-success").click(function(e)
             {
                 var cashCustomer = new Array();
@@ -303,14 +307,13 @@ $m=Session::get('run_company');
 
         function get_nature_type()
         {
-            var nature=  $("#account_id option:selected").text();
-            nature=nature.split('-');
-            nature=nature[0];
-            if (nature==1 ||  nature==4)
+            // Since account head is always 1-1-1, check the first part
+            var accountHead = $('#account_head_hidden').val() || '1-1-1';
+            var nature = accountHead.split('-')[0];
+            if (nature == 1 || nature == 4)
             {
                 $('#o_blnc_trans').val(1);
             }
-
             else
             {
                 $('#o_blnc_trans').val(0);

@@ -181,7 +181,7 @@ class SalesAddDetailControler extends Controller
     public function addCreditCustomerDetail(){
         CommonHelper::companyDatabaseConnection($_GET['m']);
 
-        $account_head = Input::get('account_head');
+        $account_head = Input::get('account_head') ?: '1-1-1';
         $customer_code = Input::get('customer_code');
         $customer_name = Input::get('customer_name');
         $country = Input::get('country');
