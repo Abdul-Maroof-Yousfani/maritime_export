@@ -215,19 +215,15 @@ $m = Session::get('run_company');
                                                                                     <th style="width:50%;border:1px solid;padding:8px;">Grand Total:</th>
                                                                                     <td style="width:50%;border:1px solid;padding:8px;text-align:right;font-weight:bold;" id="display_grand_total">$ 0.00</td>
                                                                                 </tr>
-                                                                                <tr>
-                                                                                    <th style="border:1px solid;padding:8px;">Grand Total (PKR):</th>
-                                                                                    <td style="border:1px solid;padding:8px;text-align:right;font-weight:bold;" id="display_grand_total_pkr">PKR 0.00</td>
-                                                                                </tr>
                                                                                
                                                                                 <tr>
                                                                                     <th style="border:1px solid;padding:8px;">ADVANCE:</th>
-                                                                                    <td style="border:1px solid;padding:8px;text-align:right;font-weight:bold;" id="display_advance_amount_pkr">PKR 0.00</td>
+                                                                                    <td style="border:1px solid;padding:8px;text-align:right;font-weight:bold;" id="display_advance_amount">$ 0.00</td>
                                                                                 </tr>
                                                                                 
                                                                                 <tr>
-                                                                                    <th style="border:1px solid;padding:8px;">BALANCE IN PKR:</th>
-                                                                                    <td style="border:1px solid;padding:8px;text-align:right;font-weight:bold;" id="display_balance_amount_pkr">PKR 0.00</td>
+                                                                                    <th style="border:1px solid;padding:8px;">BALANCE:</th>
+                                                                                    <td style="border:1px solid;padding:8px;text-align:right;font-weight:bold;" id="display_balance_amount">$ 0.00</td>
                                                                                 </tr>
                                                                             </tbody>
                                                                         </table>
@@ -363,7 +359,8 @@ function loadLoadingDetails(loadingId) {
                         response.total_amount, 
                         response.advance_amount,
                         response.balance_amount_pkr,
-                        
+                        response.sale_order.currency_name || 'USD',
+                        response.sale_order.currencey_rate || 1
                     );
                 } else {
                     console.error('No sale order data received:', response);
@@ -381,7 +378,7 @@ function loadLoadingDetails(loadingId) {
     });
 }
 
-function populateProductTable(saleOrderData, totalAmount, advanceAmountPKR,balance_amount_pkr) {
+function populateProductTable(saleOrderData, totalAmount, advanceAmountPKR, balance_amount_pkr, currencyName, exchangeRate) {
     console.log('populateProductTable called with:', saleOrderData); // Debug
     var tbody = $('#productTableBody');
     tbody.empty();
@@ -395,6 +392,23 @@ function populateProductTable(saleOrderData, totalAmount, advanceAmountPKR,balan
     // Advance amount is already in PKR from transaction table (no conversion needed)
     var advanceAmountPKRNum = parseFloat(advanceAmountPKR) || 0; // Already in PKR
 
+    // Get currency symbol
+    var currencyNameStr = currencyName || 'USD';
+    var currencySymbol = '$'; // Default
+    var currencyCode = currencyNameStr.toUpperCase();
+    var currencySymbols = {
+        'USD': '$',
+        'EUR': '€',
+        'GBP': '£',
+        'PKR': 'PKR ',
+        'AED': 'AED ',
+        'SAR': 'SAR ',
+    };
+    if (currencySymbols[currencyCode]) {
+        currencySymbol = currencySymbols[currencyCode];
+    } else {
+        currencySymbol = currencyCode + ' ';
+    }
     
     var totalCartons = 0;
     var totalNetKgs = 0;
@@ -431,7 +445,7 @@ function populateProductTable(saleOrderData, totalAmount, advanceAmountPKR,balan
             '<td style="border:1px solid;padding:8px;">' + cartons + '</td>' +
             '<td style="border:1px solid;padding:8px;">' + netKgs.toFixed(2) + '</td>' +
             '<td style="border:1px solid;padding:8px;">' + ratePerKg.toFixed(2) + '</td>' +
-            '<td style="border:1px solid;padding:8px;text-align:right;">$ ' + amount.toFixed(2) + '</td>' +
+            '<td style="border:1px solid;padding:8px;text-align:right;">' + currencySymbol + ' ' + amount.toFixed(2) + '</td>' +
             '</tr>';
         tbody.append(row);
         
@@ -448,39 +462,38 @@ function populateProductTable(saleOrderData, totalAmount, advanceAmountPKR,balan
     });
     
     // Get exchange rate
-    var exchangeRate = parseFloat($('#exchange_rate').val()) || 1;
+    var exchangeRateNum = parseFloat(exchangeRate) || parseFloat($('#exchange_rate').val()) || 1;
+    
     grandTotal = totalAmount;
     // Always show the actual grand total (not remaining amount) for display
     // But use remaining amount for balance calculation if invoice exists
-    var grandTotalPKR = grandTotal * exchangeRate;
+    var grandTotalPKR = grandTotal * exchangeRateNum;
+    
+    // Convert advance amount from PKR to selected currency
+    var advanceAmountInCurrency = exchangeRateNum > 0 ? (advanceAmountPKRNum / exchangeRateNum) : 0;
+    
+    // Convert balance amount from PKR to selected currency
+    var balanceAmountInCurrency = exchangeRateNum > 0 ? (balance_amount_pkr / exchangeRateNum) : 0;
     
     // Update totals - always show actual grand total
     $('#total_cartons').text(totalCartons);
     $('#total_net_kgs').text(totalNetKgs.toFixed(2));
-    $('#grand_total').text('$ ' + grandTotal.toFixed(2));
-    $('#display_grand_total').text('$ ' + grandTotal.toFixed(2));
+    $('#grand_total').text(currencySymbol + ' ' + grandTotal.toFixed(2));
+    $('#display_grand_total').text(currencySymbol + ' ' + grandTotal.toFixed(2));
     
-    // Calculate balance amount
-    // If there's an existing invoice, don't deduct advance (advance was already considered in first invoice)
-    // Balance = remaining amount (without deducting advance)
-    // But still show the advance amount for information
-   
+    // Display amounts in selected currency only
+    $('#display_advance_amount').text(currencySymbol + ' ' + advanceAmountInCurrency.toFixed(2));
+    $('#display_balance_amount').text(currencySymbol + ' ' + balanceAmountInCurrency.toFixed(2));
     
-    // Display PKR amounts
-    // Always show actual grand total, show advance amount (even if already deducted), show balance
-    $('#display_grand_total_pkr').text('PKR ' + grandTotalPKR.toFixed(2));
-    $('#display_advance_amount_pkr').text('PKR ' + advanceAmountPKRNum.toFixed(2)); // Always show advance amount
-    $('#display_balance_amount_pkr').text('PKR ' + balance_amount_pkr.toFixed(2));
-    
-    // Set hidden fields (store PKR amounts for transactions)
+    // Set hidden fields (store PKR amounts for transactions - backend needs PKR)
     // For grand total, use actual grand total (not remaining)
-    // For advance, use 0 if already deducted (for transaction purposes), but show actual amount in display
+    // For advance, store PKR amount for backend processing
     $('#grand_total_hidden').val(grandTotal);
     $('#grand_total_pkr_hidden').val(grandTotalPKR);
-    $('#advance_amount_hidden').val((advanceAmountPKRNum ));
-    $('#advance_amount_pkr_hidden').val(advanceAmountPKRNum); // 0 for transaction if already deducted
-    $('#balance_amount_hidden').val(balance_amount_pkr / exchangeRate);
-    $('#balance_amount_pkr_hidden').val(balance_amount_pkr); // Balance in PKR (no conversion needed)
+    $('#advance_amount_hidden').val(advanceAmountPKRNum); // Store PKR for backend
+    $('#advance_amount_pkr_hidden').val(advanceAmountPKRNum);
+    $('#balance_amount_hidden').val(balanceAmountInCurrency); // Store in selected currency
+    $('#balance_amount_pkr_hidden').val(balance_amount_pkr); // Store PKR for backend
     
     // Store items for submission
     $('#commercialInvoiceForm').data('items', items);
