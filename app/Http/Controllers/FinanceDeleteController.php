@@ -262,25 +262,76 @@ class FinanceDeleteController extends Controller
         DB::Connection('mysql2')->beginTransaction();
 
         try {
-                $id= Input::get('id');
-                $accounts=new Account();
-                $data['status']=0;
-                $data['delete_date']=date('Y-m-d');
-                $accounts=$accounts->setConnection('mysql2');
-                $Acc = $accounts->where('id','=',$id)->first();
-                $accounts->where('id','=',$id) ->update($data);
-                $data1['status']=0;
-                $transaction=new Transactions();
-                $transaction=$transaction->setConnection('mysql2');
-                $transaction->where('acc_id','=',$id)->update($data1);
-                FinanceHelper::audit_trail($Acc->code,'','',5,'Delete');
+                $id = Input::get('id');
+                $accounts = new Account();
+                $accounts = $accounts->setConnection('mysql2');
+                $Acc = $accounts->where('id', '=', $id)->first();
+                
+                if (!$Acc) {
+                    DB::Connection('mysql2')->rollback();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Account not found'
+                    ], 404);
+                }
+
+                // Check if account has any transactions with amount > 0
+                // This checks for any transaction entries (hits) with amount > 0, regardless of:
+                // - status (active or inactive)
+                // - debit_credit (0 or 1)
+                // - opening_bal (opening balance or regular transaction)
+                $transaction = new Transactions();
+                $transaction = $transaction->setConnection('mysql2');
+                
+                // Check for transactions with amount > 0 (any transaction hit on this account)
+                $transactionCount = $transaction->where('acc_id', '=', $id)
+                    ->where('amount', '>', 0)
+                    ->count();
+
+                // Also check for any transaction entries (even with amount = 0) to catch account hits
+                // This ensures we prevent deletion if account was ever used, even with 0 amount
+                $anyTransactionCount = $transaction->where('acc_id', '=', $id)->count();
+
+                // Prevent deletion if:
+                // 1. Account has transactions with amount > 0, OR
+                // 2. Account has any transaction entries (account has been hit/used)
+                if ($transactionCount > 0 || $anyTransactionCount > 0) {
+                    DB::Connection('mysql2')->rollback();
+                    $message = 'Cannot delete account. ';
+                    if ($transactionCount > 0) {
+                        $message .= 'Account has ' . $transactionCount . ' transaction(s) with amount > 0.';
+                    } 
+                    return response()->json([
+                        'success' => false,
+                        'message' => $message
+                    ], 400);
+                }
+
+                // Proceed with deletion if no transactions exist
+                $data['status'] = 0;
+                $data['delete_date'] = date('Y-m-d');
+                $accounts->where('id', '=', $id)->update($data);
+                
+                // Update any inactive transactions (status already 0) to maintain consistency
+                $data1['status'] = 0;
+                $transaction->where('acc_id', '=', $id)->update($data1);
+                
+                FinanceHelper::audit_trail($Acc->code, '', '', 5, 'Delete');
                 DB::Connection('mysql2')->commit();
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Account deleted successfully',
+                    'id' => $id
+                ]);
             }
             catch(\Exception $e)
             {
                 DB::Connection('mysql2')->rollback();
-                echo "EROOR"; //die();
-                dd($e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error deleting account: ' . $e->getMessage()
+                ], 500);
             }
 
     }

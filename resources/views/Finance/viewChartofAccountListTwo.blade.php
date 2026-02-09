@@ -156,17 +156,28 @@ use App\Helpers\FinanceHelper;
         function delete_record(id)
         {
 
-            if (confirm('Are you sure you want to delete this request')) {
+            if (confirm('Are you sure you want to delete this account? This action cannot be undone if the account has no transactions.')) {
                 $.ajax({
                     url: '/fd/deletechartofaccount',
                     type: 'Get',
                     data: {id: id},
-
+                    dataType: 'json',
                     success: function (response) {
-
-
-                        $('#' + id).remove();
-
+                        if (response.success) {
+                            alert(response.message || 'Account deleted successfully');
+                            $('tr[title="' + id + '"]').remove();
+                            // Reload page to refresh the list
+                            location.reload();
+                        } else {
+                            alert(response.message || 'Error deleting account');
+                        }
+                    },
+                    error: function(xhr) {
+                        var errorMsg = 'Error deleting account';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+                        alert(errorMsg);
                     }
                 });
             }

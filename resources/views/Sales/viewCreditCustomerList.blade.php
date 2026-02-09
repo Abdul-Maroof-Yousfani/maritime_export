@@ -101,16 +101,27 @@ if($accType == 'client'){
         function CustomerDelete(id)
         {
 
-            if (confirm('Are you sure you want to delete this request')) {
+            if (confirm('Are you sure you want to delete this customer? This will also delete associated accounts if no transactions exist.')) {
                 $.ajax({
                     url: '/sdc/customer_delete',
                     type: 'Get',
                     data: {id: id},
-
+                    dataType: 'json',
                     success: function (response)
                     {
-                        $('#'+response).remove();
-
+                        if (response.success) {
+                            alert(response.message || 'Customer deleted successfully');
+                            $('#' + response.id).remove();
+                        } else {
+                            alert(response.message || 'Error deleting customer');
+                        }
+                    },
+                    error: function(xhr) {
+                        var errorMsg = 'Error deleting customer';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+                        alert(errorMsg);
                     }
                 });
             }

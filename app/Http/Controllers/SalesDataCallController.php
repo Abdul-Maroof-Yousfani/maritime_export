@@ -301,20 +301,112 @@ class SalesDataCallController extends Controller
     {
         $CustomerId = $request->id;
 
-        $data['status']=0;
+        // Get customer details including both account IDs
+        $customer = DB::Connection('mysql2')->table('customers')->where('id', $CustomerId)->first();
+        
+        if (!$customer) {
+            return response()->json(['success' => false, 'message' => 'Customer not found'], 404);
+        }
 
-        DB::Connection('mysql2')->table('customers')->where('id',$CustomerId)->update($data);
+        $acc_id = $customer->acc_id ?? 0;
+        $liability_acc_id = $customer->liability_acc_id ?? 0;
 
-        $acc_id=  DB::Connection('mysql2')->table('customers')->where('id',$CustomerId)->select('acc_id')->value('acc_id');
+        // Check if customer has transactions with amount > 0 in acc_id account
+        // This checks for any transaction entries (hits) with amount > 0, regardless of:
+        // - status (active or inactive)
+        // - debit_credit (0 or 1)
+        // - opening_bal (opening balance or regular transaction)
+        $hasAccTransactions = false;
+        $accTransactionCount = 0;
+        if ($acc_id != 0) {
+            $accTransactionCount = DB::Connection('mysql2')->table('transactions')
+                ->where('acc_id', $acc_id)
+                ->where('amount', '>', 0)
+                ->count();
+            
+            if ($accTransactionCount > 0) {
+                $hasAccTransactions = true;
+            }
+        }
 
-        if ($acc_id!=0):
+        // Check if customer has transactions with amount > 0 in liability_acc_id account
+        $hasLiabilityTransactions = false;
+        $liabilityTransactionCount = 0;
+        if ($liability_acc_id != 0) {
+            $liabilityTransactionCount = DB::Connection('mysql2')->table('transactions')
+                ->where('acc_id', $liability_acc_id)
+                ->where('amount', '>', 0)
+                ->count();
+            
+            if ($liabilityTransactionCount > 0) {
+                $hasLiabilityTransactions = true;
+            }
+        }
 
-            DB::Connection('mysql2')->table('accounts')->where('id',$acc_id)->update($data);
-        endif;
+        // Also check for any transaction entries (even with amount = 0) to catch account hits
+        $accAnyTransactionCount = 0;
+        $liabilityAnyTransactionCount = 0;
+        if ($acc_id != 0) {
+            $accAnyTransactionCount = DB::Connection('mysql2')->table('transactions')
+                ->where('acc_id', $acc_id)
+                ->count();
+        }
+        if ($liability_acc_id != 0) {
+            $liabilityAnyTransactionCount = DB::Connection('mysql2')->table('transactions')
+                ->where('acc_id', $liability_acc_id)
+                ->count();
+        }
 
-        echo $CustomerId;
+        // Prevent deletion if:
+        // 1. Account has transactions with amount > 0, OR
+        // 2. Account has any transaction entries (account has been hit/used)
+        if ($hasAccTransactions && $hasLiabilityTransactions || $accAnyTransactionCount > 0 && $liabilityAnyTransactionCount > 0) {
+            $message = 'Cannot delete customer. ';
+            if ($accTransactionCount > 0 || $liabilityTransactionCount > 0) {
+                $totalAmountTransactions = $accTransactionCount + $liabilityTransactionCount;
+                $message .= 'Customer has ' . $totalAmountTransactions . ' transaction(s) with amount > 0 in their account(s).';
+            } elseif ($accAnyTransactionCount > 0 || $liabilityAnyTransactionCount > 0) {
+                $totalAnyTransactions = $accAnyTransactionCount + $liabilityAnyTransactionCount;
+                $message .= 'Customer account(s) have ' . $totalAnyTransactions . ' transaction entry/entries (account has been used/hit).';
+            }
+            return response()->json([
+                'success' => false, 
+                'message' => $message
+            ], 400);
+        }
 
+        // Proceed with deletion if no transactions exist
+        DB::Connection('mysql2')->beginTransaction();
+        try {
+            $data['status'] = 0;
 
+            // Delete customer
+            DB::Connection('mysql2')->table('customers')->where('id', $CustomerId)->update($data);
+
+            // Delete acc_id account if exists
+            if ($acc_id != 0) {
+                DB::Connection('mysql2')->table('accounts')->where('id', $acc_id)->update($data);
+            }
+
+            // Delete liability_acc_id account if exists
+            if ($liability_acc_id != 0) {
+                DB::Connection('mysql2')->table('accounts')->where('id', $liability_acc_id)->update($data);
+            }
+
+            DB::Connection('mysql2')->commit();
+            
+            return response()->json([
+                'success' => true, 
+                'message' => 'Customer and associated accounts deleted successfully',
+                'id' => $CustomerId
+            ]);
+        } catch (\Exception $e) {
+            DB::Connection('mysql2')->rollBack();
+            return response()->json([
+                'success' => false, 
+                'message' => 'Error deleting customer: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     function createCustomerAccount()
