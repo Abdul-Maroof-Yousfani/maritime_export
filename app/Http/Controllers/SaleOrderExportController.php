@@ -523,7 +523,7 @@ class SaleOrderExportController extends Controller
             $transaction_bank->master_id = $saleOrder->id;
             $transaction_bank->save();
 
-            $saleOrder->advance_payment = $advance_amount;
+            $saleOrder->advance_amount = $advance_amount;
             $saleOrder->advance_received_status = 1; // Mark advance as received
             $saleOrder->save();
             
