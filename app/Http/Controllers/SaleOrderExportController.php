@@ -395,7 +395,7 @@ class SaleOrderExportController extends Controller
                 $sale_order_data->actual_qty = $request->actual_qty[$key];
                 $sale_order_data->flc_size = $request->flc_size[$key] ?? null;
                 $sale_order_data->flc_qty = $request->flc_qty[$key] ?? null;
-                $sale_order_data->no_of_container = $request->no_of_container[$key] ?? null;
+                $sale_order_data->no_of_container = 0;//$request->no_of_container[$key] ?? null;
 
                 $sale_order_data->qty_variation = $request->qty_variation[$key] ?? null;
                 $sale_order_data->rate = $request->rate[$key];
