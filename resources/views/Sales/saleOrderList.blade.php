@@ -287,19 +287,22 @@ $AccYearTo = $AccYearDate->accyearto;
         }
 
         function openReceiveAdvanceModal(saleOrderId) {
-            var base_url='<?php echo URL::to('/'); ?>';
-            $.ajax({
-                url: base_url+'/export/getSaleOrderForAdvance',
-                type: 'GET',
-                data: {id: saleOrderId},
-                success: function (response) {
-                    $('#receiveAdvanceModalBody').html(response);
-                    $('#receiveAdvanceModal').modal('show');
-                },
-                error: function() {
-                    alert('Error loading sale order details');
-                }
-            });
+            // Show alert first
+            if (confirm('Do you want to receive advance payment for this order?')) {
+                var base_url='<?php echo URL::to('/'); ?>';
+                $.ajax({
+                    url: base_url+'/export/getSaleOrderForAdvance',
+                    type: 'GET',
+                    data: {id: saleOrderId},
+                    success: function (response) {
+                        $('#receiveAdvanceModalBody').html(response);
+                        $('#receiveAdvanceModal').modal('show');
+                    },
+                    error: function() {
+                        alert('Error loading sale order details');
+                    }
+                });
+            }
         }
 
         function submitAdvancePayment() {

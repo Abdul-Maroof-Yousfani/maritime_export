@@ -333,11 +333,9 @@ use App\Helpers\CommonHelper;
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Is Advance</label>
-                                    <select class="form-control" name="is_advance" id="is_advance">
-                                        <option value="0" {{ ($exportOrder->is_advance ?? 0) == 0 ? 'selected' : '' }}>No</option>
-                                        <option value="1" {{ ($exportOrder->is_advance ?? 0) == 1 ? 'selected' : '' }}>Yes</option>
-                                    </select>
+                                    <label class="form-label">Advance Amount</label>
+                                    <input type="number" class="form-control" name="advance_amount" id="advance_amount" 
+                                        value="{{ $exportOrder->advance_amount ?? 0 }}" min="0" step="0.01" placeholder="Enter advance amount">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Mode of Production</label>

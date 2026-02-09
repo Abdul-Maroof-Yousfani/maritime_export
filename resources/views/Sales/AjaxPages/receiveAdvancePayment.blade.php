@@ -59,7 +59,7 @@
             <div class="form-group">
                 <label class="form-label">Advance Amount <span class="rflabelsteric">*</span></label>
                 <input type="number" class="form-control" name="advance_amount" id="advance_amount" 
-                    step="0.01" min="0" placeholder="Enter advance payment amount" required />
+                    value="{{ $saleOrder->advance_amount ?? 0 }}" step="0.01" min="0" placeholder="Enter advance payment amount" required readonly />
             </div>
         </div>
     </div>

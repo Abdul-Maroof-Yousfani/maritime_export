@@ -360,14 +360,11 @@ class SalesDataCallController extends Controller
         // Prevent deletion if:
         // 1. Account has transactions with amount > 0, OR
         // 2. Account has any transaction entries (account has been hit/used)
-        if ($hasAccTransactions && $hasLiabilityTransactions || $accAnyTransactionCount > 0 && $liabilityAnyTransactionCount > 0) {
+        if ($hasAccTransactions || $hasLiabilityTransactions || $accAnyTransactionCount > 0 || $liabilityAnyTransactionCount > 0) {
             $message = 'Cannot delete customer. ';
             if ($accTransactionCount > 0 || $liabilityTransactionCount > 0) {
                 $totalAmountTransactions = $accTransactionCount + $liabilityTransactionCount;
                 $message .= 'Customer has ' . $totalAmountTransactions . ' transaction(s) with amount > 0 in their account(s).';
-            } elseif ($accAnyTransactionCount > 0 || $liabilityAnyTransactionCount > 0) {
-                $totalAnyTransactions = $accAnyTransactionCount + $liabilityAnyTransactionCount;
-                $message .= 'Customer account(s) have ' . $totalAnyTransactions . ' transaction entry/entries (account has been used/hit).';
             }
             return response()->json([
                 'success' => false, 

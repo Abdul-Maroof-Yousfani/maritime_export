@@ -115,7 +115,7 @@ class SaleOrderExportController extends Controller
             $sale_order->packing = $request->packing ? (int)$request->packing : null;
             $sale_order->bank = $request->beneficiary_bank ?? 1;
             $sale_order->proforma_status = 0;
-            $sale_order->is_advance = $request->is_advance ?? 0;
+            $sale_order->advance_amount = $request->advance_amount ?? 0;
             $sale_order->mode_of_production = $request->mode_of_production ?? null;
             $sale_order->currencey_id = $request->rate_conversion;
             $sale_order->currencey_rate = $request->rate_of_conversion;
@@ -355,7 +355,7 @@ class SaleOrderExportController extends Controller
             $sale_order->packing = null;// $request->packing ? (int)$request->packing : null;
             $sale_order->bank = $request->beneficiary_bank ?? 1;
             $sale_order->proforma_status = 0;
-            $sale_order->is_advance = $request->is_advance ?? 0;
+            $sale_order->advance_amount = $request->advance_amount ?? 0;
             $sale_order->mode_of_production = $request->mode_of_production ?? null;
             $sale_order->payment_days = $request->payment_days;
             $sale_order->currencey_id = $request->rate_conversion;
@@ -452,7 +452,8 @@ class SaleOrderExportController extends Controller
                 return response()->json(['success' => false, 'message' => 'Sale order not found'], 404);
             }
             
-            $advance_amount = $request->advance_amount;
+            // Use advance_amount from sale order (stored in form)
+            $advance_amount = $saleOrder->advance_amount ?? 0;
             
             if ($advance_amount <= 0) {
                 return response()->json(['success' => false, 'message' => 'Advance amount must be greater than 0'], 400);
@@ -588,16 +589,16 @@ class SaleOrderExportController extends Controller
             ->where('status', 1)
             ->whereNotNull('voucehr_no')
             ->where('voucehr_no', '!=', '')
-            ->select('id', 'contract_no', 'voucehr_no', 'voucher_date', 'is_advance', 'advance_received_status')
+            ->select('id', 'contract_no', 'voucehr_no', 'voucher_date', 'advance_amount', 'advance_received_status')
             ->get();
 
         // Filter contracts: exclude those with complete loading AND exclude those where advance is required but not received
         $contracts = $allContracts->filter(function($contract) {
             // Exclude if advance is required but not received
-            $isAdvance = $contract->is_advance ?? 0;
+            $advanceAmount = $contract->advance_amount ?? 0;
             $advanceReceived = $contract->advance_received_status ?? 0;
             
-            if ($isAdvance == 1 && $advanceReceived == 0) {
+            if ($advanceAmount > 0 && $advanceReceived == 0) {
                 return false; // Exclude this contract
             }
             // Get all loadings for this order
@@ -711,7 +712,7 @@ class SaleOrderExportController extends Controller
         });
 
         // Check advance status
-        $isAdvance = $saleOrder->is_advance ?? 0;
+        $advanceAmount = $saleOrder->advance_amount ?? 0;
         $advanceReceived = $saleOrder->advance_received_status ?? 0;
         
         return response()->json([
@@ -719,7 +720,7 @@ class SaleOrderExportController extends Controller
             'sale_order_data' => $saleOrderDataWithNames,
             'total_amount' => $totalAmount,
             'total_amount_pkr' => $totalAmountPKR,
-            'is_advance' => $isAdvance,
+            'advance_amount' => $advanceAmount,
             'advance_received_status' => $advanceReceived
         ]);
     }
@@ -734,11 +735,11 @@ class SaleOrderExportController extends Controller
             // Check if advance is required and not received
             $saleOrder = SaleOrderExport::find($request->sale_order_export_id);
             if ($saleOrder) {
-                $isAdvance = $saleOrder->is_advance ?? 0;
+                $advanceAmount = $saleOrder->advance_amount ?? 0;
                 $advanceReceived = $saleOrder->advance_received_status ?? 0;
                 
-                // If advance is required (is_advance = 1) but not received (advance_received_status = 0)
-                if ($isAdvance == 1 && $advanceReceived == 0) {
+                // If advance is required (advance_amount > 0) but not received (advance_received_status = 0)
+                if ($advanceAmount > 0 && $advanceReceived == 0) {
                     DB::connection('mysql2')->rollBack();
                     return response()->json([
                         'success' => false,

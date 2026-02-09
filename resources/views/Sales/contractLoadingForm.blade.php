@@ -316,14 +316,14 @@ function loadExportOrderByOrderNo(orderNo) {
         success: function(response) {
             if (response.sale_order) {
                 // Check if advance is required but not received
-                var isAdvance = response.is_advance || 0;
+                var advanceAmount = response.advance_amount || 0;
                 var advanceReceived = response.advance_received_status || 0;
                 
                 // Show export order details section
                 $('#exportOrderDetails').show();
                 
                 // Show/hide advance warning and disable/enable submit button
-                if (isAdvance == 1 && advanceReceived == 0) {
+                if (advanceAmount > 0 && advanceReceived == 0) {
                     $('#advanceWarning').show();
                     $('#submitLoadingBtn').prop('disabled', true).addClass('disabled');
                 } else {
