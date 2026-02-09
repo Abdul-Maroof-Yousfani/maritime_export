@@ -252,17 +252,10 @@ $total_expense =0;
                                 <td style="border:1px solid black;" class="text-left">insurance_coverd</td>
                                 <td style="border:1px solid black;" class="text-left">@if($sales_order->insurance_coverd == 0) Buyer @else Supplier @endif</td>
                                
-                                <td style="border:1px solid black;" class="text-left">Is Advance</td>
+                                <td style="border:1px solid black;" class="text-left">Advance Amount</td>
                                 <td style="border:1px solid black;" class="text-left">
-                                    @php
-                                        $isAdvance = 0;
-                                        if (isset($sales_order->is_advance)) {
-                                            $isAdvance = $sales_order->is_advance;
-                                        } elseif (isset($sales_order->advance_payment)) {
-                                            $isAdvance = ($sales_order->advance_payment == 'Yes' || $sales_order->advance_payment == 1) ? 1 : 0;
-                                        }
-                                    @endphp
-                                    {{ $isAdvance == 1 ? 'Yes' : 'No' }}
+                                  
+                                    {{ $sales_order->advance_amount ?? '' }}
                                 </td>
                                
                             </tr>

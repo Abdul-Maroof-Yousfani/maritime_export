@@ -227,17 +227,10 @@ textarea{border-style:none;border-color:Transparent;}
                                     -
                                 @endif
                             </td>
-                            <th style="border:1px solid">Is Advance</th>
+                            <th style="border:1px solid">Advance Amount</th>
                             <td style="border:1px solid">
-                                @php
-                                    $isAdvance = 0;
-                                    if (isset($sales_order->is_advance)) {
-                                        $isAdvance = $sales_order->is_advance;
-                                    } elseif (isset($sales_order->advance_payment)) {
-                                        $isAdvance = ($sales_order->advance_payment == 'Yes' || $sales_order->advance_payment == 1) ? 1 : 0;
-                                    }
-                                @endphp
-                                {{ $isAdvance == 1 ? 'Yes' : 'No' }}
+                              
+                                {{ $sales_order->advance_amount ?? '-' }}
                             </td>
                         </tr>
                         <tr>

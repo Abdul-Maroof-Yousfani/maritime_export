@@ -30,7 +30,7 @@
     @endif --}}
 
             @if ($payAdvance)
-                @if (($sale_or->advance_payment > 0 && $sale_or->advance_payment_status == 0) || $sale_or->advance_payment_status == 2)
+                @if (($sale_or->advance_amount > 0 && $sale_or->advance_payment_status == 0) || $sale_or->advance_payment_status == 2)
                     <a class="btn btn-primary btn-xs" href="{{ route('addAdvancePayment', $sale_or->id) }}"> Pay
                         Advance</a>
                 @endif
