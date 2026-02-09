@@ -18,7 +18,7 @@ use App\Models\CommercialInvoice;
     }
 </style>
 
-<h2 style="font-size: large;font-weight: bold; text-decoration: underline;">Bank Receipt Voucher (Commercial Invoice)</h2>
+<h2 style="font-size: large;font-weight: bold; text-decoration: underline;">Receipt Voucher (Commercial Invoice)</h2>
 
 <?php
 
@@ -53,7 +53,6 @@ $Colll = DB::Connection('mysql2')->select('
                         </select>
                     </div>
 
-
                     <div  class="col-lg-3 col-md-3 col-sm-3 col-xs-12 hidee">
                         <label for="pwd"> Banks </label>
                         <?php $bank=DB::Connection('mysql2')->table('bank_detail')->get(); ?>
@@ -62,38 +61,37 @@ $Colll = DB::Connection('mysql2')->select('
                             <option value="{{$row->id}}">{{$row->bank_name}}</option>
                             @endforeach
                         </select>
-
                     </div>
-                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 hidee">
+
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 hidee">
                         <label for="pwd">Cheque No:</label>
-                         <input type="text" class="form-control" id="cheque" name="cheque">
-                                 </div>
-            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 hidee">
-        <label for="pwd">Cheque Date:</label>
-      <input value="{{date('Y-m-d')}}" class="form-control" name="cheque_date" type="date" >
-    </div>
+                        <input type="text" class="form-control" id="cheque" name="cheque">
+                    </div>
 
-            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" id="dr_account_div" style="display: none;">
-            <label for="pwd">Dr Account</label>
-            <select name="acc_id" id="acc_id" class="form-control select2">
-                <option value="">Select</option>
-                @foreach(CommonHelper::get_all_account() as $row)
-                    <option value="{{$row->id}}">{{$row->name}}</option>
-                    @endforeach
-            </select>
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 hidee">
+                        <label for="pwd">Cheque Date:</label>
+                        <input value="{{date('Y-m-d')}}" class="form-control" name="cheque_date" type="date" >
+                    </div>
 
-        </div>
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="dr_account_div" style="display: none;">
+                        <label for="pwd">Dr Account</label>
+                        <select name="acc_id" id="acc_id" class="form-control select2">
+                            <option value="">Select</option>
+                            @foreach(CommonHelper::get_all_account() as $row)
+                                <option value="{{$row->id}}">{{$row->name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     
-    </div>
-    <div class="row">
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-            <label for="comment">Remarks:</label>
-            <textarea name="desc" class="form-control" rows="3" id="comment"><?php foreach($Colll as $cc):if(isset($cc->buyer_id) && $cc->buyer_id):echo CommonHelper::byers_name($cc->buyer_id)->name;endif;endforeach;?></textarea>
-
-        </div>
-    </div>
-        </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                    <label for="comment">Remarks:</label>
+                    <textarea name="desc" class="form-control" rows="3" id="comment"><?php foreach($Colll as $cc):if(isset($cc->buyer_id) && $cc->buyer_id):echo CommonHelper::byers_name($cc->buyer_id)->name;endif;endforeach;?></textarea>
+                </div>
             </div>
+            
+        </div>
+    </div>
 
 
         <input type="hidden" name="ref_bill_no" value="" />
