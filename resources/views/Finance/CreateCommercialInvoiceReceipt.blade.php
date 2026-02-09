@@ -16,9 +16,35 @@ use App\Models\CommercialInvoice;
         font-size: large;
         font-weight: bold;
     }
+    .receipt-voucher-title-wrapper {
+        width: 100%;
+        overflow: visible !important;
+        position: relative;
+        margin-bottom: 15px;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    .receipt-voucher-title-wrapper h2 {
+        font-size: large !important;
+        font-weight: bold !important;
+        text-decoration: underline !important;
+        width: 100% !important;
+        overflow: visible !important;
+        word-wrap: break-word !important;
+        white-space: normal !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        position: relative !important;
+        left: 0 !important;
+        right: 0 !important;
+        display: block !important;
+        box-sizing: border-box !important;
+    }
 </style>
 
-<h2 style="font-size: large;font-weight: bold; text-decoration: underline;">Receipt Voucher (Commercial Invoice)</h2>
+<div class="receipt-voucher-title-wrapper">
+    <h2>Receipt Voucher (Commercial Invoice)</h2>
+</div>
 
 <?php
 
@@ -73,7 +99,7 @@ $Colll = DB::Connection('mysql2')->select('
                         <input value="{{date('Y-m-d')}}" class="form-control" name="cheque_date" type="date" >
                     </div>
 
-                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="dr_account_div" style="display: none;">
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" id="dr_account_div" style="display: none;">
                         <label for="pwd">Dr Account</label>
                         <select name="acc_id" id="acc_id" class="form-control select2">
                             <option value="">Select</option>
