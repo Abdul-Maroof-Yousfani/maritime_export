@@ -1094,7 +1094,7 @@ class SaleOrderExportController extends Controller
         
         // Get advance payment from sale_order_exports table (advance_amount column)
         // Advance is received against export order (sale_order_export_id), not against individual loadings
-        $advanceAmountPKR = $saleOrder->advance_payment ?? 0; // Advance amount in PKR from sale_order_exports table
+        $advanceAmountPKR = $saleOrder->advance_amount ?? 0; // Advance amount in PKR from sale_order_exports table
         // IMPORTANT: Advance amount should only be deducted ONCE across all commercial invoices
         // for the same sale_order_export_id, even if there are multiple loadings
         // If there's an existing invoice, the advance was already deducted in the first invoice
