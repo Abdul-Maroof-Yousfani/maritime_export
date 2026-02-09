@@ -1046,7 +1046,6 @@ use App\Helpers\CommonHelper;
                 row.find('.hs-code-display').val(parts[7] || ''); // HS Code (display)
                 
                 // Set Pack UOM dropdown
-                row.find('.pack-uom-select').val(parts[5]).trigger('change');
                 
                 // Set Pack Size if available and not already set
                 if (parts[4] && parts[4] != '' && !row.find('.pack-size').val()) {
@@ -1057,7 +1056,6 @@ use App\Helpers\CommonHelper;
                 row.find('.uom-id-hidden').val(parts[1]);
                 row.find('.uom-display').val(parts[2]);
                 row.find('.hs-code-display').val('');
-                row.find('.pack-uom-select').val(parts[5]).trigger('change');
                 if (parts[4] && parts[4] != '' && !row.find('.pack-size').val()) {
                     row.find('.pack-size').val(parts[4]);
                 }
@@ -1066,7 +1064,6 @@ use App\Helpers\CommonHelper;
             row.find('.uom-id-hidden').val('');
             row.find('.uom-display').val('');
             row.find('.hs-code-display').val('');
-            row.find('.pack-uom-select').val('').trigger('change');
         }
     }
     
