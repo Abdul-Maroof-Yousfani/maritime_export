@@ -83,11 +83,14 @@ $Colll = DB::Connection('mysql2')->select('
             </select>
 
         </div>
-                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                        <label for="comment">Remarks:</label>
-                        <textarea name="desc" class="form-control" rows="3" id="comment"><?php foreach($Colll as $cc):if(isset($cc->buyer_id) && $cc->buyer_id):echo CommonHelper::byers_name($cc->buyer_id)->name;endif;endforeach;?></textarea>
+                    
+    </div>
+    <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+            <label for="comment">Remarks:</label>
+            <textarea name="desc" class="form-control" rows="3" id="comment"><?php foreach($Colll as $cc):if(isset($cc->buyer_id) && $cc->buyer_id):echo CommonHelper::byers_name($cc->buyer_id)->name;endif;endforeach;?></textarea>
 
-                    </div>
+        </div>
     </div>
         </div>
             </div>
