@@ -518,6 +518,7 @@ class SaleOrderExportController extends Controller
             $transaction_bank->save();
 
             $saleOrder->advance_payment = $advance_amount;
+            $saleOrder->advance_received_status = 1; // Mark advance as received
             $saleOrder->save();
             
             DB::Connection('mysql2')->commit();
@@ -587,11 +588,18 @@ class SaleOrderExportController extends Controller
             ->where('status', 1)
             ->whereNotNull('voucehr_no')
             ->where('voucehr_no', '!=', '')
-            ->select('id', 'contract_no', 'voucehr_no', 'voucher_date')
+            ->select('id', 'contract_no', 'voucehr_no', 'voucher_date', 'is_advance', 'advance_received_status')
             ->get();
 
-        // Filter contracts: exclude only those with complete loading
+        // Filter contracts: exclude those with complete loading AND exclude those where advance is required but not received
         $contracts = $allContracts->filter(function($contract) {
+            // Exclude if advance is required but not received
+            $isAdvance = $contract->is_advance ?? 0;
+            $advanceReceived = $contract->advance_received_status ?? 0;
+            
+            if ($isAdvance == 1 && $advanceReceived == 0) {
+                return false; // Exclude this contract
+            }
             // Get all loadings for this order
             $loadings = ContractLoading::where('sale_order_export_id', $contract->id)
                 ->where('status', 1)
@@ -702,11 +710,17 @@ class SaleOrderExportController extends Controller
             return $item;
         });
 
+        // Check advance status
+        $isAdvance = $saleOrder->is_advance ?? 0;
+        $advanceReceived = $saleOrder->advance_received_status ?? 0;
+        
         return response()->json([
             'sale_order' => $saleOrder,
             'sale_order_data' => $saleOrderDataWithNames,
             'total_amount' => $totalAmount,
-            'total_amount_pkr' => $totalAmountPKR
+            'total_amount_pkr' => $totalAmountPKR,
+            'is_advance' => $isAdvance,
+            'advance_received_status' => $advanceReceived
         ]);
     }
 
@@ -717,6 +731,22 @@ class SaleOrderExportController extends Controller
     {
         DB::connection('mysql2')->beginTransaction();
         try {
+            // Check if advance is required and not received
+            $saleOrder = SaleOrderExport::find($request->sale_order_export_id);
+            if ($saleOrder) {
+                $isAdvance = $saleOrder->is_advance ?? 0;
+                $advanceReceived = $saleOrder->advance_received_status ?? 0;
+                
+                // If advance is required (is_advance = 1) but not received (advance_received_status = 0)
+                if ($isAdvance == 1 && $advanceReceived == 0) {
+                    DB::connection('mysql2')->rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot create shipment. Advance payment is required but not yet received. Please receive the advance payment first.'
+                    ], 400);
+                }
+            }
+            
             // Create contract loading with auto-generated loading number
             $data = [
                 'loading_no' => SalesHelper::get_unique_loading_no(),

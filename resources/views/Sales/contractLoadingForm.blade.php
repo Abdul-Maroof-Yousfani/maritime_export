@@ -79,6 +79,13 @@ $m = Session::get('run_company');
                                                 <div id="exportOrderDetails" class="export-order-details">
                                                     <div class="lineHeight">&nbsp;</div>
                                                     
+                                                    {{-- Advance Warning Section --}}
+                                                    <div id="advanceWarning" class="alert alert-danger" style="display: none; margin-bottom: 15px;">
+                                                        <strong><i class="fa fa-exclamation-triangle"></i> Warning:</strong> 
+                                                        Advance payment is required for this order but has not been received yet. 
+                                                        Please receive the advance payment before creating shipment/loading.
+                                                    </div>
+                                                    
                                                     {{-- Master Details Section --}}
                                                     <div class="row">
                                                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -233,7 +240,7 @@ $m = Session::get('run_company');
                                                     
                                                     <div class="row">
                                                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                            <button type="submit" class="btn btn-success">Submit</button>
+                                                            <button type="submit" class="btn btn-success" id="submitLoadingBtn">Submit</button>
                                                             <button type="reset" class="btn btn-danger">Clear Form</button>
                                                         </div>
                                                     </div>
@@ -269,6 +276,8 @@ $(document).ready(function() {
             loadExportOrderByOrderNo(orderNo);
         } else {
             $('#exportOrderDetails').hide();
+            $('#advanceWarning').hide();
+            $('#submitLoadingBtn').prop('disabled', false).removeClass('disabled');
         }
     });
     
@@ -306,8 +315,21 @@ function loadExportOrderByOrderNo(orderNo) {
         data: { order_no: orderNo },
         success: function(response) {
             if (response.sale_order) {
+                // Check if advance is required but not received
+                var isAdvance = response.is_advance || 0;
+                var advanceReceived = response.advance_received_status || 0;
+                
                 // Show export order details section
                 $('#exportOrderDetails').show();
+                
+                // Show/hide advance warning and disable/enable submit button
+                if (isAdvance == 1 && advanceReceived == 0) {
+                    $('#advanceWarning').show();
+                    $('#submitLoadingBtn').prop('disabled', true).addClass('disabled');
+                } else {
+                    $('#advanceWarning').hide();
+                    $('#submitLoadingBtn').prop('disabled', false).removeClass('disabled');
+                }
                 
                 // Set sale order export ID
                 $('#sale_order_export_id').val(response.sale_order.id);
@@ -370,6 +392,11 @@ function loadExportOrderByOrderNo(orderNo) {
 
 
 function submitContractLoading() {
+    // Check if submit button is disabled (advance not received)
+    if ($('#submitLoadingBtn').prop('disabled')) {
+        alert('Cannot create shipment. Advance payment is required but not yet received. Please receive the advance payment first.');
+        return;
+    }
 
     // Sum layer qty per item
     var layerQtyByItem = {};

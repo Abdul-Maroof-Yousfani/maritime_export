@@ -73,8 +73,16 @@ $counter =  1 ;
                 } elseif (isset($item->advance_payment)) {
                     $isAdvance = ($item->advance_payment == 'Yes' || $item->advance_payment == 1) ? 1 : 0;
                 }
+                // Check if advance is received (advance_received_status = 1 or advance_payment > 0)
+                $advanceReceived = 0;
+                if (isset($item->advance_received_status)) {
+                    $advanceReceived = $item->advance_received_status;
+                } elseif (isset($item->advance_payment) && $item->advance_payment > 0) {
+                    $advanceReceived = 1;
+                }
             @endphp
-            @if($isAdvance == 1)
+            {{-- Show "Advance Received" button only if: advance is required (is_advance=1), order is approved (approved_status=1), and advance not yet received --}}
+            @if($isAdvance == 1 && $item->approved_status == 1 && $advanceReceived == 0)
             <a href="javascript:void(0)" 
                onclick="openReceiveAdvanceModal({{ $item->id}})" 
                title="Receive Advance" 

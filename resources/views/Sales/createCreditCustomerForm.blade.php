@@ -54,7 +54,7 @@ $m=Session::get('run_company');
                                                             @endif
                                                     </select>
                                                 </div>
-                                                <input type="hidden" name="account_head" value="1-1-1" id="account_head_hidden">
+                                                <input type="hidden" name="account_head" value="1-2-1" id="account_head_hidden">
                                                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
                                                     <label>Customer Name :</label>
                                                     <span class="rflabelsteric"><strong>*</strong></span>
