@@ -197,7 +197,7 @@ CommonHelper::reconnectMasterDatabase();
                 </div>
             </li>
         </ul>
-        <div class="nav navbar-nav">
+        {{-- <div class="nav navbar-nav">
             <ul class="nav navbar-nav tmenu-list">
                 <li>
                     <a href="{{ URL('dClient/?m=') . Input::get('m') }}" class="drpdn"><i
@@ -209,7 +209,6 @@ CommonHelper::reconnectMasterDatabase();
                             aria-hidden="true"></i> Inventory </a>
                 </li>
                 <li>
-                    {{-- <a href="{{ URL('purchase/purchase_page') }}" class="drpdn"><i class="glyphicon glyphicon-home" aria-hidden="true"></i> Purchase </a> --}}
                 </li>
                 <li>
                     <a href="{{ URL('purchase/sales_page') }}" class="drpdn"><i class="glyphicon glyphicon-home"
@@ -236,7 +235,7 @@ CommonHelper::reconnectMasterDatabase();
                 <?php endif;?>
                 </li>
             </ul>
-        </div>
+        </div> --}}
     </div>
 </div>
 <div class="container-fluid">
