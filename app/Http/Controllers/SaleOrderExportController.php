@@ -365,12 +365,14 @@ class SaleOrderExportController extends Controller
             $sale_order->save();
 
             ExportOrderNotify::where('export_order_id', $sale_order->id)->delete();      
-            foreach ($request->notify_party_details as $key => $notify_party_details) {
-                if (!empty($notify_party_details)) {
-                    ExportOrderNotify::create([
-                        'notify' => $notify_party_details,
-                        'export_order_id' => $sale_order->id
-                    ]);
+            if ($request->has('notify_party_details') && is_array($request->notify_party_details)) {
+                foreach ($request->notify_party_details as $key => $notify_party_details) {
+                    if (!empty($notify_party_details)) {
+                        ExportOrderNotify::create([
+                            'notify' => $notify_party_details,
+                            'export_order_id' => $sale_order->id
+                        ]);
+                    }
                 }
             }
 
