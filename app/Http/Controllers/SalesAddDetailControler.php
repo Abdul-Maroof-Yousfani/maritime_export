@@ -364,14 +364,30 @@ class SalesAddDetailControler extends Controller
         $data2['action']     		 = 'update';
         $data2['customer_type']     = $customer_type;
         $data2['terms_of_payment']     = Input::get('term');
+        
+        // Get customer to find liability_acc_id before updating
+        $customer = DB::table('customers')->where('id', $EditId)->first();
+        $liability_acc_id = $customer->liability_acc_id ?? 0;
+        
         DB::table('customers')->where('id',$EditId)->update($data2);
 
+        // Update acc_id account
         $AccUpdate['name']     		   = $customer_name;
         $AccUpdate['type'] = 1;
         $AccUpdate['username']	 	   = Auth::user()->name;
         $AccUpdate['action'] = 'update';
         $AccUpdate['status'] = 1;
         DB::table('accounts')->where('id',$AccId)->update($AccUpdate);
+
+        // Update liability_acc_id account if it exists
+        if ($liability_acc_id != 0) {
+            $LiabilityAccUpdate['name'] = $customer_name;
+            $LiabilityAccUpdate['type'] = 1;
+            $LiabilityAccUpdate['username'] = Auth::user()->name;
+            $LiabilityAccUpdate['action'] = 'update';
+            $LiabilityAccUpdate['status'] = 1;
+            DB::table('accounts')->where('id', $liability_acc_id)->update($LiabilityAccUpdate);
+        }
 
 
         DB::table('customer_info')->where('cust_id',$EditId)->delete();

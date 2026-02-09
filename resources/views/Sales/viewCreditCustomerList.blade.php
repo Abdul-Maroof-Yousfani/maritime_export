@@ -103,7 +103,7 @@ if($accType == 'client'){
 
             if (confirm('Are you sure you want to delete this customer? This will also delete associated accounts if no transactions exist.')) {
                 $.ajax({
-                    url: '/sdc/customer_delete',
+                    url: '{{url("/")}}/sdc/customer_delete',
                     type: 'Get',
                     data: {id: id},
                     dataType: 'json',
