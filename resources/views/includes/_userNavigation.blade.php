@@ -231,7 +231,7 @@ endif;
                     <a href="{{ URL('dClient/?m=') . Input::get('m') }}" class="drpdn"><i
                             class="glyphicon glyphicon-home" aria-hidden="true"></i> Dashboard </a>
                 </li>
-                <?php if(Session::get('run_company')!=null):?>
+                if(Session::get('run_company')!=null):?>
                 <li>
                     <a href="{{ URL('purchase/inventory_page') }}" class="drpdn"><i class="glyphicon glyphicon-home"
                             aria-hidden="true"></i> Inventory </a>
@@ -258,7 +258,7 @@ endif;
 
                     </div>
                 </li>
-                <?php endif;?>
+                p endif;?>
                 </li>
             </ul>
         </div> --}}

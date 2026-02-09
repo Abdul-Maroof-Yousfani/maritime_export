@@ -203,7 +203,7 @@ CommonHelper::reconnectMasterDatabase();
                     <a href="{{ URL('dClient/?m=') . Input::get('m') }}" class="drpdn"><i
                             class="glyphicon glyphicon-home" aria-hidden="true"></i> Dashboard </a>
                 </li>
-                <?php if(Session::get('run_company')!=null):?>
+                < if(Session::get('run_company')!=null):?>
                 <li>
                     <a href="{{ URL('purchase/inventory_page') }}" class="drpdn"><i class="glyphicon glyphicon-home"
                             aria-hidden="true"></i> Inventory </a>
@@ -232,7 +232,7 @@ CommonHelper::reconnectMasterDatabase();
                      
                    </div>
                 </li>
-                <?php endif;?>
+                 endif;?>
                 </li>
             </ul>
         </div> --}}
