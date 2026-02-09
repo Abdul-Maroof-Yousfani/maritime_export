@@ -119,6 +119,7 @@ class SaleOrderExportController extends Controller
             $sale_order->mode_of_production = $request->mode_of_production ?? null;
             $sale_order->currencey_id = $request->rate_conversion;
             $sale_order->currencey_rate = $request->rate_of_conversion;
+            $sale_order->mode_transport = $request->mode_transport ? (int)$request->mode_transport : null;
            
             $sale_order->consignee = $request->consignee ? (int)$request->consignee : null;
             $sale_order->save();
@@ -360,6 +361,7 @@ class SaleOrderExportController extends Controller
             $sale_order->payment_days = $request->payment_days;
             $sale_order->currencey_id = $request->rate_conversion;
             $sale_order->currencey_rate = $request->rate_of_conversion;
+            $sale_order->mode_transport = $request->mode_transport ? (int)$request->mode_transport : null;
            
             $sale_order->consignee = $request->consignee ? (int)$request->consignee : null;
             $sale_order->save();
