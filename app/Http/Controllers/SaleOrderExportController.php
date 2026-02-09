@@ -485,6 +485,7 @@ class SaleOrderExportController extends Controller
                 return response()->json(['success' => false, 'message' => 'Bank account ID not found'], 400);
             }
             
+            dd($bank_acc_id, $credit_acc_id);
             // Generate unique voucher number for advance payment
             $advance_voucher_no = $saleOrder->voucehr_no . '-ADV-' . date('YmdHis');
             
