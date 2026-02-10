@@ -195,6 +195,8 @@ class BankController extends Controller
             $bank->status = 1;
             $bank->username = Auth::user()->name;
             $bank->save();
+
+            $account = DB::Connection('mysql2')->table('accounts')->where('id',$bank->acc_id)->update(['name'=>$request->bank_name.' - ('.$request->account_no.')']);
             DB::Connection('mysql2')->commit();
       return redirect()->route('bankList');
       } catch (Exception $ex) {
