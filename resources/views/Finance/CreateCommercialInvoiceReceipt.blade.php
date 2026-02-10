@@ -42,9 +42,6 @@ use App\Models\CommercialInvoice;
     }
 </style>
 
-<div class="receipt-voucher-title-wrapper">
-    <h2>Receipt Voucher (Commercial Invoice)</h2>
-</div>
 
 <?php
 
@@ -62,6 +59,11 @@ $Colll = DB::Connection('mysql2')->select('
 
  <?php echo Form::open(array('url' => 'fad/addCommercialInvoiceReceipt?m='.$_GET['m'].'','id'=>'createCommercialInvoiceReceipt','class'=>'stop'));?>
 <div class="well_N">
+    <div class="receipt-voucher-title-wrapper">
+        <h2>Receipt Voucher (Commercial Invoice)</h2>
+
+    </div>
+
         <div class="well">
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
