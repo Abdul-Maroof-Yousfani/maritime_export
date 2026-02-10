@@ -103,8 +103,9 @@ class PackingListController extends Controller
             $packingList->packing_list_no = SalesHelper::get_unique_packing_list_no();
             $packingList->invoice_no = $commercialInvoice->invoice_no;
             $packingList->date = $request->date;
-            $packingList->gd_no = $request->gd_no ?? $commercialInvoice->gd_no;
-            $packingList->container_no = $request->container_no ?? $commercialInvoice->container_no;
+            // GD No should always come from commercial invoice
+            $packingList->gd_no = $commercialInvoice->gd_no ?? $request->gd_no;
+            // Container no removed from master - it's now in items detail only
             $packingList->consignee_name = $request->consignee_name ?? $commercialInvoice->consignee_name;
             $packingList->vessel_voyage = $request->vessel_voyage ?? $commercialInvoice->vessel_voyage;
             $packingList->port_from = $request->port_from ?? $commercialInvoice->port_from;
@@ -292,8 +293,14 @@ class PackingListController extends Controller
             }
 
             $packingList->date = $request->date;
-            $packingList->gd_no = $request->gd_no;
-            $packingList->container_no = $request->container_no;
+            // GD No should always come from commercial invoice
+            $commercialInvoice = CommercialInvoice::find($packingList->commercial_invoice_id);
+            if ($commercialInvoice) {
+                $packingList->gd_no = $commercialInvoice->gd_no ?? $request->gd_no;
+            } else {
+                $packingList->gd_no = $request->gd_no;
+            }
+            // Container no removed from master - it's now in items detail only
             $packingList->consignee_name = $request->consignee_name;
             $packingList->vessel_voyage = $request->vessel_voyage;
             $packingList->port_from = $request->port_from;

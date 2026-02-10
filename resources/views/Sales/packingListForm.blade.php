@@ -151,13 +151,7 @@ $isEdit = isset($packingList) && $packingList;
                                                             <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
                                                                 <div class="form-group-custom">
                                                                     <label>GD NO</label>
-                                                                    <input type="text" class="form-control form-control-custom" name="gd_no" id="gd_no" value="{{ $isEdit ? $packingList->gd_no : '' }}" placeholder="Enter GD NO">
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                                                                <div class="form-group-custom">
-                                                                    <label>Container #</label>
-                                                                    <input type="text" class="form-control form-control-custom" name="container_no" id="container_no" value="{{ $isEdit ? $packingList->container_no : '' }}" placeholder="Enter Container Number">
+                                                                    <input type="text" class="form-control form-control-custom" name="gd_no" id="gd_no" value="{{ $isEdit ? $packingList->gd_no : '' }}" placeholder="GD NO" readonly style="background-color: #f5f5f5;">
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -331,7 +325,6 @@ function loadCommercialInvoiceDetails(commercialInvoiceId) {
                 // Populate invoice details
                 $('#invoice_no').val(response.commercial_invoice.invoice_no || '');
                 $('#gd_no').val(response.commercial_invoice.gd_no || '');
-                $('#container_no').val(response.commercial_invoice.container_no || '');
                 $('#consignee_name').val(response.commercial_invoice.consignee_name || '');
                 $('#vessel_voyage').val(response.commercial_invoice.vessel_voyage || '');
                 $('#port_from').val(response.commercial_invoice.port_from || '');
@@ -550,7 +543,6 @@ function submitPackingList() {
         invoice_no: $('#invoice_no').val(),
         date: $('#date').val(),
         gd_no: $('#gd_no').val(),
-        container_no: $('#container_no').val(),
         consignee_name: $('#consignee_name').val(),
         vessel_voyage: $('#vessel_voyage').val(),
         port_from: $('#port_from').val(),

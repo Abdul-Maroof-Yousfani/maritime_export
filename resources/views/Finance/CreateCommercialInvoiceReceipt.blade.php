@@ -75,11 +75,11 @@ $Colll = DB::Connection('mysql2')->select('
                         <label for="pwd">Payment Mode</label>
                         <select id="pay_mode" name="pay_mode" onchange="hide_unhide()" class="form-control">
                             <option value="1,1">Cheque</option>
-                            <option value="2,2">Cash </option>
+                            <option selected value="2,2">Cash </option>
                         </select>
                     </div>
 
-                    <div  class="col-lg-3 col-md-3 col-sm-3 col-xs-12 hidee">
+                    <div  class="col-lg-3 col-md-3 col-sm-3 col-xs-12 hidee" style="display:none;">
                         <label for="pwd"> Banks </label>
                         <?php $bank=DB::Connection('mysql2')->table('bank_detail')->get(); ?>
                         <select name="bank" class="form-control">
@@ -89,17 +89,17 @@ $Colll = DB::Connection('mysql2')->select('
                         </select>
                     </div>
 
-                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 hidee">
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 hidee" style="display:none;">
                         <label for="pwd">Cheque No:</label>
                         <input type="text" class="form-control" id="cheque" name="cheque">
                     </div>
 
-                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 hidee">
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 hidee" style="display:none;">
                         <label for="pwd">Cheque Date:</label>
                         <input value="{{date('Y-m-d')}}" class="form-control" name="cheque_date" type="date" >
                     </div>
 
-                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" id="dr_account_div" style="display: none;">
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" id="dr_account_div" >
                         <label for="pwd">Dr Account</label>
                         <select name="acc_id" id="acc_id" class="form-control select2">
                             <option value="">Select</option>
