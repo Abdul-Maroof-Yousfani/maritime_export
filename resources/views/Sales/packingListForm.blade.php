@@ -95,6 +95,43 @@ $isEdit = isset($packingList) && $packingList;
         outline: none;
         box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
     }
+    
+    .loader-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .loader-overlay.active {
+        display: flex;
+    }
+    
+    .loader-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .loader-text {
+        color: white;
+        margin-top: 20px;
+        font-size: 16px;
+    }
 </style>
 
 <div class="well_N">
@@ -250,6 +287,13 @@ $isEdit = isset($packingList) && $packingList;
     </div>
 </div>
 
+<div class="loader-overlay" id="loaderOverlay">
+    <div style="text-align: center;">
+        <div class="loader-spinner"></div>
+        <div class="loader-text" id="loaderText">Loading...</div>
+    </div>
+</div>
+
 <script>
 $(document).ready(function() {
     // Load commercial invoices
@@ -310,11 +354,19 @@ function loadCommercialInvoices() {
 }
 
 function loadCommercialInvoiceDetails(commercialInvoiceId) {
+    // Show loader and disable submit button
+    $('#loaderOverlay').addClass('active');
+    $('#loaderText').text('Loading Commercial Invoice Details...');
+    $('button[type="submit"]').prop('disabled', true);
+    
     $.ajax({
         url: '{{ url("/export/getCommercialInvoiceDetailsForPackingList") }}',
         type: 'GET',
         data: { commercial_invoice_id: commercialInvoiceId },
         success: function(response) {
+            // Hide loader and enable submit button
+            $('#loaderOverlay').removeClass('active');
+            $('button[type="submit"]').prop('disabled', false);
             if (response.commercial_invoice && response.invoice_data) {
                 // Show packing list details section
                 $('#packingListDetails').show();
@@ -337,6 +389,9 @@ function loadCommercialInvoiceDetails(commercialInvoiceId) {
             }
         },
         error: function(xhr, status, error) {
+            // Hide loader and enable submit button
+            $('#loaderOverlay').removeClass('active');
+            $('button[type="submit"]').prop('disabled', false);
             console.error('AJAX Error:', xhr, status, error);
             alert('Error loading commercial invoice details: ' + error);
         }
@@ -525,6 +580,11 @@ function calculateTotals() {
 }
 
 function submitPackingList() {
+    // Show loader and disable submit button
+    $('#loaderOverlay').addClass('active');
+    $('#loaderText').text('Submitting Packing List...');
+    $('button[type="submit"]').prop('disabled', true);
+    
     var items = $('#packingListForm').data('items') || [];
     
     // Update items with current gross kgs values
@@ -565,6 +625,10 @@ function submitPackingList() {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
         success: function(response) {
+            // Hide loader and enable submit button
+            $('#loaderOverlay').removeClass('active');
+            $('button[type="submit"]').prop('disabled', false);
+            
             if (response.success) {
                 alert(formData.id ? 'Packing list updated successfully' : 'Packing list created successfully');
                 window.location.href = '{{ url("/export/packingListList") }}';
@@ -573,6 +637,10 @@ function submitPackingList() {
             }
         },
         error: function(xhr) {
+            // Hide loader and enable submit button
+            $('#loaderOverlay').removeClass('active');
+            $('button[type="submit"]').prop('disabled', false);
+            
             var errorMsg = 'Error saving packing list';
             if (xhr.responseJSON && xhr.responseJSON.message) {
                 errorMsg = xhr.responseJSON.message;

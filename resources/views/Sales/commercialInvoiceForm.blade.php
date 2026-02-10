@@ -44,6 +44,43 @@ $m = Session::get('run_company');
     .commercial-invoice-details {
         display: none;
     }
+    
+    .loader-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .loader-overlay.active {
+        display: flex;
+    }
+    
+    .loader-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .loader-text {
+        color: white;
+        margin-top: 20px;
+        font-size: 16px;
+    }
 </style>
 
 <div class="well_N">
@@ -269,6 +306,13 @@ $m = Session::get('run_company');
     </div>
 </div>
 
+<div class="loader-overlay" id="loaderOverlay">
+    <div style="text-align: center;">
+        <div class="loader-spinner"></div>
+        <div class="loader-text" id="loaderText">Loading...</div>
+    </div>
+</div>
+
 <script>
 $(document).ready(function() {
     // Load loadings
@@ -311,11 +355,19 @@ function loadLoadings() {
 }
 
 function loadLoadingDetails(loadingId) {
+    // Show loader and disable submit button
+    $('#loaderOverlay').addClass('active');
+    $('#loaderText').text('Loading Commercial Invoice Details...');
+    $('button[type="submit"]').prop('disabled', true);
+    
     $.ajax({
         url: '{{ url("/export/getLoadingDetailsForCommercialInvoice") }}',
         type: 'GET',
         data: { loading_id: loadingId },
         success: function(response) {
+            // Hide loader and enable submit button
+            $('#loaderOverlay').removeClass('active');
+            $('button[type="submit"]').prop('disabled', false);
             if (response.loading && response.sale_order) {
                 // Show commercial invoice details section
                 $('#commercialInvoiceDetails').show();
@@ -372,6 +424,9 @@ function loadLoadingDetails(loadingId) {
             }
         },
         error: function(xhr, status, error) {
+            // Hide loader and enable submit button
+            $('#loaderOverlay').removeClass('active');
+            $('button[type="submit"]').prop('disabled', false);
             console.error('AJAX Error:', xhr, status, error);
             alert('Error loading loading details: ' + error);
         }
@@ -500,6 +555,11 @@ function populateProductTable(saleOrderData, totalAmount, advanceAmountPKR, bala
 }
 
 function submitCommercialInvoice() {
+    // Show loader and disable submit button
+    $('#loaderOverlay').addClass('active');
+    $('#loaderText').text('Submitting Commercial Invoice...');
+    $('button[type="submit"]').prop('disabled', true);
+    
     var formData = {
         contract_loading_id: $('#contract_loading_id').val(),
         sale_order_export_id: $('#sale_order_export_id').val(),
@@ -532,6 +592,10 @@ function submitCommercialInvoice() {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
         success: function(response) {
+            // Hide loader and enable submit button
+            $('#loaderOverlay').removeClass('active');
+            $('button[type="submit"]').prop('disabled', false);
+            
             if (response.success) {
                 alert('Commercial invoice created successfully');
                 $('#commercialInvoiceForm')[0].reset();
@@ -545,6 +609,10 @@ function submitCommercialInvoice() {
             }
         },
         error: function(xhr) {
+            // Hide loader and enable submit button
+            $('#loaderOverlay').removeClass('active');
+            $('button[type="submit"]').prop('disabled', false);
+            
             var errorMsg = 'Error saving commercial invoice';
             if (xhr.responseJSON && xhr.responseJSON.message) {
                 errorMsg = xhr.responseJSON.message;
