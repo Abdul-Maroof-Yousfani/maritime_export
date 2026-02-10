@@ -148,7 +148,7 @@ $AccYearTo = $AccYearDate->accyearto;
 
                                         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
                                            
-                                            <input type="button" onclick="show()" class="btn btn-sm btn-primary" value="Submit"/>
+                                            <input style="cursor: pointer" type="button" onclick="show()" class="btn btn-sm btn-primary" value="Submit"/>
 
                                         </div>
 

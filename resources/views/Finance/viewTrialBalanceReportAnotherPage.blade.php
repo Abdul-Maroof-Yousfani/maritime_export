@@ -31,8 +31,8 @@ $m=Session::get('run_company');
 
 {{--<button type="button" id="print2" class="btn btn-primary btn-xs printt-btn">&nbsp; Print &nbsp;</button>--}}
 <a id="dlink" style="display:none;"></a>
+<div id="" class="well_N">
 <input type="button" class="btn btn-sm btn-warning" onclick="tablesToExcel(array1, 'Sheet1', 'myfile.xls')" value="Export to Excel">
-<div id="" class="well">
 
     <?php
     $all_debit=0;
