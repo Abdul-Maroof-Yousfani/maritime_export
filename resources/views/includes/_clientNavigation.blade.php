@@ -197,13 +197,13 @@ CommonHelper::reconnectMasterDatabase();
                 </div>
             </li>
         </ul>
-        {{-- <div class="nav navbar-nav">
+        <div class="nav navbar-nav">
             <ul class="nav navbar-nav tmenu-list">
                 <li>
                     <a href="{{ URL('dClient/?m=') . Input::get('m') }}" class="drpdn"><i
                             class="glyphicon glyphicon-home" aria-hidden="true"></i> Dashboard </a>
                 </li>
-                < if(Session::get('run_company')!=null):?>
+                {{-- < if(Session::get('run_company')!=null):?>
                 <li>
                     <a href="{{ URL('purchase/inventory_page') }}" class="drpdn"><i class="glyphicon glyphicon-home"
                             aria-hidden="true"></i> Inventory </a>
@@ -233,9 +233,9 @@ CommonHelper::reconnectMasterDatabase();
                    </div>
                 </li>
                  endif;?>
-                </li>
+                </li> --}}
             </ul>
-        </div> --}}
+        </div>
     </div>
 </div>
 <div class="container-fluid">

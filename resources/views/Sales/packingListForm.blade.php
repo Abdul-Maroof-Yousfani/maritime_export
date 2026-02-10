@@ -370,11 +370,13 @@ function populateProductTable(invoiceData, containersByItem) {
         totalGrossKgs += grossKgs;
         
         // Get container numbers for this item (combine all container nos)
-        var itemContainers = containersByItem[item.item_id] || [];
+        // Handle both string and integer item_id matching
+        var itemId = item.item_id;
+        var itemContainers = containersByItem[itemId] || containersByItem[String(itemId)] || containersByItem[parseInt(itemId)] || [];
         var containerNos = [];
-        if (itemContainers.length > 0) {
+        if (itemContainers && itemContainers.length > 0) {
             $.each(itemContainers, function(containerIndex, container) {
-                if (container.container_no) {
+                if (container && container.container_no) {
                     containerNos.push(container.container_no);
                 }
             });
@@ -457,11 +459,13 @@ function populateProductTableForEdit(packingListData) {
         totalGrossKgs += grossKgs;
         
         // Get container numbers for this item (combine all container nos)
-        var itemContainers = containersByItem[item.item_id] || [];
+        // Handle both string and integer item_id matching
+        var itemId = item.item_id;
+        var itemContainers = containersByItem[itemId] || containersByItem[String(itemId)] || containersByItem[parseInt(itemId)] || [];
         var containerNos = [];
-        if (itemContainers.length > 0) {
+        if (itemContainers && itemContainers.length > 0) {
             $.each(itemContainers, function(containerIndex, container) {
-                if (container.container_no) {
+                if (container && container.container_no) {
                     containerNos.push(container.container_no);
                 }
             });

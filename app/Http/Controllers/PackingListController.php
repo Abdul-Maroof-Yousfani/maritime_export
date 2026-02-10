@@ -61,19 +61,22 @@ class PackingListController extends Controller
         });
 
         // Get containers grouped by item_id
+        // Normalize item_id to integer for consistent matching
         $containersByItem = [];
         if ($commercialInvoice->contractLoading && $commercialInvoice->contractLoading->containers) {
             foreach ($commercialInvoice->contractLoading->containers as $container) {
-                $itemId = $container->item_id;
-                if (!isset($containersByItem[$itemId])) {
-                    $containersByItem[$itemId] = [];
+                $itemId = (int)$container->item_id; // Normalize to integer
+                if ($itemId > 0) { // Only process if item_id is valid
+                    if (!isset($containersByItem[$itemId])) {
+                        $containersByItem[$itemId] = [];
+                    }
+                    $containersByItem[$itemId][] = [
+                        'container_no' => $container->container_no ?? '',
+                        'vehicle_no' => $container->vehicle_no ?? '',
+                        'seal_no' => $container->seal_no ?? '',
+                        'quantity' => $container->quantity ?? ''
+                    ];
                 }
-                $containersByItem[$itemId][] = [
-                    'container_no' => $container->container_no ?? '',
-                    'vehicle_no' => $container->vehicle_no ?? '',
-                    'seal_no' => $container->seal_no ?? '',
-                    'quantity' => $container->quantity ?? ''
-                ];
             }
         }
 

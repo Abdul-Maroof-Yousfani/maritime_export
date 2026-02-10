@@ -225,13 +225,13 @@ endif;
                 </div>
             </li>
         </ul>
-        {{-- <div class="nav navbar-nav">
+       <div class="nav navbar-nav">
             <ul class="nav navbar-nav tmenu-list">
                 <li>
                     <a href="{{ URL('dClient/?m=') . Input::get('m') }}" class="drpdn"><i
                             class="glyphicon glyphicon-home" aria-hidden="true"></i> Dashboard </a>
                 </li>
-                if(Session::get('run_company')!=null):?>
+                {{-- < if(Session::get('run_company')!=null):?>
                 <li>
                     <a href="{{ URL('purchase/inventory_page') }}" class="drpdn"><i class="glyphicon glyphicon-home"
                             aria-hidden="true"></i> Inventory </a>
@@ -246,22 +246,24 @@ endif;
                     <a href="{{ URL('production/production_dashboard') }}" class="drpdn"><i
                             class="glyphicon glyphicon-home" aria-hidden="true"></i> Production </a>
                 </li>
+                <li>
+                    <a href="{{ URL('changeCompany') }}" class="drpdn"><i class="glyphicon glyphicon-home"
+                            aria-hidden="true"></i> Change Company </a>
+                </li>
                 <li class="myst">
-                    <div class="row">
-                        Compact&nbsp;Mode
-
-                        <div class="btn-wrap">
-                            <input type="checkbox" name="compact_mode" id="compact_mode"
-                                {{ Auth::user()->compact_mode ? 'checked' : '' }} onclick="compactChecked()"
-                                value="1">
-                        </div>
-
-                    </div>
+                  <div class="row">
+                       Compact&nbsp;Mode
+                       
+                       <div class="btn-wrap">
+                         <input type="checkbox" name="compact_mode" id="compact_mode" {{(Auth::user()->compact_mode)? 'checked':'' }} onclick="compactChecked()" value="1">
+                       </div>
+                     
+                   </div>
                 </li>
-                p endif;?>
-                </li>
+                 endif;?>
+                </li> --}}
             </ul>
-        </div> --}}
+        </div>
     </div>
 </div>
 <br />
