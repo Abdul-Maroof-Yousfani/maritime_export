@@ -106,7 +106,7 @@ class BankController extends Controller
         DB::Connection('mysql2')->beginTransaction();
         try {
 
-            $parent_code = '1-1-4';
+            $parent_code = '1-1-8';
             $max_id = DB::Connection('mysql2')->selectOne('SELECT max(`id`) as id  FROM `accounts` WHERE `parent_code` LIKE \''.$parent_code.'\' and status=1')->id;
             if($max_id == ''){
                 $code = $parent_code.'-1';
