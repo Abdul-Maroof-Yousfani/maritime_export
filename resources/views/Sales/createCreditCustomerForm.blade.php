@@ -28,15 +28,8 @@ $m=Session::get('run_company');
                                                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                                 <input type="hidden" name="pageType" value="<?php echo $_GET['pageType']?>">
                                                 <input type="hidden" name="parentCode" value="<?php echo $_GET['parentCode']?>">
-                                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-                                                    <label>Type</label>
-                                                    <span class="rflabelsteric"><strong>*</strong></span>
-                                                   <select class="form-control" name="purchaser_type" id="">
-                                                    <option value="">Select Type</option>
-                                                    <option value="1">Local</option>
-                                                    <option value="2" selected>Export </option>
-                                                   </select>
-                                                </div>
+                                                <!-- Customer type is always Export, hidden field -->
+                                                <input type="hidden" name="purchaser_type" value="2">
                                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="display: none;">
                                                     <label>Account Head :</label>
                                                     <span class="rflabelsteric"><strong>*</strong></span>
