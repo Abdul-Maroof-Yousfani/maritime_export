@@ -124,7 +124,7 @@ class BankController extends Controller
                 $counter++;
             endforeach;
             $data1['code'] = $code;
-            $data1['name'] = $request->bank_name.' - ('.$request->account_no.')';
+            $data1['name'] = $request->name.' - ('.$request->account_no.')';
             $data1['parent_code'] = $parent_code;
             $data1['username'] 		 	= auth()->user()->username;
             $data1['date']     		  = date("Y-m-d");
@@ -196,7 +196,7 @@ class BankController extends Controller
             $bank->username = Auth::user()->name;
             $bank->save();
 
-            $account = DB::Connection('mysql2')->table('accounts')->where('id',$bank->acc_id)->update(['name'=>$request->bank_name.' - ('.$request->account_no.')']);
+            $account = DB::Connection('mysql2')->table('accounts')->where('id',$bank->acc_id)->update(['name'=>$request->name.' - ('.$request->account_no.')']);
             DB::Connection('mysql2')->commit();
       return redirect()->route('bankList');
       } catch (Exception $ex) {
