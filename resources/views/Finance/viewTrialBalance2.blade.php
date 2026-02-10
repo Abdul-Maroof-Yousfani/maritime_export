@@ -146,15 +146,7 @@ $AccYearTo = $AccYearDate->accyearto;
                                                     />
                                         </div>
 
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                                            <label class="radio-inline"><input type="radio" id="optradio" name="optradio" value="1"><b>ASSETS</b></label>
-                                            <label class="radio-inline"><input type="radio" id="optradio" name="optradio" value="2"><b>LIABILITIES</b></label>
-                                            <label class="radio-inline"><input type="radio" name="optradio" value="3"><b>CAPITAL</b></label>
-                                            <label class="radio-inline"><input type="radio" name="optradio" value="4"><b>EXPENSES</b></label>
-                                            <label class="radio-inline"><input type="radio" name="optradio" value="5"><b>REVENUE</b></label>
-                                            <input type="button" onclick="show()" class="btn btn-sm btn-primary" value="Submit"/>
-
-                                        </div>
+                                      
 
 
 
