@@ -312,13 +312,16 @@ $AccYearTo = $AccYearDate->accyearto;
                 return;
             }
 
-            var formData = form.serialize();
+            // Use FormData to support file uploads
+            var formData = new FormData(form[0]);
             var base_url='<?php echo URL::to('/'); ?>';
             
             $.ajax({
                 url: base_url+'/export/receiveAdvancePayment',
                 type: 'POST',
                 data: formData,
+                processData: false,
+                contentType: false,
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },

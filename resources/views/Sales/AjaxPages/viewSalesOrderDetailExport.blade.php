@@ -36,8 +36,36 @@ $total_expense =0;
         table.table-bordered > thead > tr > th{
             border:1px solid blue !important;
         }
-
-
+        
+        /* Hide action column in print */
+        .attachment-action-column {
+            display: none !important;
+        }
+        
+        /* Show embedded attachments only in print */
+        .attachment-embedded {
+            display: block !important;
+            page-break-before: always;
+            page-break-inside: avoid;
+        }
+        
+        .attachment-embedded img,
+        .attachment-embedded iframe,
+        .attachment-embedded embed {
+            max-width: 100%;
+            height: auto;
+            page-break-inside: avoid;
+        }
+        
+        /* Hide attachment table in print, show embedded content */
+        .attachment-table-section {
+            display: none !important;
+        }
+    }
+    
+    /* Hide embedded attachments on screen */
+    .attachment-embedded {
+        display: none;
     }
 </style>
 <?php
@@ -256,6 +284,11 @@ $total_expense =0;
                                 <td style="border:1px solid black;" class="text-left">
                                   
                                     {{ $sales_order->advance_amount ?? '' }}
+                                    @if(isset($advanceAttachments) && $advanceAttachments->count() > 0)
+                                        <span class="badge badge-info" style="margin-left: 10px;">
+                                            {{ $advanceAttachments->count() }} Attachment(s)
+                                        </span>
+                                    @endif
                                 </td>
                                
                             </tr>
@@ -438,9 +471,74 @@ $total_expense =0;
                         </div>
                     </div>
 
-                    <!-- Attachments Section -->
-                    @if(isset($attachments) && $attachments->count() > 0)
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 30px;">
+                    <!-- Advance Payment Attachments Section -->
+                    @if(isset($advanceAttachments) && $advanceAttachments->count() > 0)
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 attachment-table-section" style="margin-top: 30px;">
+                        <h4 style="text-align: center; margin-bottom: 20px; color: #28a745;">Advance Payment Attachments</h4>
+                        <div class="table-responsive">
+                            <table class="table table-bordered" style="border: solid 1px black;">
+                                <thead>
+                                    <tr>
+                                        <th style="border:1px solid black; text-align: center;">S.No</th>
+                                        <th style="border:1px solid black; text-align: center;">File Name</th>
+                                        <th style="border:1px solid black; text-align: center;">File Type</th>
+                                        <th style="border:1px solid black; text-align: center;">File Size</th>
+                                        <th class="attachment-action-column" style="border:1px solid black; text-align: center;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($advanceAttachments as $index => $attachment)
+                                    <tr>
+                                        <td style="border:1px solid black; text-align: center;">{{ $index + 1 }}</td>
+                                        <td style="border:1px solid black;">{{ $attachment->original_name }}</td>
+                                        <td style="border:1px solid black; text-align: center;">{{ strtoupper($attachment->file_type) }}</td>
+                                        <td style="border:1px solid black; text-align: center;">{{ number_format($attachment->file_size / 1024, 2) }} KB</td>
+                                        <td class="attachment-action-column" style="border:1px solid black; text-align: center;">
+                                            <a href="{{ Storage::url($attachment->file_path) }}" target="_blank" class="btn btn-sm btn-primary">View</a>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Embedded Advance Payment Attachments for Print -->
+                    <div class="attachment-embedded">
+                        <h4 style="text-align: center; margin-bottom: 20px; color: #28a745;">Advance Payment Attachments</h4>
+                        @foreach($advanceAttachments as $index => $attachment)
+                            <div style="page-break-before: {{ $index > 0 ? 'always' : 'auto' }}; margin-bottom: 20px;">
+                                <h5 style="text-align: center; margin-bottom: 10px;">{{ $attachment->original_name }}</h5>
+                                @php
+                                    $fileUrl = Storage::url($attachment->file_path);
+                                    $fileType = strtolower($attachment->file_type);
+                                    $imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+                                @endphp
+                                
+                                @if(in_array($fileType, $imageTypes))
+                                    <div style="text-align: center;">
+                                        <img src="{{ $fileUrl }}" alt="{{ $attachment->original_name }}" style="max-width: 100%; height: auto; page-break-inside: avoid;" />
+                                    </div>
+                                @elseif($fileType == 'pdf')
+                                    <div style="text-align: center; width: 100%; height: 800px;">
+                                        <iframe src="{{ $fileUrl }}" style="width: 100%; height: 100%; border: 1px solid #000;" frameborder="0"></iframe>
+                                    </div>
+                                @else
+                                    <div style="text-align: center; padding: 20px; border: 1px solid #000;">
+                                        <p><strong>File Type:</strong> {{ strtoupper($fileType) }}</p>
+                                        <p><strong>File Name:</strong> {{ $attachment->original_name }}</p>
+                                        <p><strong>File Size:</strong> {{ number_format($attachment->file_size / 1024, 2) }} KB</p>
+                                        <p>This file type cannot be embedded. Please view it separately.</p>
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                    @endif
+
+                    <!-- Regular Attachments Section -->
+                    @if(isset($regularAttachments) && $regularAttachments->count() > 0)
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 attachment-table-section" style="margin-top: 30px;">
                         <h4 style="text-align: center; margin-bottom: 20px;">Attachments</h4>
                         <div class="table-responsive">
                             <table class="table table-bordered" style="border: solid 1px black;">
@@ -450,17 +548,17 @@ $total_expense =0;
                                         <th style="border:1px solid black; text-align: center;">File Name</th>
                                         <th style="border:1px solid black; text-align: center;">File Type</th>
                                         <th style="border:1px solid black; text-align: center;">File Size</th>
-                                        <th style="border:1px solid black; text-align: center;">Action</th>
+                                        <th class="attachment-action-column" style="border:1px solid black; text-align: center;">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($attachments as $index => $attachment)
+                                    @foreach($regularAttachments as $index => $attachment)
                                     <tr>
                                         <td style="border:1px solid black; text-align: center;">{{ $index + 1 }}</td>
                                         <td style="border:1px solid black;">{{ $attachment->original_name }}</td>
                                         <td style="border:1px solid black; text-align: center;">{{ strtoupper($attachment->file_type) }}</td>
                                         <td style="border:1px solid black; text-align: center;">{{ number_format($attachment->file_size / 1024, 2) }} KB</td>
-                                        <td style="border:1px solid black; text-align: center;">
+                                        <td class="attachment-action-column" style="border:1px solid black; text-align: center;">
                                             <a href="{{ Storage::url($attachment->file_path) }}" target="_blank" class="btn btn-sm btn-primary">View</a>
                                         </td>
                                     </tr>
@@ -468,6 +566,38 @@ $total_expense =0;
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                    
+                    <!-- Embedded Regular Attachments for Print -->
+                    <div class="attachment-embedded">
+                        <h4 style="text-align: center; margin-bottom: 20px;">Attachments</h4>
+                        @foreach($regularAttachments as $index => $attachment)
+                            <div style="page-break-before: {{ $index > 0 ? 'always' : 'auto' }}; margin-bottom: 20px;">
+                                <h5 style="text-align: center; margin-bottom: 10px;">{{ $attachment->original_name }}</h5>
+                                @php
+                                    $fileUrl = Storage::url($attachment->file_path);
+                                    $fileType = strtolower($attachment->file_type);
+                                    $imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+                                @endphp
+                                
+                                @if(in_array($fileType, $imageTypes))
+                                    <div style="text-align: center;">
+                                        <img src="{{ $fileUrl }}" alt="{{ $attachment->original_name }}" style="max-width: 100%; height: auto; page-break-inside: avoid;" />
+                                    </div>
+                                @elseif($fileType == 'pdf')
+                                    <div style="text-align: center; width: 100%; height: 800px;">
+                                        <iframe src="{{ $fileUrl }}" style="width: 100%; height: 100%; border: 1px solid #000;" frameborder="0"></iframe>
+                                    </div>
+                                @else
+                                    <div style="text-align: center; padding: 20px; border: 1px solid #000;">
+                                        <p><strong>File Type:</strong> {{ strtoupper($fileType) }}</p>
+                                        <p><strong>File Name:</strong> {{ $attachment->original_name }}</p>
+                                        <p><strong>File Size:</strong> {{ number_format($attachment->file_size / 1024, 2) }} KB</p>
+                                        <p>This file type cannot be embedded. Please view it separately.</p>
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
                     </div>
                     @endif
 

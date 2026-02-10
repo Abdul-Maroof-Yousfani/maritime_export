@@ -262,8 +262,18 @@ class SaleOrderExportController extends Controller
         $attachments = SaleOrderExportAttachment::where('sale_order_export_id', $id)
             ->where('status', 1)
             ->get();
+        
+        // Separate advance payment attachments (description = 'Advance Payment Receipt')
+        $advanceAttachments = $attachments->filter(function($attachment) {
+            return $attachment->description === 'Advance Payment Receipt';
+        });
+        
+        // Regular attachments (excluding advance payment attachments)
+        $regularAttachments = $attachments->filter(function($attachment) {
+            return $attachment->description !== 'Advance Payment Receipt';
+        });
 
-        return view('Sales.AjaxPages.viewSalesOrderDetailExport', compact('sales_order', 'sales_order_data', 'attachments'));
+        return view('Sales.AjaxPages.viewSalesOrderDetailExport', compact('sales_order', 'sales_order_data', 'attachments', 'advanceAttachments', 'regularAttachments'));
     }
 
     public function updateApprovedStatus(Request $request)
@@ -527,6 +537,34 @@ class SaleOrderExportController extends Controller
             $saleOrder->advance_amount = $advance_amount;
             $saleOrder->advance_received_status = 1; // Mark advance as received
             $saleOrder->save();
+            
+            // Handle attachments (optional, multiple files)
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    if (!$file) {
+                        continue;
+                    }
+
+                    $originalName = $file->getClientOriginalName();
+                    $extension = $file->getClientOriginalExtension();
+                    $size = $file->getSize();
+
+                    $fileName = time() . '_' . uniqid() . '.' . $extension;
+                    // Store in public disk under sale_order_export_attachments
+                    $path = $file->storeAs('sale_order_export_attachments', $fileName, 'public');
+
+                    SaleOrderExportAttachment::create([
+                        'sale_order_export_id' => $saleOrder->id,
+                        'file_name'            => $fileName,
+                        'original_name'        => $originalName,
+                        'file_path'            => $path,
+                        'file_type'            => $extension,
+                        'file_size'            => $size,
+                        'description'          => 'Advance Payment Receipt',
+                        'status'               => 1,
+                    ]);
+                }
+            }
             
             DB::Connection('mysql2')->commit();
             

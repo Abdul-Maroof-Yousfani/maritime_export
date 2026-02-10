@@ -1,4 +1,4 @@
-<form id="advancePaymentForm">
+<form id="advancePaymentForm" enctype="multipart/form-data">
     <input type="hidden" name="sale_order_id" value="{{ $saleOrder->id }}">
     <input type="hidden" name="voucher_no" value="{{ $saleOrder->voucehr_no }}">
     
@@ -60,6 +60,18 @@
                 <label class="form-label">Advance Amount <span class="rflabelsteric">*</span></label>
                 <input type="number" class="form-control" name="advance_amount" id="advance_amount" 
                     value="{{ $saleOrder->advance_amount ?? 0 }}" step="0.01" min="0" placeholder="Enter advance payment amount" required readonly />
+            </div>
+        </div>
+    </div>
+    
+    <div class="row" style="margin-top: 20px;">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="form-group">
+                <label class="form-label">Attachments</label>
+                <input type="file" class="form-control" name="attachments[]" id="attachments" 
+                    multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif" />
+                <small class="text-muted">You can select multiple files (PDF, DOC, XLS, Images). Optional field.</small>
+                <div id="attachmentPreview" class="mt-2"></div>
             </div>
         </div>
     </div>
