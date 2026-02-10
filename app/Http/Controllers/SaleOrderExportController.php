@@ -1267,6 +1267,60 @@ class SaleOrderExportController extends Controller
                     $transaction_customer->save();
                 }
 
+
+                if($balanceAmountPKR != $grandTotalPKR){
+                    // If balance is different from grand total, it means there's an advance component
+                    // We need to create a separate transaction for the advance amount (if this is the first invoice)
+                    if ($advanceAmountPKR > 0) {
+                        // Customer Credit (Advance) - advance amount in PKR
+                        if ($customer_acc_id) {
+                            $transaction_cr_advance = new Transactions();
+                            $transaction_cr_advance = $transaction_cr_advance->SetConnection('mysql2');
+                            $transaction_cr_advance->voucher_no = $voucher_no; // Different voucher no for advance
+                            $transaction_cr_advance->v_date = $v_date;
+                            $transaction_cr_advance->acc_id = $customer_acc_id;
+                            $transaction_cr_advance->acc_code = FinanceHelper::getAccountCodeByAccId($customer_acc_id);
+                            $transaction_cr_advance->particulars = 'Advance for Commercial Invoice - ' . $voucher_no;
+                            $transaction_cr_advance->opening_bal = 0;
+                            $transaction_cr_advance->debit_credit = 0; // Credit - advance received
+                            $transaction_cr_advance->amount = $advanceAmountPKR; // Advance amount in PKR (no conversion needed)
+                            $transaction_cr_advance->username = Auth::user()->name;
+                            $transaction_cr_advance->status = 1;
+                            $transaction_cr_advance->voucher_type = 22; // Commercial Invoice voucher type
+                            $transaction_cr_advance->master_id = $commercialInvoice->id;
+                            $transaction_cr_advance->save();
+
+                            $transaction_dr_advance = new Transactions();
+                            $transaction_dr_advance = $transaction_dr_advance->SetConnection('mysql2');
+                            $transaction_dr_advance->voucher_no = $voucher_no; // Different voucher no for advance
+                            $transaction_dr_advance->v_date = $v_date;
+                            $transaction_dr_advance->acc_id = $customer->liability_acc_id; // Assuming customer has a liability account for advances
+                            $transaction_dr_advance->acc_code = FinanceHelper::getAccountCodeByAccId($customer->liability_acc_id);
+                            $transaction_dr_advance->particulars = 'Advance for Commercial Invoice - ' . $voucher_no;
+                            $transaction_dr_advance->opening_bal = 0;
+                            $transaction_dr_advance->debit_credit = 1; // Debit - advance received
+                            $transaction_dr_advance->amount = $advanceAmountPKR; // Advance amount in PKR (no conversion needed)
+                            $transaction_dr_advance->username = Auth::user()->name;
+                            $transaction_dr_advance->status = 1;
+                            $transaction_dr_advance->voucher_type = 22; // Commercial Invoice voucher type
+                            $transaction_dr_advance->master_id = $commercialInvoice->id;
+                            $transaction_dr_advance->save();
+
+
+                            $received_paymet=array
+                            (
+                                'commercial_invoice_id'=>$commercialInvoice->id,
+                                'commercial_invoice_no'=>$voucher_no,
+                                'receipt_id'=>'',
+                                'receipt_no'=>'',
+                                'received_amount'=>$advanceAmountPKR,
+                                'slip_no'=>'',
+                                'status'=>1,
+                            );
+                            DB::Connection('mysql2')->table('received_paymet')->insert($received_paymet);
+                        }
+                }
+
                 // Sales Revenue Credit - grand total in PKR
                 // Assuming there's a sales revenue account (you may need to adjust this)
                 $sales_revenue_acc_id = 1; // Adjust based on your chart of accounts
@@ -1279,7 +1333,7 @@ class SaleOrderExportController extends Controller
                 $transaction_sales->particulars = 'Commercial Invoice - ' . $voucher_no;
                 $transaction_sales->opening_bal = 0;
                 $transaction_sales->debit_credit = 0; // Credit - revenue
-                $transaction_sales->amount = $grandTotalPKR; // Grand total in PKR (no conversion needed)
+                $transaction_sales->amount = $balanceAmountPKR; // Grand total in PKR (no conversion needed)
                 $transaction_sales->username = Auth::user()->name;
                 $transaction_sales->status = 1;
                 $transaction_sales->voucher_type = 22;

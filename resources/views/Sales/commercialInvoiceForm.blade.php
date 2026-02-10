@@ -545,7 +545,7 @@ function populateProductTable(saleOrderData, totalAmount, advanceAmountPKR, bala
     // For advance, store PKR amount for backend processing
     $('#grand_total_hidden').val(grandTotal);
     $('#grand_total_pkr_hidden').val(grandTotalPKR);
-    $('#advance_amount_hidden').val(advanceAmountPKRNum); // Store PKR for backend
+    $('#advance_amount_hidden').val(advanceAmountInCurrency); // Store PKR for backend
     $('#advance_amount_pkr_hidden').val(advanceAmountPKRNum);
     $('#balance_amount_hidden').val(balanceAmountInCurrency); // Store in selected currency
     $('#balance_amount_pkr_hidden').val(balance_amount_pkr); // Store PKR for backend
