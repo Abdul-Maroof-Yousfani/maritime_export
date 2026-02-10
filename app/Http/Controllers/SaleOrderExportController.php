@@ -458,7 +458,8 @@ class SaleOrderExportController extends Controller
             
             // Use advance_amount from sale order (stored in form)
             $advance_amount = $saleOrder->advance_amount ?? 0;
-            
+            $exchangeRate = $saleOrder->currencey_rate ?? 1;
+            $advance_amount_in_base_currency = $advance_amount * $exchangeRate;
             if ($advance_amount <= 0) {
                 return response()->json(['success' => false, 'message' => 'Advance amount must be greater than 0'], 400);
             }
@@ -499,7 +500,7 @@ class SaleOrderExportController extends Controller
             $transaction_customer->particulars = 'Advance Payment Received - ' . $saleOrder->voucehr_no;
             $transaction_customer->opening_bal = 0;
             $transaction_customer->debit_credit = 0; // Credit - customer paying
-            $transaction_customer->amount = $advance_amount;
+            $transaction_customer->amount = $advance_amount_in_base_currency;
             $transaction_customer->username = Auth::user()->name;
             $transaction_customer->status = 1;
             $transaction_customer->voucher_type = 21; // Export Sale Order voucher type
@@ -516,7 +517,7 @@ class SaleOrderExportController extends Controller
             $transaction_bank->particulars = 'Advance Payment Received - ' . $saleOrder->voucehr_no;
             $transaction_bank->opening_bal = 0;
             $transaction_bank->debit_credit = 1; // Debit - money coming in
-            $transaction_bank->amount = $advance_amount;
+            $transaction_bank->amount = $advance_amount_in_base_currency;
             $transaction_bank->username = Auth::user()->name;
             $transaction_bank->status = 1;
             $transaction_bank->voucher_type = 21; // Export Sale Order voucher type
