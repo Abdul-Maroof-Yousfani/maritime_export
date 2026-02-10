@@ -11,6 +11,9 @@ use App\Models\CostCenterDepartmentAllocation;
 
 use App\Models\Rvs;
 use App\Models\Rvs_data;
+use App\Models\CommercialInvoice;
+use App\Models\Transactions;
+use App\Helpers\SalesHelper;
 use Input;
 use Auth;
 use DB;
@@ -1293,6 +1296,225 @@ class FinanceEditDetailControler extends Controller
         Session::flash('dataInsert','successfully saved.');
 
      return Redirect::to('finance/viewCashPaymentVoucherList?pageType=viewlist&&parentCode=21&&m='.$_GET['m'].'#SFR');
+    }
+
+    function updateCommercialInvoiceReceipt(Request $request)
+    {
+        DB::Connection('mysql2')->beginTransaction();
+        try
+        {
+            $id = $request->id;
+            $rvs = DB::Connection('mysql2')->table('new_rvs')->where('id', $id)->first();
+            
+            if (!$rvs) {
+                return redirect()->back()->with('error', 'Receipt voucher not found');
+            }
+
+            $rv_type=0;
+            $bank=0;
+
+            if ($request->pay_mode=='1,1'):
+                $rv_type=1;
+                $pay_mode=1;
+                $bank=$request->bank;
+            elseif ($request->pay_mode=='2,2'):
+                $pay_mode=2;
+                $rv_type=2;
+            endif;
+
+            // Update master record
+            $data=array
+            (
+                'rv_date'=>$request->v_date,
+                'ref_bill_no'=>$request->ref_bill_no,
+                'cheque_no'=>$request->cheque,
+                'cheque_date'=>$request->cheque_date,
+                'rv_type'=>$rv_type,
+                'description'=>$request->desc,
+                'bank'=>$bank,
+                'pay_mode'=>$pay_mode
+            );
+
+            DB::Connection('mysql2')->table('new_rvs')->where('id', $id)->update($data);
+
+            // Soft delete existing detail records (set status = 0 instead of hard delete)
+            // This must happen BEFORE inserting new records to prevent double counting
+            // IMPORTANT: Soft delete ALL records for this receipt_id, regardless of current status
+            // to ensure no duplicates exist when we insert new records
+            DB::Connection('mysql2')->table('brige_table_sales_receipt')->where('rv_id', $id)->delete();
+            DB::Connection('mysql2')->table('received_paymet')->where('receipt_id', $id)->delete();
+            DB::Connection('mysql2')->table('new_rv_data')->where('master_id', $id)->delete();
+            DB::Connection('mysql2')->table('transactions')->where('master_id', $id)->where('voucher_type', 5)->delete();
+            
+            // Verify that all old records are soft deleted before proceeding
+            $remainingActiveRecords = DB::Connection('mysql2')->table('received_paymet')
+                ->where('receipt_id', $id)
+                ->where('status', 1)
+                ->count();
+            
+            if ($remainingActiveRecords > 0) {
+                // Force soft delete any remaining active records
+                DB::Connection('mysql2')->table('received_paymet')
+                    ->where('receipt_id', $id)
+                    ->where('status', 1)
+                    ->update(['status' => 0]);
+            }
+
+            $brig=$request->commercial_invoice_id;
+            $net_amount=0;
+            $tax_amount=0;
+            $tax_acc_id=0;
+            $total_amount=0;
+            $discount_amount=0;
+            $buyer_id=null;
+
+            foreach($brig as $key=>$row):
+                // Get commercial invoice to find buyer_id
+                $commercialInvoice = CommercialInvoice::where('id', $row)->first();
+                if ($commercialInvoice && $commercialInvoice->saleOrderExport) {
+                    $buyer_id = $commercialInvoice->saleOrderExport->buyer_id;
+                }
+
+                $data1=array
+                (
+                    'commercial_invoice_id'=>$row,
+                    'commercial_invoice_no'=>$request->input('commercial_invoice_no')[$key],
+                    'rv_id'=>$id,
+                    'rv_no'=>$rvs->rv_no,
+                    'received_amount'=>CommonHelper::check_str_replace($request->input('receive_amount')[$key]),
+                    'tax_percent'=>$request->input('percent')[$key],
+                    'tax_amount'=>$request->input('tax_amount')[$key],
+                    'discount_amount'=>$request->input('discount')[$key],
+                    'net_amount'=>CommonHelper::check_str_replace($request->input('net_amount')[$key]),
+                    'status'=>1
+                );
+                if ($request->input('percent')[$key]!=0):
+                $tax_acc_id=	CommonHelper::generic('invoice_tax',array('name'=>$request->input('percent')[$key]),'acc_id')->first()->acc_id;
+                
+                    endif;
+
+                $net_amount+=CommonHelper::check_str_replace($request->input('receive_amount')[$key]);
+                $discount_amount+=$request->input('discount')[$key];
+
+                if ($request->input('percent')[$key]!=0):
+                $tax_amount+=$request->input('tax_amount')[$key];
+                    else:
+                        $tax_amount+=0;
+                    endif;
+                $total_amount+=CommonHelper::check_str_replace($request->input('net_amount')[$key]);
+                DB::Connection('mysql2')->table('brige_table_sales_receipt')->insert($data1);
+
+
+
+                $received_paymet=array
+                (
+                    'commercial_invoice_id'=>$row,
+                    'commercial_invoice_no'=>$request->input('commercial_invoice_no')[$key],
+                    'receipt_id'=>$id,
+                    'receipt_no'=>$rvs->rv_no,
+                    'received_amount'=>CommonHelper::check_str_replace($request->input('receive_amount')[$key]),
+                    'slip_no'=>$request->cheque,
+                    'status'=>1,
+                );
+                DB::Connection('mysql2')->table('received_paymet')->insert($received_paymet);
+            endforeach;
+
+            $transaction=new Transactions();
+            $transaction=$transaction->SetConnection('mysql2');
+
+            $data2=array
+            (
+                'master_id'=>$id,
+                'rv_no'=>$rvs->rv_no,
+                'acc_id'=>$request->acc_id,
+                'amount'=>$total_amount,
+                'debit_credit'=>1,
+                'description'=>'',
+                'status'=>1,
+                'rv_status'=>1,
+                'description'=>$request->desc,
+                );
+                DB::Connection('mysql2')->table('new_rv_data')->insert($data2);
+
+        if ($tax_amount>0):
+
+            $data3=array
+            (
+                'master_id'=>$id,
+                'rv_no'=>$rvs->rv_no,
+                'acc_id'=>$tax_acc_id,
+                'amount'=>$tax_amount,
+                'debit_credit'=>1,
+                'description'=>'',
+                'status'=>1,
+                'rv_status'=>1,
+                'description'=>$request->desc,
+            );
+                    DB::Connection('mysql2')->table('new_rv_data')->insert($data3);
+
+            endif;
+
+
+            if ($discount_amount>0):
+            $disc_acc_id=DB::Connection('mysql2')->table('accounts')->where('status',1)->where('name','Sales Discount')->first()->id;
+                $data6=array
+                (
+                    'master_id'=>$id,
+                    'rv_no'=>$rvs->rv_no,
+                    'acc_id'=>$disc_acc_id,
+                    'amount'=>$discount_amount,
+                    'debit_credit'=>1,
+                    'description'=>'',
+                    'status'=>1,
+                    'rv_status'=>1,
+                    'description'=>$request->desc,
+                );
+                DB::Connection('mysql2')->table('new_rv_data')->insert($data6);
+                endif;
+
+
+
+        if ($buyer_id):
+            $customer_acc_id=	SalesHelper::get_customer_acc_id($buyer_id);
+
+            $data4=array
+            (
+                'master_id'=>$id,
+                'rv_no'=>$rvs->rv_no,
+                'acc_id'=>$customer_acc_id,
+                'amount'=>$net_amount,
+                'debit_credit'=>0,
+                'description'=>'',
+                'status'=>1,
+                'rv_status'=>1,
+                'description'=>$request->desc,
+            );
+            DB::Connection('mysql2')->table('new_rv_data')->insert($data4);
+        endif;
+
+            SalesHelper::sales_activity($rvs->rv_no,$request->v_date,$total_amount,5,'Update');
+
+            DB::Connection('mysql2')->commit();
+
+        }
+        catch(\Exception $e)
+        {
+            DB::Connection('mysql2')->rollback();
+            return redirect()->back()->with('error', 'Error updating receipt voucher: ' . $e->getMessage());
+        }
+
+        $SavePrintVal = Input::get('SavePrintVal');
+
+        //Testing Redirect
+        if($SavePrintVal == 1)
+        {
+            $Url = url('sdc/viewReceiptVoucherDirect?id='.$id.'&&pageType='.Input::get('pageType').'&&parentCode='.Input::get('parentCode').'&&m='.Session::get('run_company').'#Murtaza Corp');
+            return Redirect::to($Url);
+        }
+        else
+        {
+            return Redirect::to('sales/receiptVoucherList?m='.$request->m);
+        }
     }
 
     function editBankReceiptVoucherForm(request $request){

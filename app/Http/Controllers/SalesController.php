@@ -1086,6 +1086,18 @@ class SalesController extends Controller
     public function editVoucherList()
     {
         $id = $_GET['id'];
+        
+        // Check if this is a commercial invoice receipt
+        $brige_table_check = DB::Connection('mysql2')->table('brige_table_sales_receipt')
+            ->where('status', 1)
+            ->where('rv_id', '=', $id)
+            ->first();
+        
+        // If it has commercial_invoice_id, redirect to commercial invoice receipt edit
+        if ($brige_table_check && isset($brige_table_check->commercial_invoice_id) && $brige_table_check->commercial_invoice_id) {
+            return redirect()->route('editCommercialInvoiceReceipt', ['id' => $id, 'm' => $_GET['m']]);
+        }
+        
         $accounts = new Account;
         $accounts = $accounts->SetConnection('mysql2');
         $accounts = $accounts->where('status', 1)->select('id', 'name', 'code')->orderBy('level1', 'ASC')

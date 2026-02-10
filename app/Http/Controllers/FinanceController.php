@@ -1517,6 +1517,41 @@ class FinanceController extends Controller
 		return view('Finance.CreateCommercialInvoiceReceipt',compact('accounts','val'));
 	}
 
+	public function editCommercialInvoiceReceipt(Request $request)
+	{
+		$id = $request->id;
+		
+		// Get receipt voucher master data
+		$rvs = DB::Connection('mysql2')->table('new_rvs')->where('id', $id)->where('status', 1)->first();
+		
+		if (!$rvs) {
+			return redirect()->back()->with('error', 'Receipt voucher not found');
+		}
+		
+		// Get receipt voucher detail data (commercial invoices)
+		$rvsData = DB::Connection('mysql2')->table('brige_table_sales_receipt')
+			->where('rv_id', $id)
+			->where('status', 1)
+			->get();
+		
+		// Get commercial invoice IDs
+		$val = $rvsData->pluck('commercial_invoice_id')->toArray();
+		
+		// Get accounts
+		$accounts = new Account;
+		$accounts=$accounts->SetConnection('mysql2');
+		$accounts = $accounts->where('status',1)->select('id','name','code')->orderBy('level1', 'ASC')
+			->orderBy('level2', 'ASC')
+			->orderBy('level3', 'ASC')
+			->orderBy('level4', 'ASC')
+			->orderBy('level5', 'ASC')
+			->orderBy('level6', 'ASC')
+			->orderBy('level7', 'ASC')
+			->get();
+		
+		return view('Finance.EditCommercialInvoiceReceipt',compact('accounts','val','rvs','rvsData'));
+	}
+
 	public function viewOutstanding_bills_through_jvs()
 	{
 		$supplier= new Supplier();

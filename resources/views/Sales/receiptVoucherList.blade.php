@@ -216,7 +216,7 @@ $AccYearTo = $AccYearDate->accyearto;
             $('#data').html('<tr><td colspan="14"><div class="row"><div class="col-lg-12 col-md-12 col-sm-12 col-xs-12"><div class="loader"></div></div></div></td><tr>');
 
             $.ajax({
-                url: '/fdc/getRvsDateAndAccontWiseForSales',
+                url: '{{url("/fdc/getRvsDateAndAccontWiseForSales")}}',
                 type: 'Get',
                 data: {FromDate: FromDate,ToDate:ToDate,VoucherStatus:VoucherStatus,AccountId:AccountId,m:m},
 
@@ -234,7 +234,7 @@ $AccYearTo = $AccYearDate->accyearto;
         {
             if (confirm('Are you sure you want to delete this request')) {
                 $.ajax({
-                    url: '/pdc/deleteResourceAssignedList',
+                    url: '{{url("/pdc/deleteResourceAssignedList")}}',
                     type: 'Get',
                     data: {id: id},
                     success: function (response) {

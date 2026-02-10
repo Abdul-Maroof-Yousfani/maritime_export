@@ -341,6 +341,7 @@ Route::group(['prefix' => 'finance', 'middleware' => 'mysql2', 'before' => 'csrf
     //for sales receipt voucher
     Route::post('/CreateReceiptVoucherForSales/{id?}', 'FinanceController@CreateReceiptVoucherForSales');
     Route::post('/CreateReceiptVoucherForCommercialInvoice', 'FinanceController@CreateReceiptVoucherForCommercialInvoice');
+    Route::get('/editCommercialInvoiceReceipt', 'FinanceController@editCommercialInvoiceReceipt')->name('editCommercialInvoiceReceipt');
 
     Route::get('/viewBookDay', 'FinanceController@viewBookDay');
     //end amir
@@ -364,6 +365,7 @@ Route::group(['prefix' => 'fad', 'middleware' => 'mysql2', 'before' => 'csrf'], 
     Route::post('/add_role', 'FinanceAddDetailControler@add_role');
     Route::post('/addSalesReceipt', 'FinanceAddDetailControler@addSalesReceipt');
     Route::post('/addCommercialInvoiceReceipt', 'FinanceAddDetailControler@addCommercialInvoiceReceipt');
+    Route::post('/updateCommercialInvoiceReceipt', 'FinanceEditDetailControler@updateCommercialInvoiceReceipt');
     Route::post('/addJournalVoucherDetail', 'FinanceAddDetailControler@addJournalVoucherDetail');
     Route::post('/updateJournalVoucherDetail', 'FinanceEditDetailControler@updateJournalVoucherDetail');
     //amir
