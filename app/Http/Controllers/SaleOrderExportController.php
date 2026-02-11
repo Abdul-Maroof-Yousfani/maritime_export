@@ -1162,7 +1162,7 @@ class SaleOrderExportController extends Controller
             'sale_order_data' => $loadingDataWithNames->values()->toArray(), // Use loading data instead of sale order data
             'total_amount' => $totalAmount, // Based on loading qty
             'advance_amount_fcy' => $advanceAmountFCY, // Advance amount in FCY from sale_order_exports.advance_amount column
-            'advance_amount_pkr' => $advanceAmountPKR, // Advance amount in PKR from sale_order_exports.advance_amount column
+            'advance_amount' => $advanceAmountPKR, // Advance amount in PKR from sale_order_exports.advance_amount column
             'balance_amount_pkr' => $balanceAmountPKR, // Calculated balance amount in PKR
             'containers' => $containers->map(function($container) {
                 return [
