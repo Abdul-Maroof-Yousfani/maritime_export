@@ -280,22 +280,31 @@ $m = Session::get('run_company');
             
             {{-- Grand Total Section --}}
             <div class="grand-total-section">
+                @php
+                    // Advance amount is stored in PKR, convert to selected currency
+                    $advanceAmount = $commercialInvoice->advance_amount ?? 0;
+                    
+                    $balanceAmount = $commercialInvoice->balance_amount ?? $grandTotal;
+                @endphp
+                
                 <table class="grand-total-table">
                     <tr>
                         <td><strong>Grand Total:-</strong></td>
                         <td>{{ $currencySymbol }} {{ number_format($grandTotal, 2) }}</td>
                     </tr>
+                    @if($advanceAmount > 0)
+                    <tr>
+                        <td><strong>Advance:-</strong></td>
+                        <td>{{ $currencySymbol }} {{ number_format($advanceAmount, 2) }}</td>
+                    </tr>
+                    @endif
+                    <tr>
+                        <td><strong>Balance:-</strong></td>
+                        <td>{{ $currencySymbol }} {{ number_format($balanceAmount, 2) }}</td>
+                    </tr>
                 </table>
                 
                 <div class="amount-in-words">
-                    @php
-                        // Advance amount is stored in PKR, convert to selected currency
-                        $advanceAmountPKR = $commercialInvoice->advance_amount ?? 0;
-                        $exchangeRate = $commercialInvoice->exchange_rate ?? 1;
-                        $advanceAmount = $exchangeRate > 0 ? ($advanceAmountPKR / $exchangeRate) : 0;
-                        $balanceAmount = $commercialInvoice->balance_amount ?? $grandTotal;
-                    @endphp
-                    
                     @if($advanceAmount > 0)
                         <div><strong>ADVANCE IN {{ strtoupper($currencyName) }}:</strong> {{ CommonHelper::AmountInWords($advanceAmount, $currencyName) }}. ({{ $currencySymbol }} {{ number_format($advanceAmount, 2) }})</div>
                     @endif
