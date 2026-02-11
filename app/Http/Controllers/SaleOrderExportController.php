@@ -1133,7 +1133,8 @@ class SaleOrderExportController extends Controller
         
         // Get advance payment from sale_order_exports table (advance_amount column)
         // Advance is received against export order (sale_order_export_id), not against individual loadings
-        $advanceAmountPKR = $saleOrder->advance_amount ?? 0; // Advance amount in PKR from sale_order_exports table
+        $advanceAmountPKR = $saleOrder->advance_amount * $exchangeRate?? 0; // Advance amount in PKR from sale_order_exports table
+        $advanceAmountFCY = $saleOrder->advance_amount ?? 0; // Advance amount in PKR from sale_order_exports table
         // IMPORTANT: Advance amount should only be deducted ONCE across all commercial invoices
         // for the same sale_order_export_id, even if there are multiple loadings
         // If there's an existing invoice, the advance was already deducted in the first invoice
@@ -1160,7 +1161,8 @@ class SaleOrderExportController extends Controller
             'sale_order' => $saleOrder,
             'sale_order_data' => $loadingDataWithNames->values()->toArray(), // Use loading data instead of sale order data
             'total_amount' => $totalAmount, // Based on loading qty
-            'advance_amount' => $advanceAmountPKR, // Advance amount in PKR from sale_order_exports.advance_amount column
+            'advance_amount_fcy' => $advanceAmountFCY, // Advance amount in FCY from sale_order_exports.advance_amount column
+            'advance_amount_pkr' => $advanceAmountPKR, // Advance amount in PKR from sale_order_exports.advance_amount column
             'balance_amount_pkr' => $balanceAmountPKR, // Calculated balance amount in PKR
             'containers' => $containers->map(function($container) {
                 return [
