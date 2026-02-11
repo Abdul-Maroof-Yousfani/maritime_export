@@ -1323,7 +1323,7 @@ class SaleOrderExportController extends Controller
 
                 // Sales Revenue Credit - grand total in PKR
                 // Assuming there's a sales revenue account (you may need to adjust this)
-                $sales_revenue_acc_id = 1; // Adjust based on your chart of accounts
+                $sales_revenue_acc_id = 5; // Adjust based on your chart of accounts
                 $transaction_sales = new Transactions();
                 $transaction_sales = $transaction_sales->SetConnection('mysql2');
                 $transaction_sales->voucher_no = $voucher_no;
