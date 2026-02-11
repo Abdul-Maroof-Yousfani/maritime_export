@@ -1259,16 +1259,16 @@ class SaleOrderExportController extends Controller
                     $transaction_customer->particulars = 'Commercial Invoice - ' . $voucher_no;
                     $transaction_customer->opening_bal = 0;
                     $transaction_customer->debit_credit = 1; // Debit - customer owes
-                    $transaction_customer->amount = $balanceAmountPKR; // Balance in PKR (no conversion needed)
+                    $transaction_customer->amount = $grandTotalPKR; // Balance in PKR (no conversion needed)
                     $transaction_customer->username = Auth::user()->name;
                     $transaction_customer->status = 1;
                     $transaction_customer->voucher_type = 22; // Commercial Invoice voucher type
                     $transaction_customer->master_id = $commercialInvoice->id;
                     $transaction_customer->save();
                 }
+            }
 
-
-                if($balanceAmountPKR != $grandTotalPKR){
+             if($balanceAmountPKR != $grandTotalPKR){
                     // If balance is different from grand total, it means there's an advance component
                     // We need to create a separate transaction for the advance amount (if this is the first invoice)
                     if ($advanceAmountPKR > 0) {
@@ -1319,27 +1319,30 @@ class SaleOrderExportController extends Controller
                             );
                             DB::Connection('mysql2')->table('received_paymet')->insert($received_paymet);
                         }
+                    }
+
+                    // Sales Revenue Credit - grand total in PKR
+                    // Assuming there's a sales revenue account (you may need to adjust this)
+                    $sales_revenue_acc_id = 5; // Adjust based on your chart of accounts
+                    $transaction_sales = new Transactions();
+                    $transaction_sales = $transaction_sales->SetConnection('mysql2');
+                    $transaction_sales->voucher_no = $voucher_no;
+                    $transaction_sales->v_date = $v_date;
+                    $transaction_sales->acc_id = $sales_revenue_acc_id;
+                    $transaction_sales->acc_code = FinanceHelper::getAccountCodeByAccId($sales_revenue_acc_id);
+                    $transaction_sales->particulars = 'Commercial Invoice - ' . $voucher_no;
+                    $transaction_sales->opening_bal = 0;
+                    $transaction_sales->debit_credit = 0; // Credit - revenue
+                    $transaction_sales->amount = $grandTotalPKR; // Grand total in PKR (no conversion needed)
+                    $transaction_sales->username = Auth::user()->name;
+                    $transaction_sales->status = 1;
+                    $transaction_sales->voucher_type = 22;
+                    $transaction_sales->master_id = $commercialInvoice->id;
+                    $transaction_sales->save();
                 }
 
-                // Sales Revenue Credit - grand total in PKR
-                // Assuming there's a sales revenue account (you may need to adjust this)
-                $sales_revenue_acc_id = 5; // Adjust based on your chart of accounts
-                $transaction_sales = new Transactions();
-                $transaction_sales = $transaction_sales->SetConnection('mysql2');
-                $transaction_sales->voucher_no = $voucher_no;
-                $transaction_sales->v_date = $v_date;
-                $transaction_sales->acc_id = $sales_revenue_acc_id;
-                $transaction_sales->acc_code = FinanceHelper::getAccountCodeByAccId($sales_revenue_acc_id);
-                $transaction_sales->particulars = 'Commercial Invoice - ' . $voucher_no;
-                $transaction_sales->opening_bal = 0;
-                $transaction_sales->debit_credit = 0; // Credit - revenue
-                $transaction_sales->amount = $balanceAmountPKR; // Grand total in PKR (no conversion needed)
-                $transaction_sales->username = Auth::user()->name;
-                $transaction_sales->status = 1;
-                $transaction_sales->voucher_type = 22;
-                $transaction_sales->master_id = $commercialInvoice->id;
-                $transaction_sales->save();
-            }
+
+               
 
             DB::connection('mysql2')->commit();
             return response()->json(['success' => true, 'message' => 'Commercial invoice created successfully', 'invoice_id' => $commercialInvoice->id]);
