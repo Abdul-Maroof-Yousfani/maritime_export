@@ -304,13 +304,13 @@ $m = Session::get('run_company');
                     </tr>
                 </table>
                 
-                <div class="amount-in-words">
+                {{-- <div class="amount-in-words">
                     @if($advanceAmount > 0)
                         <div><strong>ADVANCE IN {{ strtoupper($currencyName) }}:</strong> {{ CommonHelper::AmountInWords($advanceAmount, $currencyName) }}. ({{ $currencySymbol }} {{ number_format($advanceAmount, 2) }})</div>
                     @endif
                     
                     <div><strong>{{ strtoupper($currencyName) }}:</strong> {{ CommonHelper::AmountInWords($balanceAmount, $currencyName) }}. ({{ $currencySymbol }} {{ number_format($balanceAmount, 2) }})</div>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>
