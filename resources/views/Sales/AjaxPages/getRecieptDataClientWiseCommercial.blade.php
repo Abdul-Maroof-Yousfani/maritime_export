@@ -13,9 +13,9 @@ echo Form::open(array('url' => 'finance/CreateReceiptVoucherForCommercialInvoice
     <th class="text-center col-sm-1">SO No</th>
     <th class="text-center">Terms Of Payment</th>
     <th class="text-center">Customer</th>
-    <th class="text-center">Invoice Amount (USD)</th>
-    <th class="text-center">Received Amount</th>
-    <th class="text-center">Remaining Amount</th>
+    <th class="text-center">Invoice Amount (PKR)</th>
+    <th class="text-center">Received Amount (PKR)</th>
+    <th class="text-center">Remaining Amount (PKR)</th>
     <th class="text-center">view</th>
     </thead>
     <tbody id="data">
